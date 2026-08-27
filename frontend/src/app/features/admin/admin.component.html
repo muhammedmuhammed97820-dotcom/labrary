@@ -1,0 +1,31 @@
+<main class="admin-shell">
+  <section class="admin-hero">
+    <div>
+      <span class="eyebrow">DIGITAL LIBRARY · ADMIN</span>
+      <h1>لوحة التحكم</h1>
+      <p>إدارة الكتب والمحتوى الرقمي من مكان واحد.</p>
+    </div>
+    <a routerLink="/admin/books/create" class="primary">+ إضافة كتاب</a>
+  </section>
+
+  <section class="stats">
+    @for (stat of stats; track stat.label) {
+      <article class="stat-card">
+        <span class="stat-icon">{{ stat.icon }}</span>
+        <div><small>{{ stat.label }}</small><strong>{{ stat.value }}</strong></div>
+      </article>
+    }
+  </section>
+
+  <section class="workspace">
+    <article class="panel">
+      <div class="panel-head"><div><span class="eyebrow">CONTENT</span><h2>إدارة المحتوى</h2></div></div>
+      <div class="actions">
+        <a routerLink="/admin/books" class="action"><b>▤</b><span>الكتب</span><small>عرض وتعديل وحذف</small></a>
+        <a routerLink="/admin/books/create" class="action"><b>＋</b><span>إضافة كتاب</span><small>PDF + غلاف + بيانات</small></a>
+        <a routerLink="/admin/authors" class="action"><b>◉</b><span>المؤلفون</span><small>إدارة المؤلفين</small></a>
+        <a routerLink="/admin/categories" class="action"><b>⌘</b><span>التصنيفات</span><small>تنظيم المكتبة</small></a>
+      </div>
+    </article>
+  </section>
+</main>
