@@ -5,12 +5,13 @@
     <a routerLink="/books" routerLinkActive="active">المكتبة</a>
     <a routerLink="/books" fragment="categories">التصنيفات</a>
     <a routerLink="/books">اكتشف</a>
+    @if (isLoggedIn) { <a routerLink="/favorites" routerLinkActive="active">المفضلة</a> }
     @if (isAdmin) { <a routerLink="/admin/books" routerLinkActive="active">إدارة الكتب</a> }
   </nav>
   <div class="nav-actions">
     <a class="search-link" routerLink="/books">⌕ <span>بحث</span></a>
     @if (isLoggedIn) {
-      <a class="user-link" routerLink="/admin" title="حسابي">
+      <a class="user-link" routerLink="/profile" title="الملف الشخصي">
         @if (avatar) { <img [src]="avatar" [alt]="userName"> } @else { <span class="avatar-fallback">{{ userInitial }}</span> }
         <span>{{ userName }}</span>
       </a>
@@ -27,6 +28,10 @@
       <a routerLink="/books" (click)="closeMenu()">المكتبة</a>
       <a routerLink="/books" fragment="categories" (click)="closeMenu()">التصنيفات</a>
       <a routerLink="/books" (click)="closeMenu()">اكتشف</a>
+      @if (isLoggedIn) {
+        <a routerLink="/profile" (click)="closeMenu()">الملف الشخصي</a>
+        <a routerLink="/favorites" (click)="closeMenu()">المفضلة</a>
+      }
       @if (isAdmin) {
         <a routerLink="/admin" (click)="closeMenu()">لوحة الإدارة</a>
         <a routerLink="/admin/books" (click)="closeMenu()">إدارة الكتب</a>
