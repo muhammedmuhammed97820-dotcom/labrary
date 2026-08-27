@@ -36,6 +36,13 @@ export class ProfileComponent {
     return `${this.serverOrigin}${this.avatar}`;
   }
 
+  // Reset the file input before opening the picker so the change event
+  // fires every time, including when the user chooses the same image again.
+  resetAvatarInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = '';
+  }
+
   chooseAvatar(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
