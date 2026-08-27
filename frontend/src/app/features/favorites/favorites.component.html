@@ -1,11 +1,12 @@
 <main class="favorites-page" dir="rtl">
   <section class="hero"><span>MY LIBRARY / FAVORITES</span><h1>كتبك المفضلة</h1><p>كل الكتب التي اخترتها للعودة إليها لاحقًا.</p></section>
+  <div *ngIf="message" class="state favorite-notice">{{ message }}</div>
   <div *ngIf="loading" class="state">جاري تحميل المفضلة...</div>
-  <div *ngIf="error" class="state error">{{ error }}</div>
+  <div *ngIf="error" class="state error">{{ error }} <button type="button" (click)="load()">إعادة المحاولة</button></div>
   <section *ngIf="!loading && !error && books.length" class="grid">
     <article class="book" *ngFor="let book of books">
       <a [routerLink]="['/books', id(book)]"><img [src]="cover(book)" [alt]="book.title || 'كتاب'"></a>
-      <div class="info"><h2>{{ book.title || 'بدون عنوان' }}</h2><p>{{ author(book) }}</p><div><a class="open" [routerLink]="['/books', id(book)]">عرض الكتاب</a><button type="button" (click)="remove(book)" title="إزالة من المفضلة">♥</button></div></div>
+      <div class="info"><h2>{{ book.title || 'بدون عنوان' }}</h2><p>{{ author(book) }}</p><div><a class="open" [routerLink]="['/books', id(book)]">عرض الكتاب</a><button type="button" [disabled]="removing.has(id(book))" (click)="remove(book)" title="إزالة من المفضلة">{{ removing.has(id(book)) ? '…' : '♥' }}</button></div></div>
     </article>
   </section>
   <section *ngIf="!loading && !error && !books.length" class="empty"><div>♡</div><h2>لا توجد كتب في المفضلة</h2><p>تصفح المكتبة وأضف الكتب التي تريد العودة إليها.</p><a routerLink="/books">اكتشف الكتب</a></section>
