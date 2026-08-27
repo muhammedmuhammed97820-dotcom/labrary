@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const fs = require('fs');
 const User = require('../models/user.model');
 
 function tokenFor(user) {
@@ -17,6 +19,15 @@ function publicUser(user) {
     avatar: user.avatar || null,
     favorites: user.favorites || []
   };
+}
+
+function removeStoredAvatar(avatar) {
+  if (!avatar || typeof avatar !== 'string') return;
+  const prefix = '/uploads/avatars/';
+  if (!avatar.startsWith(prefix)) return;
+  const filename = path.basename(avatar);
+  const filePath = path.resolve(process.env.UPLOAD_AVATARS_DIR || 'uploads/avatars', filename);
+  try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch (error) { console.warn('Could not remove old avatar:', error.message); }
 }
 
 async function register(req, res, next) {
@@ -52,17 +63,22 @@ async function me(req, res) {
 
 async function updateProfile(req, res, next) {
   try {
-    const { name, avatar } = req.body;
+    const { name, removeAvatar } = req.body;
     if (name !== undefined) {
       const cleanName = String(name).trim();
       if (!cleanName || cleanName.length > 100) return res.status(400).json({ message: 'Name is required and must be 100 characters or less.' });
       req.user.name = cleanName;
     }
-    if (avatar !== undefined) {
-      if (avatar !== null && typeof avatar !== 'string') return res.status(400).json({ message: 'Invalid avatar.' });
-      if (avatar && avatar.length > 2500000) return res.status(413).json({ message: 'Avatar is too large.' });
-      req.user.avatar = avatar || null;
+
+    if (req.file) {
+      const oldAvatar = req.user.avatar;
+      req.user.avatar = `/uploads/avatars/${req.file.filename}`;
+      removeStoredAvatar(oldAvatar);
+    } else if (String(removeAvatar).toLowerCase() === 'true') {
+      removeStoredAvatar(req.user.avatar);
+      req.user.avatar = null;
     }
+
     await req.user.save();
     res.json({ message: 'Profile updated successfully.', user: publicUser(req.user) });
   } catch (error) { next(error); }

@@ -16,10 +16,13 @@ export class ProfileComponent {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
   private readonly api = 'http://localhost:5000/api';
+  private readonly serverOrigin = 'http://localhost:5000';
 
   user: CurrentUser | null = this.auth.currentUser;
   name = this.user?.name || '';
   avatar: string | null = this.user?.avatar || null;
+  avatarFile: File | null = null;
+  avatarRemoved = false;
   saving = false;
   message = '';
   error = '';
@@ -27,40 +30,74 @@ export class ProfileComponent {
   get initial(): string { return this.name.trim().charAt(0) || 'م'; }
   get favoriteCount(): number { return this.user?.favorites?.length || 0; }
 
+  get avatarUrl(): string | null {
+    if (!this.avatar) return null;
+    if (this.avatar.startsWith('data:') || this.avatar.startsWith('blob:') || this.avatar.startsWith('http')) return this.avatar;
+    return `${this.serverOrigin}${this.avatar}`;
+  }
+
   chooseAvatar(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { this.error = 'اختر صورة صالحة.'; return; }
-    if (file.size > 1800000) { this.error = 'حجم الصورة يجب أن يكون أقل من 1.8MB.'; return; }
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      this.error = 'اختر صورة JPG أو PNG أو WEBP.';
+      input.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.error = 'حجم الصورة يجب أن يكون أقل من 5MB.';
+      input.value = '';
+      return;
+    }
+
+    this.avatarFile = file;
+    this.avatarRemoved = false;
+    this.error = '';
 
     const reader = new FileReader();
-    reader.onload = () => {
-      this.avatar = String(reader.result);
-      this.error = '';
-    };
+    reader.onload = () => this.avatar = String(reader.result);
     reader.readAsDataURL(file);
   }
 
-  removeAvatar(): void { this.avatar = null; }
+  removeAvatar(): void {
+    this.avatar = null;
+    this.avatarFile = null;
+    this.avatarRemoved = true;
+    this.error = '';
+  }
 
   save(): void {
     if (this.saving) return;
+
     const cleanName = this.name.trim();
-    if (!cleanName) { this.error = 'الاسم مطلوب.'; return; }
+    if (!cleanName) {
+      this.error = 'الاسم مطلوب.';
+      return;
+    }
 
     this.saving = true;
     this.message = '';
     this.error = '';
 
-    this.http.put<{ message: string; user: CurrentUser }>(`${this.api}/auth/profile`, {
-      name: cleanName,
-      avatar: this.avatar
-    }).subscribe({
+    const formData = new FormData();
+    formData.append('name', cleanName);
+
+    if (this.avatarFile) {
+      formData.append('avatar', this.avatarFile, this.avatarFile.name);
+    } else if (this.avatarRemoved) {
+      formData.append('removeAvatar', 'true');
+    }
+
+    this.http.put<{ message: string; user: CurrentUser }>(`${this.api}/auth/profile`, formData).subscribe({
       next: response => {
         this.user = response.user;
         this.name = response.user.name;
         this.avatar = response.user.avatar || null;
+        this.avatarFile = null;
+        this.avatarRemoved = false;
         this.auth.updateUser(response.user);
         this.message = 'تم حفظ الملف الشخصي بنجاح ✓';
         this.saving = false;
