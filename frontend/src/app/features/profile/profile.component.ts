@@ -55,6 +55,7 @@ export class ProfileComponent {
 
     this.avatarFile = file;
     this.avatarRemoved = false;
+    this.message = '';
     this.error = '';
 
     const reader = new FileReader();
@@ -66,6 +67,7 @@ export class ProfileComponent {
     this.avatar = null;
     this.avatarFile = null;
     this.avatarRemoved = true;
+    this.message = '';
     this.error = '';
   }
 
@@ -74,6 +76,7 @@ export class ProfileComponent {
 
     const cleanName = this.name.trim();
     if (!cleanName) {
+      this.message = '';
       this.error = 'الاسم مطلوب.';
       return;
     }
@@ -82,6 +85,32 @@ export class ProfileComponent {
     this.message = '';
     this.error = '';
 
+    const hasFileChange = !!this.avatarFile || this.avatarRemoved;
+    const requestBody: FormData | { name: string } = hasFileChange
+      ? this.buildFormData(cleanName)
+      : { name: cleanName };
+
+    this.http.put<{ message: string; user: CurrentUser }>(`${this.api}/auth/profile`, requestBody).subscribe({
+      next: response => {
+        this.user = response.user;
+        this.name = response.user.name;
+        this.avatar = response.user.avatar || null;
+        this.avatarFile = null;
+        this.avatarRemoved = false;
+        this.auth.updateUser(response.user);
+        this.message = 'تم الحفظ بنجاح ✓';
+        this.error = '';
+        this.saving = false;
+      },
+      error: err => {
+        this.message = '';
+        this.error = err?.error?.message || 'تعذر حفظ التغييرات. تأكد من تشغيل الخادم ثم حاول مرة أخرى.';
+        this.saving = false;
+      }
+    });
+  }
+
+  private buildFormData(cleanName: string): FormData {
     const formData = new FormData();
     formData.append('name', cleanName);
 
@@ -91,21 +120,6 @@ export class ProfileComponent {
       formData.append('removeAvatar', 'true');
     }
 
-    this.http.put<{ message: string; user: CurrentUser }>(`${this.api}/auth/profile`, formData).subscribe({
-      next: response => {
-        this.user = response.user;
-        this.name = response.user.name;
-        this.avatar = response.user.avatar || null;
-        this.avatarFile = null;
-        this.avatarRemoved = false;
-        this.auth.updateUser(response.user);
-        this.message = 'تم حفظ الملف الشخصي بنجاح ✓';
-        this.saving = false;
-      },
-      error: err => {
-        this.error = err?.error?.message || 'تعذر حفظ التغييرات.';
-        this.saving = false;
-      }
-    });
+    return formData;
   }
 }
