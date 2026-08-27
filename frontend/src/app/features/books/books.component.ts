@@ -16,7 +16,15 @@ export class BooksComponent {
   ngOnInit() { this.loadBooks(); }
   loadBooks() { this.loading = true; this.error = ''; this.http.get<any>('http://localhost:5000/api/books').subscribe({ next: r => { this.books = Array.isArray(r) ? r : (r.books ?? r.data ?? []); this.filtered = this.books; this.loading = false; }, error: () => { this.error = 'تعذر الاتصال بالمكتبة الرقمية'; this.loading = false; } }); }
   filter() { const q=this.search.trim().toLowerCase(); this.filtered=!q?this.books:this.books.filter(b=>`${b.title??''} ${this.author(b)} ${this.category(b)}`.toLowerCase().includes(q)); }
-  id(b:Book){return String(b._id ?? b.id ?? '');} author(b:Book){return typeof b.author==='string'?b.author:b.author?.name??'مؤلف غير محدد';} category(b:Book){return typeof b.category==='string'?b.category:b.category?.name??'عام';} cover(b:Book){return b.coverImage||b.coverUrl||'assets/images/default-cover.svg';}
+  id(b:Book){return String(b._id ?? b.id ?? '');}
+  author(b:Book){return typeof b.author==='string'?b.author:b.author?.name??'مؤلف غير محدد';}
+  category(b:Book){return typeof b.category==='string'?b.category:b.category?.name??'عام';}
+  cover(b:Book): string {
+    const value = b.coverImage || b.coverUrl;
+    if (!value) return 'assets/images/default-cover.svg';
+    if (/^https?:\/\//i.test(value)) return value;
+    return `http://localhost:5000${value.startsWith('/') ? value : `/${value}`}`;
+  }
   isFavorite(b: Book): boolean { const id = this.id(b); return !!id && (this.auth.currentUser?.favorites || []).some(f => String(f) === id); }
   toggleFavorite(book: Book): void {
     const id = this.id(book);
