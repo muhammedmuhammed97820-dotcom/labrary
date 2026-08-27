@@ -1,24 +1,12 @@
-﻿import {
-  Component
-} from '@angular/core';
-
-import {
-  RouterOutlet
-} from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { NavbarComponent } from './shared/components/navbar/navbar.component';
 
 @Component({
   selector: 'app-root',
-
   standalone: true,
-
-  imports: [
-    RouterOutlet
-  ],
-
-  templateUrl:
-    './app.html',
-
-  styleUrl:
-    './app.scss'
+  imports: [RouterOutlet, NavbarComponent],
+  templateUrl: './app.html',
+  styleUrl: './app.scss'
 })
 export class App {}
