@@ -1,1 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
+﻿:root {
+  --bg: #07110f;
+  --surface: #0c1815;
+  --surface-2: #11201c;
+  --line: rgba(255,255,255,.09);
+  --text: #f4f1e8;
+  --muted: #8b9791;
+  --gold: #d6b56b;
+  --gold-soft: #ead39a;
+  --danger: #d97979;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Cairo", Arial, sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}

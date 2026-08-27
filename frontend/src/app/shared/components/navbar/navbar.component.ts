@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -11,11 +11,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class NavbarComponent {
   menuOpen = false;
 
-  toggleMenu() {
-    this.menuOpen = !this.menuOpen;
-  }
-
   closeMenu() {
     this.menuOpen = false;
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
   }
 }
