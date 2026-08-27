@@ -1,60 +1,6 @@
-﻿<header class="navbar" dir="rtl">
-
-  <a class="brand" routerLink="/" (click)="closeMenu()">
-    <span class="brand-mark">م</span>
-
-    <span class="brand-text">
-      <strong>مَكتبة</strong>
-      <small>DIGITAL LIBRARY</small>
-    </span>
-  </a>
-
-  <nav class="desktop-nav">
-    <a routerLink="/" routerLinkActive="active"
-       [routerLinkActiveOptions]="{ exact: true }">
-      الرئيسية
-    </a>
-
-    <a routerLink="/books" routerLinkActive="active">
-      استكشاف الكتب
-    </a>
-
-    <a href="#categories">
-      التصنيفات
-    </a>
-
-    <a href="#authors">
-      المؤلفون
-    </a>
-  </nav>
-
-  <div class="actions">
-
-    <button class="search" type="button">
-      <span>⌕</span>
-      <small>بحث</small>
-    </button>
-
-    <a routerLink="/admin" class="admin">
-      الإدارة
-      <span>↗</span>
-    </a>
-
-    <button class="menu" type="button" (click)="toggleMenu()">
-      <i></i>
-      <i></i>
-    </button>
-
-  </div>
-
-  @if (menuOpen) {
-    <nav class="mobile-nav">
-      <a routerLink="/" (click)="closeMenu()">الرئيسية</a>
-      <a routerLink="/books" (click)="closeMenu()">استكشاف الكتب</a>
-      <a href="#categories" (click)="closeMenu()">التصنيفات</a>
-      <a href="#authors" (click)="closeMenu()">المؤلفون</a>
-      <a routerLink="/admin" (click)="closeMenu()">الإدارة</a>
-    </nav>
-  }
-
+<header class="navbar" dir="rtl">
+  <a class="brand" routerLink="/" (click)="closeMenu()"><span class="brand-icon">م</span><span><strong>مَكتبة</strong><small>DIGITAL LIBRARY</small></span></a>
+  <nav class="desktop-nav"><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a><a routerLink="/books" routerLinkActive="active">المكتبة</a><a href="/books#categories">التصنيفات</a><a href="/books">اكتشف</a></nav>
+  <div class="nav-actions"><a class="search-link" routerLink="/books">⌕ <span>بحث</span></a><a class="library-link" routerLink="/books">دخول المكتبة <b>↗</b></a><button class="menu" type="button" (click)="toggleMenu()"><i></i><i></i></button></div>
+  @if (menuOpen) { <nav class="mobile-nav"><a routerLink="/" (click)="closeMenu()">الرئيسية</a><a routerLink="/books" (click)="closeMenu()">المكتبة</a><a routerLink="/books" (click)="closeMenu()">التصنيفات</a><a routerLink="/books" (click)="closeMenu()">اكتشف</a></nav> }
 </header>
