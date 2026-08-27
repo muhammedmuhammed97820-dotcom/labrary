@@ -11,8 +11,8 @@
   <section class="profile-grid">
     <article class="card identity-card">
       <div class="avatar-wrap">
-        <img *ngIf="avatar" [src]="avatar" alt="صورة المستخدم">
-        <span *ngIf="!avatar">{{ initial }}</span>
+        <img *ngIf="avatarUrl" [src]="avatarUrl" alt="صورة المستخدم">
+        <span *ngIf="!avatarUrl">{{ initial }}</span>
         <label class="avatar-edit" title="تغيير الصورة">
           ✎
           <input type="file" accept="image/png,image/jpeg,image/webp" (change)="chooseAvatar($event)">
@@ -21,7 +21,7 @@
       <h2>{{ name || 'المستخدم' }}</h2>
       <p>{{ user?.email }}</p>
       <span class="role" [class.admin]="user?.role === 'admin'">{{ user?.role === 'admin' ? 'ADMIN' : 'MEMBER' }}</span>
-      <button *ngIf="avatar" type="button" class="remove-avatar" (click)="removeAvatar()">إزالة الصورة</button>
+      <button *ngIf="avatarUrl" type="button" class="remove-avatar" (click)="removeAvatar()">إزالة الصورة</button>
     </article>
 
     <article class="card form-card">
