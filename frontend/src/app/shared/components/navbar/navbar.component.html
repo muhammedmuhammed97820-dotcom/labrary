@@ -1,0 +1,27 @@
+<header class="navbar-shell" dir="rtl">
+  <a class="brand" routerLink="/" (click)="closeMenu()">
+    <span class="brand-symbol">م</span>
+    <span class="brand-copy"><b>مَكتبة</b><small>DIGITAL LIBRARY</small></span>
+  </a>
+
+  <nav class="desktop-nav" aria-label="التنقل الرئيسي">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">الرئيسية</a>
+    <a routerLink="/books" routerLinkActive="active">المكتبة</a>
+    <a href="/books#categories">التصنيفات</a>
+    <a href="/books#authors">المؤلفون</a>
+  </nav>
+
+  <div class="nav-actions">
+    <button class="search-button" type="button" aria-label="البحث"><span>⌕</span><small>بحث</small></button>
+    <a routerLink="/admin/books" class="admin-link">الإدارة <span>↗</span></a>
+    <button class="menu-button" type="button" aria-label="القائمة" (click)="toggleMenu()"><span></span><span></span></button>
+  </div>
+
+  <div class="mobile-menu" [class.open]="menuOpen">
+    <a routerLink="/" (click)="closeMenu()">الرئيسية <span>01</span></a>
+    <a routerLink="/books" (click)="closeMenu()">المكتبة <span>02</span></a>
+    <a href="/books#categories" (click)="closeMenu()">التصنيفات <span>03</span></a>
+    <a href="/books#authors" (click)="closeMenu()">المؤلفون <span>04</span></a>
+    <a routerLink="/admin/books" (click)="closeMenu()">الإدارة <span>↗</span></a>
+  </div>
+</header>
