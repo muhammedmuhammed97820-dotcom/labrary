@@ -1,0 +1,34 @@
+<main class="auth-shell" dir="rtl">
+  <section class="auth-art">
+    <div class="orb orb-a"></div><div class="orb orb-b"></div>
+    <span class="eyebrow">DIGITAL LIBRARY</span>
+    <h1>عالم كامل من<br><em>المعرفة</em> بانتظارك.</h1>
+    <p>اكتشف الكتب، احفظ ما تحب، وواصل القراءة من المكان الذي توقفت عنده.</p>
+    <div class="quote">« الكتاب الجيد يفتح لك أبوابًا لم تكن تعرف أنها موجودة »</div>
+  </section>
+
+  <section class="auth-card">
+    <a routerLink="/" class="brand"><span>DL</span><b>Digital Library</b></a>
+    <div class="heading">
+      <span>{{ mode === 'login' ? 'مرحباً بعودتك' : 'ابدأ رحلتك' }}</span>
+      <h2>{{ mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد' }}</h2>
+      <p>{{ mode === 'login' ? 'أدخل بياناتك للوصول إلى مكتبتك.' : 'أنشئ حسابك وابدأ ببناء مكتبتك الشخصية.' }}</p>
+    </div>
+
+    <form (ngSubmit)="submit()">
+      <label *ngIf="mode === 'register'">الاسم
+        <input name="name" [(ngModel)]="name" placeholder="اسمك الكامل" autocomplete="name">
+      </label>
+      <label>البريد الإلكتروني
+        <input name="email" [(ngModel)]="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </label>
+      <label>كلمة المرور
+        <div class="password"><input name="password" [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" placeholder="••••••••" autocomplete="current-password" required><button type="button" (click)="showPassword=!showPassword">{{ showPassword ? 'إخفاء' : 'إظهار' }}</button></div>
+      </label>
+      <button class="submit" type="submit">{{ mode === 'login' ? 'دخول إلى المكتبة' : 'إنشاء الحساب' }} <b>←</b></button>
+    </form>
+
+    <div class="divider"><span>أو</span></div>
+    <p class="switch">{{ mode === 'login' ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟' }} <button type="button" (click)="switchMode()">{{ mode === 'login' ? 'إنشاء حساب' : 'تسجيل الدخول' }}</button></p>
+  </section>
+</main>
