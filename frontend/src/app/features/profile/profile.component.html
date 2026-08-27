@@ -1,0 +1,51 @@
+<main class="profile-page" dir="rtl">
+  <section class="profile-hero">
+    <div>
+      <span class="eyebrow">MY LIBRARY / ACCOUNT</span>
+      <h1>ملفي الشخصي</h1>
+      <p>تحكم ببياناتك وصورتك ومكتبتك الشخصية من مكان واحد.</p>
+    </div>
+    <a routerLink="/books" class="back">← العودة للمكتبة</a>
+  </section>
+
+  <section class="profile-grid">
+    <article class="card identity-card">
+      <div class="avatar-wrap">
+        <img *ngIf="avatar" [src]="avatar" alt="صورة المستخدم">
+        <span *ngIf="!avatar">{{ initial }}</span>
+        <label class="avatar-edit" title="تغيير الصورة">
+          ✎
+          <input type="file" accept="image/png,image/jpeg,image/webp" (change)="chooseAvatar($event)">
+        </label>
+      </div>
+      <h2>{{ name || 'المستخدم' }}</h2>
+      <p>{{ user?.email }}</p>
+      <span class="role" [class.admin]="user?.role === 'admin'">{{ user?.role === 'admin' ? 'ADMIN' : 'MEMBER' }}</span>
+      <button *ngIf="avatar" type="button" class="remove-avatar" (click)="removeAvatar()">إزالة الصورة</button>
+    </article>
+
+    <article class="card form-card">
+      <div class="card-title"><span>ACCOUNT</span><h2>معلومات الحساب</h2></div>
+
+      <div *ngIf="message" class="notice success">{{ message }}</div>
+      <div *ngIf="error" class="notice error">{{ error }}</div>
+
+      <label>الاسم الكامل
+        <input [(ngModel)]="name" maxlength="100" placeholder="اسمك الكامل">
+      </label>
+
+      <label>البريد الإلكتروني
+        <input [value]="user?.email || ''" disabled>
+      </label>
+
+      <button class="save" type="button" (click)="save()" [disabled]="saving">
+        {{ saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات' }}
+      </button>
+    </article>
+
+    <article class="card stats-card">
+      <div class="stat"><strong>{{ favoriteCount }}</strong><span>المفضلة</span></div>
+      <a routerLink="/favorites" class="favorites-link">♥ عرض المفضلة</a>
+    </article>
+  </section>
+</main>
