@@ -1,23 +1,58 @@
-﻿<section class="home">
-  <div class="hero">
-    <span class="eyebrow">ELECTRONIC LIBRARY</span>
+<main class="home-page" dir="rtl">
+  <header class="topbar">
+    <a class="brand" routerLink="/">
+      <span class="brand-mark">م</span>
+      <span><strong>مَكتبة</strong><small>THE DIGITAL LIBRARY</small></span>
+    </a>
+    <nav>
+      <a routerLink="/">الرئيسية</a>
+      <a routerLink="/books">المكتبة</a>
+      <a routerLink="/admin/books">الإدارة</a>
+    </nav>
+    <a routerLink="/books" class="nav-cta">استكشف الكتب <span>←</span></a>
+  </header>
 
-    <h1>
-      مكتبتك الإلكترونية
-    </h1>
-
-    <p>
-      اكتشف الكتب، اقرأها، وحمّلها بسهولة من مكان واحد.
-    </p>
-
-    <div class="actions">
-      <a routerLink="/books" class="primary">
-        تصفح المكتبة
-      </a>
-
-      <a routerLink="/admin/books" class="secondary">
-        إدارة الكتب
-      </a>
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="kicker"><i></i> مكتبة رقمية مفتوحة للجميع</span>
+      <h1>اقرأ أكثر.<br><em>اكتشف أبعد.</em></h1>
+      <p>مساحة هادئة تجمع الكتب والمعرفة في تجربة قراءة حديثة، أنيقة وسهلة الاستخدام.</p>
+      <div class="hero-actions">
+        <a routerLink="/books" class="primary-action">ابدأ الاستكشاف <span>←</span></a>
+        <a href="#about" class="ghost-action">كيف تعمل المكتبة؟</a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>∞</strong><span>معرفة بلا حدود</span></div>
+        <div><strong>PDF</strong><span>قراءة وتحميل</span></div>
+        <div><strong>24/7</strong><span>متاحة دائمًا</span></div>
+      </div>
     </div>
-  </div>
-</section>
+
+    <div class="hero-art" aria-hidden="true">
+      <div class="orb"></div>
+      <div class="book-shadow"></div>
+      <div class="book-visual">
+        <div class="book-spine">مَكتبة</div>
+        <div class="book-cover">
+          <small>THE ART OF</small>
+          <strong>READING</strong>
+          <span>المعرفة تبدأ من صفحة</span>
+          <b>✦</b>
+        </div>
+      </div>
+      <span class="floating-note note-one">01 — اكتشف</span>
+      <span class="floating-note note-two">اقرأ · احفظ · شارك</span>
+    </div>
+  </section>
+
+  <section id="about" class="feature-strip">
+    <div><span class="feature-icon">01</span><strong>اكتشاف بسيط</strong><p>اعثر على الكتاب المناسب بسرعة.</p></div>
+    <div><span class="feature-icon">02</span><strong>قراءة مريحة</strong><p>افتح الكتاب واقرأه من المتصفح.</p></div>
+    <div><span class="feature-icon">03</span><strong>تحميل مباشر</strong><p>احتفظ بكتبك بصيغة PDF.</p></div>
+  </section>
+
+  <section class="library-promo">
+    <div><span class="kicker"><i></i> مجموعتنا</span><h2>رفوف مليئة<br>بأفكار جديدة.</h2></div>
+    <div><p>من الكتب الكلاسيكية إلى المعرفة المعاصرة، صممنا المكتبة لتكون نقطة انطلاقك التالية.</p><a routerLink="/books">تصفح المجموعة <span>←</span></a></div>
+  </section>
+</main>
