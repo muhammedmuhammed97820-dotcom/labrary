@@ -1,0 +1,270 @@
+﻿<div class="page">
+
+  <header class="page-header">
+
+    <div>
+      <span class="eyebrow">
+        ELECTRONIC LIBRARY
+      </span>
+
+      <h1>
+        إدارة الكتب
+      </h1>
+
+      <p>
+        إدارة جميع الكتب الموجودة في المكتبة.
+      </p>
+    </div>
+
+    <button
+      class="add-button"
+      type="button"
+      (click)="addBook()">
+
+      <span>＋</span>
+      إضافة كتاب
+    </button>
+
+  </header>
+
+
+  <!-- Loading -->
+
+  <section
+    class="state"
+    *ngIf="loading">
+
+    <div class="spinner"></div>
+
+    <h2>
+      جاري تحميل الكتب...
+    </h2>
+
+    <p>
+      يتم جلب الكتب من الخادم.
+    </p>
+
+  </section>
+
+
+  <!-- Error -->
+
+  <section
+    class="state error-state"
+    *ngIf="!loading && error">
+
+    <div class="state-icon">
+      ⚠
+    </div>
+
+    <h2>
+      حدث خطأ
+    </h2>
+
+    <p>
+      {{ error }}
+    </p>
+
+    <button
+      type="button"
+      class="retry-button"
+      (click)="loadBooks()">
+
+      إعادة المحاولة
+
+    </button>
+
+  </section>
+
+
+  <!-- Empty -->
+
+  <section
+    class="state"
+    *ngIf="!loading && !error && books.length === 0">
+
+    <div class="empty-icon">
+      📚
+    </div>
+
+    <h2>
+      لا توجد كتب
+    </h2>
+
+    <p>
+      لم تتم إضافة أي كتاب إلى المكتبة بعد.
+    </p>
+
+    <button
+      type="button"
+      class="add-button"
+      (click)="addBook()">
+
+      ＋ إضافة أول كتاب
+
+    </button>
+
+  </section>
+
+
+  <!-- Books -->
+
+  <section
+    class="books-section"
+    *ngIf="!loading && !error && books.length > 0">
+
+    <div class="section-top">
+
+      <div>
+        <h2>
+          الكتب
+        </h2>
+
+        <span>
+          {{ books.length }} كتاب
+        </span>
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadBooks()">
+
+        ↻ تحديث
+
+      </button>
+
+    </div>
+
+
+    <div class="books-grid">
+
+      <article
+        class="book-card"
+        *ngFor="let book of books">
+
+        <div class="cover-wrapper">
+
+          <img
+            [src]="getCover(book)"
+            [alt]="book.title"
+            class="cover"
+            loading="lazy"
+          />
+
+          <div class="available"
+               *ngIf="book.isAvailable">
+            متاح
+          </div>
+
+        </div>
+
+
+        <div class="book-content">
+
+          <h3
+            [title]="book.title">
+
+            {{ book.title }}
+
+          </h3>
+
+
+          <div class="meta">
+
+            <div>
+              <span class="label">
+                المؤلف
+              </span>
+
+              <strong>
+                {{ book.author?.name || 'غير محدد' }}
+              </strong>
+            </div>
+
+
+            <div>
+              <span class="label">
+                التصنيف
+              </span>
+
+              <strong>
+                {{ book.category?.name || 'غير محدد' }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <p
+            class="description"
+            *ngIf="book.description">
+
+            {{ book.description }}
+
+          </p>
+
+
+          <div class="stats">
+
+            <span>
+              👁
+              {{ book.viewsCount || 0 }}
+            </span>
+
+            <span>
+              ⬇
+              {{ book.downloads || 0 }}
+            </span>
+
+            <span>
+              ⭐
+              {{ book.rating || 0 }}
+            </span>
+
+          </div>
+
+
+          <div class="actions">
+
+            <button
+              type="button"
+              class="primary"
+              (click)="openBook(book)">
+
+              عرض الكتاب
+
+            </button>
+
+
+            <a
+              class="download"
+              [href]="getFile(book)"
+              target="_blank"
+              rel="noopener">
+
+              تحميل
+
+            </a>
+
+
+            <button
+              type="button"
+              class="delete"
+              (click)="deleteBook(book)">
+
+              حذف
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+</div>

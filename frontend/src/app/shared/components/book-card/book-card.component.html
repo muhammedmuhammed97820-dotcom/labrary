@@ -1,0 +1,35 @@
+﻿<article class="book-card">
+
+  <a
+    [routerLink]="['/books', book._id]"
+    class="cover"
+  >
+
+    <img
+      [src]="bookService.getCoverUrl(book.coverImage)"
+      [alt]="book.title"
+    >
+
+    <div class="cover-overlay">
+      <span>عرض الكتاب</span>
+    </div>
+
+  </a>
+
+  <div class="book-info">
+
+    <span class="category">
+      {{ getCategoryName() }}
+    </span>
+
+    <h3>
+      {{ book.title }}
+    </h3>
+
+    <p>
+      {{ getAuthorName() }}
+    </p>
+
+  </div>
+
+</article>

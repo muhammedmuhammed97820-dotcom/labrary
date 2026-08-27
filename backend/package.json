@@ -1,0 +1,19 @@
+﻿{
+  "name": "electronic-library-backend",
+  "version": "1.0.0",
+  "description": "Professional backend for Electronic Library",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "electronic-library",
+    "books",
+    "mongodb",
+    "express",
+    "angular"
+  ],
+  "author": "Electronic Library",
+  "license": "MIT"
+}

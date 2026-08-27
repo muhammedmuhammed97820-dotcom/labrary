@@ -1,0 +1,109 @@
+﻿<section class="library">
+
+  <header class="library-header">
+
+    <div>
+      <span class="eyebrow">
+        ELECTRONIC LIBRARY
+      </span>
+
+      <h1>
+        مكتبتك الإلكترونية
+      </h1>
+
+      <p>
+        اكتشف الكتب واقرأها وحمّلها بسهولة.
+      </p>
+    </div>
+
+    <a
+      routerLink="/admin/books"
+      class="admin-link"
+    >
+      إدارة الكتب
+    </a>
+
+  </header>
+
+  <div
+    class="loading"
+    *ngIf="loading"
+  >
+    جاري تحميل الكتب...
+  </div>
+
+  <div
+    class="error"
+    *ngIf="!loading && error"
+  >
+    {{ error }}
+  </div>
+
+  <div
+    class="empty"
+    *ngIf="!loading && !error && books.length === 0"
+  >
+    <h2>
+      لا توجد كتب حتى الآن
+    </h2>
+
+    <p>
+      يمكنك إضافة أول كتاب من لوحة الإدارة.
+    </p>
+
+    <a routerLink="/admin/books">
+      إضافة كتاب
+    </a>
+  </div>
+
+  <div
+    class="books-grid"
+    *ngIf="!loading && books.length > 0"
+  >
+
+    <article
+      class="book-card"
+      *ngFor="let book of books"
+    >
+
+      <a
+        [routerLink]="['/books', book._id]"
+        class="cover-wrapper"
+      >
+
+        <img
+          [src]="getCoverUrl(book)"
+          [alt]="book.title"
+          class="cover"
+        />
+
+      </a>
+
+      <div class="book-content">
+
+        <h2>
+          {{ book.title }}
+        </h2>
+
+        <p class="author">
+          {{ getAuthorName(book) }}
+        </p>
+
+        <span class="category">
+          {{ getCategoryName(book) }}
+        </span>
+
+        <a
+          [routerLink]="['/books', book._id]"
+          class="details"
+        >
+          عرض التفاصيل
+        </a>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</section>
