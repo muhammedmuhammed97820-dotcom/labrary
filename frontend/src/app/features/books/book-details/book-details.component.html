@@ -1,14 +1,98 @@
 <main class="details" dir="rtl">
-  <a routerLink="/books" class="back">← العودة إلى المكتبة</a>
-  <section class="hero">
-    <div class="cover"><span>BOOK</span><strong>LIBRARY</strong></div>
-    <div class="content">
-      <p class="eyebrow">DIGITAL LIBRARY / BOOK {{ bookId }}</p>
-      <h1>تفاصيل <em>الكتاب</em></h1>
-      <p class="lead">هذه المساحة مخصصة لمعلومات الكتاب، المؤلف، التصنيف، الوصف والإحصائيات. سيتم ربطها بالبيانات الحقيقية من الـ API.</p>
-      <div class="meta"><div><small>المؤلف</small><b>—</b></div><div><small>التصنيف</small><b>—</b></div><div><small>المشاهدات</small><b>—</b></div></div>
-      <div class="actions"><button>▶ قراءة الكتاب</button><button class="secondary">↓ تحميل PDF</button><button class="ghost">♡ إضافة للمفضلة</button></div>
-    </div>
+  <div class="topbar">
+    <a routerLink="/books" class="back">← العودة إلى المكتبة</a>
+    <span class="book-code" *ngIf="book">BOOK / {{ bookId }}</span>
+  </div>
+
+  <div class="state loading" *ngIf="loading">
+    <span class="loader"></span>
+    <p>جاري تحميل تفاصيل الكتاب...</p>
+  </div>
+
+  <section class="state error-state" *ngIf="!loading && error">
+    <div class="state-icon">!</div>
+    <h2>تعذر تحميل الكتاب</h2>
+    <p>{{ error }}</p>
+    <a routerLink="/books" class="back-button">العودة إلى المكتبة</a>
   </section>
-  <section class="description"><p class="eyebrow">ABOUT THIS BOOK</p><h2>عن الكتاب</h2><p>وصف الكتاب سيظهر هنا من قاعدة البيانات. الواجهة مجهزة لتقديم تجربة قراءة واكتشاف حديثة ومنظمة.</p></section>
+
+  <ng-container *ngIf="!loading && !error && book as b">
+    <section class="book-hero">
+      <div class="cover-wrap">
+        <div class="cover-shadow"></div>
+        <div class="cover-card">
+          <img [src]="cover()" [alt]="b.title">
+          <span class="cover-label">LIBRARY</span>
+        </div>
+        <div class="cover-caption">غلاف الكتاب</div>
+      </div>
+
+      <div class="book-main">
+        <div class="category-pill">{{ category() }}</div>
+        <h1>{{ b.title || 'بدون عنوان' }}</h1>
+        <p class="author">بقلم <strong>{{ author() }}</strong></p>
+
+        <p class="description-preview">
+          {{ b.description || 'لا يوجد وصف لهذا الكتاب حتى الآن.' }}
+        </p>
+
+        <div class="quick-stats">
+          <div class="stat">
+            <span class="stat-icon">◉</span>
+            <div><strong>{{ b.viewsCount || 0 }}</strong><small>مشاهدة</small></div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">↓</span>
+            <div><strong>{{ b.downloads || 0 }}</strong><small>تحميل</small></div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">★</span>
+            <div><strong>{{ b.rating || 0 }}</strong><small>التقييم</small></div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">◷</span>
+            <div><strong>{{ b.publishedYear || '—' }}</strong><small>سنة النشر</small></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a *ngIf="fileUrl()" class="primary-action" [href]="fileUrl()" target="_blank" rel="noopener" (click)="api.addView(bookId).subscribe({error: () => undefined})">
+            <span>▶</span> قراءة الكتاب
+          </a>
+          <button type="button" class="secondary-action" *ngIf="fileUrl()" (click)="download()">
+            <span>↓</span> تحميل PDF
+          </button>
+          <button type="button" class="favorite-action" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()">
+            <span>{{ isFavorite() ? '♥' : '♡' }}</span>
+            {{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}
+          </button>
+        </div>
+
+        <div class="favorite-message" *ngIf="favoriteMessage">{{ favoriteMessage }}</div>
+      </div>
+    </section>
+
+    <section class="details-grid">
+      <article class="info-panel">
+        <div class="section-heading">
+          <span>01</span>
+          <div><small>BOOK INFORMATION</small><h2>معلومات الكتاب</h2></div>
+        </div>
+        <div class="info-list">
+          <div><span>المؤلف</span><strong>{{ author() }}</strong></div>
+          <div><span>التصنيف</span><strong>{{ category() }}</strong></div>
+          <div><span>سنة النشر</span><strong>{{ b.publishedYear || 'غير محددة' }}</strong></div>
+          <div><span>الحالة</span><strong class="available" *ngIf="b.isAvailable !== false">متاح للقراءة</strong><strong class="unavailable" *ngIf="b.isAvailable === false">غير متاح</strong></div>
+        </div>
+      </article>
+
+      <article class="about-panel">
+        <div class="section-heading">
+          <span>02</span>
+          <div><small>ABOUT THIS BOOK</small><h2>عن الكتاب</h2></div>
+        </div>
+        <p>{{ b.description || 'لا يوجد وصف متاح لهذا الكتاب.' }}</p>
+      </article>
+    </section>
+  </ng-container>
 </main>
