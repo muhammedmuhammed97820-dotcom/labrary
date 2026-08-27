@@ -9,7 +9,14 @@ function tokenFor(user) {
 }
 
 function publicUser(user) {
-  return { id: user._id, name: user.name, email: user.email, role: user.role };
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    avatar: user.avatar || null,
+    favorites: user.favorites || []
+  };
 }
 
 async function register(req, res, next) {
@@ -43,4 +50,34 @@ async function me(req, res) {
   res.json({ user: publicUser(req.user) });
 }
 
-module.exports = { register, login, me };
+async function updateProfile(req, res, next) {
+  try {
+    const { name, avatar } = req.body;
+    if (name !== undefined) {
+      const cleanName = String(name).trim();
+      if (!cleanName || cleanName.length > 100) return res.status(400).json({ message: 'Name is required and must be 100 characters or less.' });
+      req.user.name = cleanName;
+    }
+    if (avatar !== undefined) {
+      if (avatar !== null && typeof avatar !== 'string') return res.status(400).json({ message: 'Invalid avatar.' });
+      if (avatar && avatar.length > 2500000) return res.status(413).json({ message: 'Avatar is too large.' });
+      req.user.avatar = avatar || null;
+    }
+    await req.user.save();
+    res.json({ message: 'Profile updated successfully.', user: publicUser(req.user) });
+  } catch (error) { next(error); }
+}
+
+async function toggleFavorite(req, res, next) {
+  try {
+    const bookId = String(req.params.bookId || '').trim();
+    if (!bookId) return res.status(400).json({ message: 'Book id is required.' });
+    const index = req.user.favorites.indexOf(bookId);
+    if (index >= 0) req.user.favorites.splice(index, 1);
+    else req.user.favorites.push(bookId);
+    await req.user.save();
+    res.json({ favorite: index < 0, favorites: req.user.favorites });
+  } catch (error) { next(error); }
+}
+
+module.exports = { register, login, me, updateProfile, toggleFavorite };
