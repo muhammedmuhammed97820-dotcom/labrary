@@ -26,16 +26,30 @@ export class AuthComponent {
   showPassword = false;
   loading = false;
   error = '';
+  success = '';
 
   submit(): void {
+    if (this.loading) return;
     this.error = '';
-    if (this.mode === 'register' && !this.name.trim()) { this.error = 'يرجى إدخال الاسم.'; return; }
-    if (!this.email.trim() || !this.password) { this.error = 'يرجى إدخال البريد الإلكتروني وكلمة المرور.'; return; }
-    if (this.password.length < 6) { this.error = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.'; return; }
+    this.success = '';
+
+    if (this.mode === 'register' && !this.name.trim()) {
+      this.error = 'يرجى إدخال الاسم.';
+      return;
+    }
+    if (!this.email.trim() || !this.password) {
+      this.error = 'يرجى إدخال البريد الإلكتروني وكلمة المرور.';
+      return;
+    }
+    if (this.password.length < 6) {
+      this.error = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
+      return;
+    }
 
     this.loading = true;
-    const endpoint = this.mode === 'login' ? '/login' : '/register';
-    const body = this.mode === 'login'
+    const isLogin = this.mode === 'login';
+    const endpoint = isLogin ? '/login' : '/register';
+    const body = isLogin
       ? { email: this.email.trim(), password: this.password }
       : { name: this.name.trim(), email: this.email.trim(), password: this.password };
 
@@ -43,17 +57,26 @@ export class AuthComponent {
       next: response => {
         this.auth.setSession(response.token, response.user);
         this.loading = false;
-        this.router.navigateByUrl(response.user.role === 'admin' ? '/admin' : '/books');
+        this.success = isLogin ? 'تم تسجيل الدخول بنجاح ✓' : 'تم إنشاء الحساب بنجاح ✓';
+
+        setTimeout(() => {
+          this.router.navigateByUrl(response.user.role === 'admin' ? '/admin' : '/books');
+        }, 700);
       },
       error: err => {
         this.loading = false;
-        this.error = err?.error?.message || 'تعذر الاتصال بالخادم. تأكد أن الـBackend يعمل.';
+        const message = err?.error?.message || err?.error?.error;
+        this.error = message || (isLogin
+          ? 'تعذر تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور.'
+          : 'تعذر إنشاء الحساب. حاول مرة أخرى.');
       }
     });
   }
 
   switchMode(): void {
+    if (this.loading) return;
     this.mode = this.mode === 'login' ? 'register' : 'login';
     this.error = '';
+    this.success = '';
   }
 }
