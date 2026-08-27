@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const User = require('../models/user.model');
+const Book = require('../models/Book');
 
 function tokenFor(user) {
   const secret = process.env.JWT_SECRET;
@@ -17,7 +18,7 @@ function publicUser(user) {
     email: user.email,
     role: user.role,
     avatar: user.avatar || null,
-    favorites: user.favorites || []
+    favorites: (user.favorites || []).map(String)
   };
 }
 
@@ -88,11 +89,16 @@ async function toggleFavorite(req, res, next) {
   try {
     const bookId = String(req.params.bookId || '').trim();
     if (!bookId) return res.status(400).json({ message: 'Book id is required.' });
-    const index = req.user.favorites.indexOf(bookId);
-    if (index >= 0) req.user.favorites.splice(index, 1);
-    else req.user.favorites.push(bookId);
+    if (!require('mongoose').Types.ObjectId.isValid(bookId)) return res.status(400).json({ message: 'Invalid book id.' });
+    if (!(await Book.exists({ _id: bookId }))) return res.status(404).json({ message: 'Book not found.' });
+
+    const favorites = Array.from(new Set((req.user.favorites || []).map(String)));
+    const index = favorites.indexOf(bookId);
+    if (index >= 0) favorites.splice(index, 1);
+    else favorites.push(bookId);
+    req.user.favorites = favorites;
     await req.user.save();
-    res.json({ favorite: index < 0, favorites: req.user.favorites });
+    res.json({ favorite: index < 0, favorites });
   } catch (error) { next(error); }
 }
 
