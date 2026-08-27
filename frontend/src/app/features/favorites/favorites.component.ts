@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 interface Book { _id?: string; id?: string|number; title?: string; coverImage?: string; coverUrl?: string; author?: { name?: string } | string; }
+interface FavoriteResponse { favorite: boolean; favorites: string[]; }
 
 @Component({
   selector: 'app-favorites',
@@ -19,16 +20,20 @@ export class FavoritesComponent {
   books: Book[] = [];
   loading = true;
   error = '';
+  message = '';
+  removing = new Set<string>();
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
-    const ids = this.auth.currentUser?.favorites || [];
+    this.loading = true;
+    this.error = '';
+    const ids = (this.auth.currentUser?.favorites || []).map(String);
     if (!ids.length) { this.books = []; this.loading = false; return; }
     this.http.get<any>('http://localhost:5000/api/books').subscribe({
       next: r => {
         const all: Book[] = Array.isArray(r) ? r : (r.books ?? r.data ?? []);
-        this.books = all.filter(b => ids.includes(String(b._id ?? b.id)));
+        this.books = all.filter(b => ids.includes(this.id(b)));
         this.loading = false;
       },
       error: () => { this.error = 'تعذر تحميل المفضلة.'; this.loading = false; }
@@ -40,9 +45,19 @@ export class FavoritesComponent {
   cover(book: Book): string { return book.coverImage || book.coverUrl || 'assets/images/default-cover.svg'; }
 
   remove(book: Book): void {
-    this.http.post<{favorite:boolean;favorites:string[]}>(`http://localhost:5000/api/auth/favorites/${this.id(book)}/toggle`, {}).subscribe({
-      next: r => { this.auth.updateUser({ ...this.auth.currentUser!, favorites: r.favorites }); this.books = this.books.filter(b => this.id(b) !== this.id(book)); },
-      error: () => this.error = 'تعذر إزالة الكتاب من المفضلة.'
+    const id = this.id(book);
+    if (!id || this.removing.has(id)) return;
+    this.removing.add(id);
+    this.message = '';
+    this.http.post<FavoriteResponse>(`http://localhost:5000/api/auth/favorites/${id}/toggle`, {}).subscribe({
+      next: r => {
+        this.auth.updateUser({ ...this.auth.currentUser!, favorites: (r.favorites || []).map(String) });
+        this.books = this.books.filter(b => this.id(b) !== id);
+        this.message = 'تمت إزالة الكتاب من المفضلة ✓';
+        this.removing.delete(id);
+        setTimeout(() => { if (this.message) this.message = ''; }, 2500);
+      },
+      error: () => { this.error = 'تعذر إزالة الكتاب من المفضلة. حاول مرة أخرى.'; this.removing.delete(id); }
     });
   }
 }
