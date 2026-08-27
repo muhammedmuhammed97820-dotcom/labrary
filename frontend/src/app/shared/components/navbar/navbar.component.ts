@@ -12,12 +12,24 @@ import { AuthService } from '../../../core/services/auth.service';
 export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly serverOrigin = 'http://localhost:5000';
   menuOpen = false;
 
   get isAdmin(): boolean { return this.auth.isAdmin; }
   get isLoggedIn(): boolean { return this.auth.isLoggedIn; }
   get userName(): string { return this.auth.currentUser?.name || 'المستخدم'; }
-  get avatar(): string | null { return this.auth.currentUser?.avatar || null; }
+
+  // The backend stores avatar as /uploads/avatars/filename.
+  // Convert relative paths to the full backend URL so the navbar can load it.
+  get avatar(): string | null {
+    const avatar = this.auth.currentUser?.avatar;
+    if (!avatar) return null;
+    if (avatar.startsWith('data:') || avatar.startsWith('blob:') || avatar.startsWith('http')) {
+      return avatar;
+    }
+    return `${this.serverOrigin}${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+  }
+
   get userInitial(): string { return this.userName.trim().charAt(0) || 'م'; }
 
   logout(): void {
