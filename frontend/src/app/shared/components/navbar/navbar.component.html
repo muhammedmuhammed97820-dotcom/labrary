@@ -1,6 +1,39 @@
 <header class="navbar" dir="rtl">
   <a class="brand" routerLink="/" (click)="closeMenu()"><span class="brand-icon">م</span><span><strong>مَكتبة</strong><small>DIGITAL LIBRARY</small></span></a>
-  <nav class="desktop-nav"><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a><a routerLink="/books" routerLinkActive="active">المكتبة</a><a href="/books#categories">التصنيفات</a><a href="/books">اكتشف</a></nav>
-  <div class="nav-actions"><a class="search-link" routerLink="/books">⌕ <span>بحث</span></a><a class="library-link" routerLink="/books">دخول المكتبة <b>↗</b></a><button class="menu" type="button" (click)="toggleMenu()"><i></i><i></i></button></div>
-  @if (menuOpen) { <nav class="mobile-nav"><a routerLink="/" (click)="closeMenu()">الرئيسية</a><a routerLink="/books" (click)="closeMenu()">المكتبة</a><a routerLink="/books" (click)="closeMenu()">التصنيفات</a><a routerLink="/books" (click)="closeMenu()">اكتشف</a></nav> }
+  <nav class="desktop-nav">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a>
+    <a routerLink="/books" routerLinkActive="active">المكتبة</a>
+    <a routerLink="/books" fragment="categories">التصنيفات</a>
+    <a routerLink="/books">اكتشف</a>
+    @if (isAdmin) { <a routerLink="/admin/books" routerLinkActive="active">إدارة الكتب</a> }
+  </nav>
+  <div class="nav-actions">
+    <a class="search-link" routerLink="/books">⌕ <span>بحث</span></a>
+    @if (isLoggedIn) {
+      <a class="user-link" routerLink="/admin" title="حسابي">
+        @if (avatar) { <img [src]="avatar" [alt]="userName"> } @else { <span class="avatar-fallback">{{ userInitial }}</span> }
+        <span>{{ userName }}</span>
+      </a>
+      <button class="logout-link" type="button" (click)="logout()">خروج</button>
+    } @else {
+      <a class="login-link" routerLink="/login">تسجيل الدخول</a>
+      <a class="register-link" routerLink="/register">إنشاء حساب</a>
+    }
+    <button class="menu" type="button" (click)="toggleMenu()" aria-label="القائمة"><i></i><i></i></button>
+  </div>
+  @if (menuOpen) {
+    <nav class="mobile-nav">
+      <a routerLink="/" (click)="closeMenu()">الرئيسية</a>
+      <a routerLink="/books" (click)="closeMenu()">المكتبة</a>
+      <a routerLink="/books" fragment="categories" (click)="closeMenu()">التصنيفات</a>
+      <a routerLink="/books" (click)="closeMenu()">اكتشف</a>
+      @if (isAdmin) {
+        <a routerLink="/admin" (click)="closeMenu()">لوحة الإدارة</a>
+        <a routerLink="/admin/books" (click)="closeMenu()">إدارة الكتب</a>
+        <a routerLink="/admin/books/create" (click)="closeMenu()">إضافة كتاب</a>
+      }
+      @if (isLoggedIn) { <button type="button" (click)="logout()">تسجيل الخروج</button> }
+      @else { <a routerLink="/login" (click)="closeMenu()">تسجيل الدخول</a><a routerLink="/register" (click)="closeMenu()">إنشاء حساب</a> }
+    </nav>
+  }
 </header>
