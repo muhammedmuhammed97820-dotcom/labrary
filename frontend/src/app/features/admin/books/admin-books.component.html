@@ -1,0 +1,33 @@
+<main class="page">
+  <header class="hero">
+    <div><span>ADMIN · LIBRARY</span><h1>إدارة الكتب</h1><p>عرض، بحث، تعديل وحذف محتوى المكتبة من مكان واحد.</p></div>
+    <a routerLink="/admin/books/create" class="add">＋ إضافة كتاب</a>
+  </header>
+
+  <section class="toolbar">
+    <label class="search">⌕<input [(ngModel)]="query" placeholder="ابحث بالعنوان أو المؤلف أو التصنيف..." /></label>
+    <button type="button" (click)="load()" [disabled]="loading">↻ تحديث</button>
+    <strong>{{ filteredBooks.length }} كتاب</strong>
+  </section>
+
+  @if (loading) { <div class="state">جارِ تحميل الكتب...</div> }
+  @else if (error) { <div class="state error">{{ error }} <button (click)="load()">إعادة المحاولة</button></div> }
+  @else if (!filteredBooks.length) { <div class="state"><div>⌘</div><h2>لا توجد كتب</h2><p>{{ query ? 'لا توجد نتائج مطابقة لبحثك.' : 'ابدأ بإضافة أول كتاب إلى المكتبة.' }}</p></div> }
+  @else {
+    <section class="table-wrap">
+      <table>
+        <thead><tr><th>الكتاب</th><th>المؤلف</th><th>التصنيف</th><th>السنة</th><th>المشاهدات</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+        <tbody>
+          @for (book of filteredBooks; track book._id) {
+            <tr>
+              <td><div class="book"><div class="cover">{{ book.title.slice(0,1) }}</div><div><b>{{ book.title }}</b><small>{{ book.description || 'بدون وصف' }}</small></div></div></td>
+              <td>{{ authorName(book) }}</td><td>{{ categoryName(book) }}</td><td>{{ book.publishedYear || '—' }}</td><td>{{ book.viewsCount || 0 }}</td>
+              <td><i [class.off]="book.isAvailable === false">{{ book.isAvailable === false ? 'غير متاح' : 'متاح' }}</i></td>
+              <td><div class="actions"><a [routerLink]="['/admin/books', book._id, 'edit']">تعديل</a><button class="danger" (click)="confirmDelete(book)" [disabled]="deletingId === book._id">{{ deletingId === book._id ? '...' : 'حذف' }}</button></div></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+</main>
