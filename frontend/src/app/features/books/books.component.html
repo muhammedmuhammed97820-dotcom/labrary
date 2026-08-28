@@ -1,14 +1,50 @@
 <main class="library" dir="rtl">
-  <section class="library-hero"><div><span class="kicker">DIGITAL LIBRARY / COLLECTION</span><h1>اكتشف ما<br><em>يستحق القراءة.</em></h1></div><p>مكتبة رقمية حقيقية تجمع كتبك المفضلة في تجربة بسيطة، سريعة وحديثة.</p></section>
-  <section class="toolbar"><label class="search"><span>⌕</span><input [(ngModel)]="search" (input)="filter()" type="search" placeholder="ابحث عن كتاب، مؤلف أو تصنيف..."/><button *ngIf="search" type="button" (click)="search='';filter()">×</button></label><button class="refresh" type="button" (click)="loadBooks()">↻ تحديث</button></section>
+  <section class="library-hero">
+    <div>
+      <span class="kicker">DIGITAL LIBRARY / COLLECTION</span>
+      <h1>اكتشف ما<br><em>يستحق القراءة.</em></h1>
+    </div>
+    <p>مجموعة رقمية مرتبة بعناية، مع تجربة بحث وتصفح مصممة لتجعلك تصل إلى الكتاب بأقل خطوات ممكنة.</p>
+  </section>
+
+  <section class="toolbar" aria-label="أدوات المكتبة">
+    <label class="search"><span>⌕</span><input [(ngModel)]="search" (input)="filter()" type="search" placeholder="ابحث عن عنوان، مؤلف أو تصنيف..." aria-label="بحث في الكتب"/><button *ngIf="search" type="button" (click)="search='';filter()" aria-label="مسح البحث">×</button></label>
+    <button class="refresh" type="button" (click)="loadBooks()" [disabled]="loading">↻ تحديث</button>
+  </section>
+
   <div class="state favorite-notice" *ngIf="favoriteMessage">{{ favoriteMessage }}</div>
-  <div class="state" *ngIf="loading">جاري تحميل المكتبة...</div>
+  <div class="state" *ngIf="loading">جاري تجهيز رفوف المكتبة...</div>
   <div class="state error" *ngIf="!loading && error">{{ error }} <button type="button" (click)="loadBooks()">إعادة المحاولة</button></div>
-  <section class="grid" *ngIf="!loading && !error">
+
+  <section class="grid" *ngIf="!loading && !error && filtered.length">
     <article class="book" *ngFor="let book of filtered; let i=index">
-      <a class="cover" [routerLink]="['/books',id(book)]"><img [src]="cover(book)" [alt]="book.title || 'كتاب'"><span>{{ (i+1).toString().padStart(2,'0') }}</span></a>
-      <div class="info"><small>{{ category(book) }}</small><h2>{{ book.title || 'بدون عنوان' }}</h2><p>{{ author(book) }}</p><div class="stats"><span>◉ {{ book.views || 0 }} مشاهدة</span><span>↓ {{ book.downloads || 0 }}</span></div><div class="book-actions"><a class="details" [routerLink]="['/books',id(book)]">عرض الكتاب ↗</a><button class="favorite-button" type="button" [class.active]="isFavorite(book)" [disabled]="isFavoriteBusy(book)" (click)="toggleFavorite(book)" [attr.aria-label]="isFavorite(book) ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'" [title]="isFavorite(book) ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'">{{ isFavorite(book) ? '♥' : '♡' }}</button></div></div>
+      <a class="cover" [routerLink]="['/books',id(book)]">
+        <img [src]="cover(book)" [alt]="book.title || 'كتاب'" loading="lazy">
+        <span>{{ (i + 1).toString().padStart(2,'0') }}</span>
+      </a>
+      <div class="info">
+        <small>{{ category(book) }}</small>
+        <h2>{{ book.title || 'بدون عنوان' }}</h2>
+        <p>{{ author(book) }}</p>
+        <div class="stats">
+          <span>◉ {{ book.viewsCount || 0 }} مشاهدة</span>
+          <span>↓ {{ book.downloads || 0 }}</span>
+        </div>
+        <div class="book-actions">
+          <a class="details" [routerLink]="['/books',id(book)]">عرض الكتاب ↗</a>
+          <button class="favorite-button" type="button" [class.active]="isFavorite(book)" [disabled]="isFavoriteBusy(book)" (click)="toggleFavorite(book)" [attr.aria-label]="isFavorite(book) ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'" [title]="isFavorite(book) ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'">{{ isFavorite(book) ? '♥' : '♡' }}</button>
+        </div>
+      </div>
     </article>
   </section>
-  <section class="empty" *ngIf="!loading && !error && !filtered.length"><b>⌕</b><h2>لم نجد ما تبحث عنه</h2><p>جرّب عنوانًا أو اسم مؤلف مختلفًا.</p></section>
+
+  <section class="empty" *ngIf="!loading && !error && !filtered.length">
+    <b>⌕</b><h2>لم نجد ما تبحث عنه</h2><p>جرّب عنوانًا أو اسم مؤلف مختلفًا.</p>
+  </section>
+
+  <nav class="catalog-pagination" *ngIf="!loading && !error && totalPages > 1" aria-label="ترقيم صفحات الكتب">
+    <button type="button" (click)="previousPage()" [disabled]="page === 1">السابق</button>
+    <span>صفحة <strong>{{ page }}</strong> من {{ totalPages }}</span>
+    <button type="button" (click)="nextPage()" [disabled]="page === totalPages">التالي</button>
+  </nav>
 </main>
