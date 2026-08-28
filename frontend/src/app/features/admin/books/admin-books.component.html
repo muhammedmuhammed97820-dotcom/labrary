@@ -1,33 +1,16 @@
-<main class="page admin-books-page">
-  <header class="hero">
-    <div><span>ADMIN · LIBRARY</span><h1>إدارة الكتب</h1><p>عرض، بحث، تعديل وحذف محتوى المكتبة من مكان واحد.</p></div>
-    <a routerLink="/admin/books/create" class="add">＋ إضافة كتاب</a>
-  </header>
-
-  <section class="toolbar">
-    <label class="search">⌕<input [(ngModel)]="query" placeholder="ابحث بالعنوان أو المؤلف أو التصنيف..." /></label>
-    <button type="button" (click)="load()" [disabled]="loading">↻ تحديث</button>
-    <strong>{{ filteredBooks.length }} كتاب</strong>
-  </section>
-
-  @if (loading) { <div class="state">جارِ تحميل الكتب...</div> }
-  @else if (error) { <div class="state error">{{ error }} <button (click)="load()">إعادة المحاولة</button></div> }
-  @else if (!filteredBooks.length) { <div class="state"><div>⌘</div><h2>لا توجد كتب</h2><p>{{ query ? 'لا توجد نتائج مطابقة لبحثك.' : 'ابدأ بإضافة أول كتاب إلى المكتبة.' }}</p></div> }
-  @else {
-    <section class="table-wrap">
-      <table>
-        <thead><tr><th>الكتاب</th><th>المؤلف</th><th>التصنيف</th><th>السنة</th><th>المشاهدات</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-        <tbody>
-          @for (book of filteredBooks; track book._id) {
-            <tr>
-              <td><div class="book"><div class="cover">{{ book.title.slice(0,1) }}</div><div><b>{{ book.title }}</b><small>{{ book.description || 'بدون وصف' }}</small></div></div></td>
-              <td>{{ authorName(book) }}</td><td>{{ categoryName(book) }}</td><td>{{ book.publishedYear || '—' }}</td><td>{{ book.viewsCount || 0 }}</td>
-              <td><i [class.off]="book.isAvailable === false">{{ book.isAvailable === false ? 'غير متاح' : 'متاح' }}</i></td>
-              <td><div class="actions"><a [routerLink]="['/admin/books', book._id, 'edit']">تعديل</a><button class="danger" (click)="confirmDelete(book)" [disabled]="deletingId === book._id">{{ deletingId === book._id ? '...' : 'حذف' }}</button></div></td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </section>
-  }
+<main class="bg-dark text-light min-vh-100 py-5" dir="rtl">
+  <div class="container-fluid px-3 px-lg-5">
+    <header class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4"><div><span class="badge text-bg-warning mb-3">ADMIN · LIBRARY</span><h1 class="display-6 fw-bold">إدارة الكتب</h1><p class="text-secondary mb-0">عرض، بحث، تعديل وحذف محتوى المكتبة من مكان واحد.</p></div><a routerLink="/admin/books/create" class="btn btn-warning">＋ إضافة كتاب</a></header>
+    <section class="card bg-black border-secondary shadow-sm mb-4"><div class="card-body"><div class="row g-2 align-items-center"><div class="col-lg-9"><div class="input-group input-group-lg"><span class="input-group-text">⌕</span><input class="form-control" [(ngModel)]="query" placeholder="ابحث بالعنوان أو المؤلف أو التصنيف..."></div></div><div class="col-lg-3 d-flex gap-2"><button class="btn btn-outline-light btn-lg flex-grow-1" type="button" (click)="load()" [disabled]="loading">↻ تحديث</button><span class="badge text-bg-secondary d-flex align-items-center">{{ filteredBooks.length }} كتاب</span></div></div></div></section>
+    @if (loading) { <div class="text-center py-5"><div class="spinner-border text-warning"></div><p class="text-secondary mt-3">جارِ تحميل الكتب...</p></div> }
+    @else if (error) { <div class="alert alert-danger d-flex justify-content-between align-items-center"><span>{{ error }}</span><button class="btn btn-sm btn-danger" type="button" (click)="load()">إعادة المحاولة</button></div> }
+    @else if (!filteredBooks.length) { <div class="card bg-black border-secondary text-center py-5"><div class="card-body"><div class="display-4">⌕</div><h2 class="h4 mt-3">لا توجد كتب</h2><p class="text-secondary mb-0">{{ query ? 'لا توجد نتائج مطابقة لبحثك.' : 'ابدأ بإضافة أول كتاب إلى المكتبة.' }}</p></div></div> }
+    @else {
+      <div class="card bg-black border-secondary shadow-sm overflow-hidden"><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>الكتاب</th><th>المؤلف</th><th>التصنيف</th><th>السنة</th><th>المشاهدات</th><th>الحالة</th><th class="text-nowrap">إجراءات</th></tr></thead><tbody>
+        @for (book of filteredBooks; track book._id) {
+          <tr><td><div class="d-flex align-items-center gap-3"><span class="badge text-bg-warning p-3 text-dark">{{ book.title.slice(0,1) }}</span><div><strong class="d-block">{{ book.title }}</strong><small class="text-secondary d-block text-truncate" style="max-width:24rem">{{ book.description || 'بدون وصف' }}</small></div></div></td><td>{{ authorName(book) }}</td><td><span class="badge text-bg-secondary">{{ categoryName(book) }}</span></td><td>{{ book.publishedYear || '—' }}</td><td>{{ book.viewsCount || 0 }}</td><td><span class="badge" [class.text-bg-success]="book.isAvailable !== false" [class.text-bg-danger]="book.isAvailable === false">{{ book.isAvailable === false ? 'غير متاح' : 'متاح' }}</span></td><td><div class="d-flex gap-2"><a class="btn btn-sm btn-outline-warning" [routerLink]="['/admin/books', book._id, 'edit']">تعديل</a><button class="btn btn-sm btn-outline-danger" type="button" (click)="confirmDelete(book)" [disabled]="deletingId === book._id">{{ deletingId === book._id ? '...' : 'حذف' }}</button></div></td></tr>
+        }
+      </tbody></table></div></div>
+    }
+  </div>
 </main>
