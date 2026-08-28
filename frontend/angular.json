@@ -1,22 +1,22 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1,
-  "cli": {"packageManager":"npm","analytics":false},
+  "$schema":"./node_modules/@angular/cli/lib/config/schema.json",
+  "version":1,
+  "cli":{"packageManager":"npm","analytics":false},
   "newProjectRoot":"projects",
-  "projects": {
-    "frontend": {
+  "projects":{
+    "frontend":{
       "projectType":"application",
       "schematics":{"@schematics/angular:component":{"style":"scss"}},
       "root":"","sourceRoot":"src","prefix":"app",
-      "architect": {
-        "build": {
+      "architect":{
+        "build":{
           "builder":"@angular/build:application",
           "options":{
             "browser":"src/main.ts",
             "tsConfig":"tsconfig.app.json",
             "inlineStyleLanguage":"scss",
             "assets":[{"glob":"**/*","input":"public"}],
-            "styles":["node_modules/bootstrap/dist/css/bootstrap.min.css","src/styles.scss","src/premium-ui.scss","src/footer-ui.scss","src/forms-ui.scss","src/catalog-ui.scss"]
+            "styles":["node_modules/bootstrap/dist/css/bootstrap.min.css"]
           },
           "configurations":{
             "production":{
