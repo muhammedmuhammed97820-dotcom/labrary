@@ -1,0 +1,3 @@
+.favorites-page .favorite-cover { aspect-ratio: 3 / 4; object-fit: cover; }
+.favorites-page .favorite-card { transition: transform .2s ease, box-shadow .2s ease; }
+.favorites-page .favorite-card:hover { transform: translateY(-3px); }
