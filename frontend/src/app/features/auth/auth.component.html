@@ -1,34 +1,36 @@
-<main class="auth-shell" dir="rtl">
-  <section class="auth-art">
-    <div class="orb orb-a"></div><div class="orb orb-b"></div>
-    <span class="eyebrow">DIGITAL LIBRARY</span>
-    <h1>عالم كامل من<br><em>المعرفة</em> بانتظارك.</h1>
-    <p>اكتشف الكتب، احفظ ما تحب، وواصل القراءة من المكان الذي توقفت عنده.</p>
-    <div class="quote">« الكتاب الجيد يفتح لك أبوابًا لم تكن تعرف أنها موجودة »</div>
-  </section>
-
-  <section class="auth-card">
-    <a routerLink="/" class="brand"><span>DL</span><b>Digital Library</b></a>
-    <div class="heading">
-      <span>{{ mode === 'login' ? 'مرحباً بعودتك' : 'ابدأ رحلتك' }}</span>
-      <h2>{{ mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد' }}</h2>
-      <p>{{ mode === 'login' ? 'أدخل بياناتك للوصول إلى مكتبتك.' : 'أنشئ حسابك وابدأ ببناء مكتبتك الشخصية.' }}</p>
+<main class="bs-auth min-vh-100 d-flex align-items-center py-5 bg-dark-subtle" dir="rtl">
+  <div class="container">
+    <div class="row g-0 justify-content-center shadow-lg overflow-hidden rounded-4 border border-secondary-subtle">
+      <section class="col-lg-6 d-none d-lg-flex flex-column justify-content-between p-5 text-light bg-dark position-relative">
+        <div class="position-absolute top-0 end-0 w-100 h-100 opacity-25" style="background:radial-gradient(circle at 80% 20%,#d7b477 0,transparent 32%),radial-gradient(circle at 15% 85%,#6f42c1 0,transparent 28%);"></div>
+        <div class="position-relative">
+          <div class="small text-uppercase text-warning fw-semibold mb-4">Digital Library</div>
+          <h1 class="display-3 fw-bold lh-1 mb-4">عالم كامل من <span class="text-warning">المعرفة</span> بانتظارك.</h1>
+          <p class="lead text-secondary">اكتشف الكتب، احفظ ما تحب، وواصل القراءة من المكان الذي توقفت عنده.</p>
+        </div>
+        <div class="position-relative border-top border-secondary pt-4 text-secondary">« الكتاب الجيد يفتح لك أبوابًا لم تكن تعرف أنها موجودة »</div>
+      </section>
+      <section class="col-lg-6 bg-body-tertiary p-4 p-md-5">
+        <div class="d-flex align-items-center gap-3 mb-5">
+          <a routerLink="/" class="btn btn-dark rounded-circle d-inline-flex align-items-center justify-content-center" style="width:48px;height:48px;">DL</a>
+          <div><div class="fw-bold">Digital Library</div><small class="text-body-secondary">مكتبتك الرقمية</small></div>
+        </div>
+        <div class="mb-4">
+          <div class="small text-warning fw-semibold mb-2">{{ mode === 'login' ? 'مرحباً بعودتك' : 'ابدأ رحلتك' }}</div>
+          <h2 class="display-6 fw-bold mb-2">{{ mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد' }}</h2>
+          <p class="text-body-secondary mb-0">{{ mode === 'login' ? 'أدخل بياناتك للوصول إلى مكتبتك.' : 'أنشئ حسابك وابدأ ببناء مكتبتك الشخصية.' }}</p>
+        </div>
+        <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+        <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+        <form (ngSubmit)="submit()" novalidate>
+          <div *ngIf="mode === 'register'" class="mb-3"><label class="form-label fw-semibold">الاسم</label><input class="form-control form-control-lg" name="name" [(ngModel)]="name" placeholder="اسمك الكامل" autocomplete="name"></div>
+          <div class="mb-3"><label class="form-label fw-semibold">البريد الإلكتروني</label><input class="form-control form-control-lg" name="email" [(ngModel)]="email" type="email" placeholder="you@example.com" autocomplete="email" required></div>
+          <div class="mb-4"><label class="form-label fw-semibold">كلمة المرور</label><div class="input-group input-group-lg"><input class="form-control" name="password" [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" placeholder="••••••••" autocomplete="current-password" required><button class="btn btn-outline-secondary" type="button" (click)="showPassword=!showPassword">{{ showPassword ? 'إخفاء' : 'إظهار' }}</button></div></div>
+          <button class="btn btn-dark btn-lg w-100 py-3" type="submit" [disabled]="loading"><span *ngIf="loading" class="spinner-border spinner-border-sm ms-2"></span>{{ mode === 'login' ? 'دخول إلى المكتبة' : 'إنشاء الحساب' }}</button>
+        </form>
+        <div class="d-flex align-items-center gap-3 my-4"><hr class="flex-grow-1"><span class="small text-body-secondary">أو</span><hr class="flex-grow-1"></div>
+        <p class="text-center text-body-secondary mb-0">{{ mode === 'login' ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟' }} <button type="button" class="btn btn-link text-warning fw-bold p-0 align-baseline" (click)="switchMode()">{{ mode === 'login' ? 'إنشاء حساب' : 'تسجيل الدخول' }}</button></p>
+      </section>
     </div>
-
-    <form (ngSubmit)="submit()">
-      <label *ngIf="mode === 'register'">الاسم
-        <input name="name" [(ngModel)]="name" placeholder="اسمك الكامل" autocomplete="name">
-      </label>
-      <label>البريد الإلكتروني
-        <input name="email" [(ngModel)]="email" type="email" placeholder="you@example.com" autocomplete="email" required>
-      </label>
-      <label>كلمة المرور
-        <div class="password"><input name="password" [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" placeholder="••••••••" autocomplete="current-password" required><button type="button" (click)="showPassword=!showPassword">{{ showPassword ? 'إخفاء' : 'إظهار' }}</button></div>
-      </label>
-      <button class="submit" type="submit">{{ mode === 'login' ? 'دخول إلى المكتبة' : 'إنشاء الحساب' }} <b>←</b></button>
-    </form>
-
-    <div class="divider"><span>أو</span></div>
-    <p class="switch">{{ mode === 'login' ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟' }} <button type="button" (click)="switchMode()">{{ mode === 'login' ? 'إنشاء حساب' : 'تسجيل الدخول' }}</button></p>
-  </section>
+  </div>
 </main>
