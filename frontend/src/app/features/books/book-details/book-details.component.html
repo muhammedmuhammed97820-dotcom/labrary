@@ -1,71 +1,17 @@
-<main class="details" dir="rtl">
-  <div class="topbar">
-    <a routerLink="/books" class="back">← العودة إلى المكتبة</a>
-    <span class="book-code" *ngIf="book">BOOK / {{ bookId }}</span>
+<main class="bg-dark text-light min-vh-100 py-5" dir="rtl">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><a routerLink="/books" class="btn btn-outline-light">← العودة إلى المكتبة</a><span *ngIf="book" class="text-secondary small">BOOK / {{ bookId }}</span></div>
+    <div *ngIf="loading" class="text-center py-5"><div class="spinner-border text-warning"></div><p class="text-secondary mt-3">جاري تحميل تفاصيل الكتاب...</p></div>
+    <div *ngIf="!loading && error" class="alert alert-danger"><h2 class="h5">تعذر تحميل الكتاب</h2><p>{{ error }}</p><a routerLink="/books" class="btn btn-outline-danger">العودة إلى المكتبة</a></div>
+    <ng-container *ngIf="!loading && !error && book as b">
+      <section class="row g-5 align-items-center mb-5">
+        <div class="col-lg-4 text-center"><div class="bg-black border border-secondary rounded-4 p-3 shadow-lg mx-auto" style="max-width:350px"><img [src]="cover()" [alt]="b.title" class="img-fluid rounded-3" style="aspect-ratio:2/3;object-fit:cover"><div class="small text-warning mt-3">DIGITAL LIBRARY</div></div></div>
+        <div class="col-lg-8"><span class="badge bg-warning text-dark mb-3">{{ category() }}</span><h1 class="display-4 fw-bold lh-1 mb-3">{{ b.title || 'بدون عنوان' }}</h1><p class="lead text-secondary">بقلم <strong class="text-light">{{ author() }}</strong></p><p class="text-secondary lh-lg">{{ b.description || 'لا يوجد وصف لهذا الكتاب حتى الآن.' }}</p>
+          <div class="row row-cols-2 row-cols-md-4 g-2 my-4"><div class="col"><div class="card bg-black border-secondary h-100"><div class="card-body"><div class="text-warning h4 mb-1">{{ b.viewsCount || 0 }}</div><small class="text-secondary">مشاهدة</small></div></div></div><div class="col"><div class="card bg-black border-secondary h-100"><div class="card-body"><div class="text-warning h4 mb-1">{{ b.downloads || 0 }}</div><small class="text-secondary">تحميل</small></div></div></div><div class="col"><div class="card bg-black border-secondary h-100"><div class="card-body"><div class="text-warning h4 mb-1">{{ b.rating || 0 }}</div><small class="text-secondary">التقييم</small></div></div></div><div class="col"><div class="card bg-black border-secondary h-100"><div class="card-body"><div class="text-warning h4 mb-1">{{ b.publishedYear || '—' }}</div><small class="text-secondary">السنة</small></div></div></div></div>
+          <div class="d-flex flex-wrap gap-2"><a *ngIf="fileUrl()" [href]="fileUrl()" target="_blank" rel="noopener" class="btn btn-warning btn-lg">▶ قراءة الكتاب</a><button *ngIf="fileUrl()" type="button" class="btn btn-outline-light btn-lg" (click)="download()">↓ تحميل PDF</button><button type="button" class="btn btn-outline-warning btn-lg" [disabled]="favoriteBusy" (click)="toggleFavorite()">{{ isFavorite() ? '♥ في المفضلة' : '♡ إضافة للمفضلة' }}</button></div><div *ngIf="favoriteMessage" class="text-warning small mt-3">{{ favoriteMessage }}</div>
+        </div>
+      </section>
+      <section class="row g-4"><div class="col-lg-5"><article class="card bg-black text-light border-secondary rounded-4 h-100"><div class="card-header bg-transparent border-secondary"><span class="text-warning small">01 · BOOK INFORMATION</span><h2 class="h4 mt-1">معلومات الكتاب</h2></div><div class="list-group list-group-flush"><div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between"><span class="text-secondary">المؤلف</span><strong>{{ author() }}</strong></div><div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between"><span class="text-secondary">التصنيف</span><strong>{{ category() }}</strong></div><div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between"><span class="text-secondary">سنة النشر</span><strong>{{ b.publishedYear || 'غير محددة' }}</strong></div><div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between"><span class="text-secondary">الحالة</span><strong class="text-success" *ngIf="b.isAvailable !== false">متاح</strong><strong class="text-danger" *ngIf="b.isAvailable === false">غير متاح</strong></div></div></article></div><div class="col-lg-7"><article class="card bg-black text-light border-secondary rounded-4 h-100"><div class="card-body p-4"><span class="text-warning small">02 · ABOUT THIS BOOK</span><h2 class="h4 mt-1">عن الكتاب</h2><p class="text-secondary lh-lg mb-0">{{ b.description || 'لا يوجد وصف متاح لهذا الكتاب.' }}</p></div></article></div></section>
+    </ng-container>
   </div>
-
-  <div class="state loading" *ngIf="loading">
-    <span class="loader"></span>
-    <p>جاري تحميل تفاصيل الكتاب...</p>
-  </div>
-
-  <section class="state error-state" *ngIf="!loading && error">
-    <div class="state-icon">!</div>
-    <h2>تعذر تحميل الكتاب</h2>
-    <p>{{ error }}</p>
-    <a routerLink="/books" class="back-button">العودة إلى المكتبة</a>
-  </section>
-
-  <ng-container *ngIf="!loading && !error && book as b">
-    <section class="book-hero">
-      <div class="cover-wrap">
-        <div class="cover-shadow"></div>
-        <div class="cover-card">
-          <img [src]="cover()" [alt]="b.title">
-          <span class="cover-label">LIBRARY</span>
-        </div>
-        <div class="cover-caption">غلاف الكتاب</div>
-      </div>
-
-      <div class="book-main">
-        <div class="category-pill">{{ category() }}</div>
-        <h1>{{ b.title || 'بدون عنوان' }}</h1>
-        <p class="author">بقلم <strong>{{ author() }}</strong></p>
-
-        <p class="description-preview">{{ b.description || 'لا يوجد وصف لهذا الكتاب حتى الآن.' }}</p>
-
-        <div class="quick-stats">
-          <div class="stat"><span class="stat-icon">◉</span><div><strong>{{ b.viewsCount || 0 }}</strong><small>مشاهدة</small></div></div>
-          <div class="stat"><span class="stat-icon">↓</span><div><strong>{{ b.downloads || 0 }}</strong><small>تحميل</small></div></div>
-          <div class="stat"><span class="stat-icon">★</span><div><strong>{{ b.rating || 0 }}</strong><small>التقييم</small></div></div>
-          <div class="stat"><span class="stat-icon">◷</span><div><strong>{{ b.publishedYear || '—' }}</strong><small>سنة النشر</small></div></div>
-        </div>
-
-        <div class="actions">
-          <a *ngIf="fileUrl()" class="primary-action" [href]="fileUrl()" target="_blank" rel="noopener"><span>▶</span> قراءة الكتاب</a>
-          <button type="button" class="secondary-action" *ngIf="fileUrl()" (click)="download()"><span>↓</span> تحميل PDF</button>
-          <button type="button" class="favorite-action" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><span>{{ isFavorite() ? '♥' : '♡' }}</span>{{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}</button>
-        </div>
-
-        <div class="favorite-message" *ngIf="favoriteMessage">{{ favoriteMessage }}</div>
-      </div>
-    </section>
-
-    <section class="details-grid">
-      <article class="info-panel">
-        <div class="section-heading"><span>01</span><div><small>BOOK INFORMATION</small><h2>معلومات الكتاب</h2></div></div>
-        <div class="info-list">
-          <div><span>المؤلف</span><strong>{{ author() }}</strong></div>
-          <div><span>التصنيف</span><strong>{{ category() }}</strong></div>
-          <div><span>سنة النشر</span><strong>{{ b.publishedYear || 'غير محددة' }}</strong></div>
-          <div><span>الحالة</span><strong class="available" *ngIf="b.isAvailable !== false">متاح للقراءة</strong><strong class="unavailable" *ngIf="b.isAvailable === false">غير متاح</strong></div>
-        </div>
-      </article>
-
-      <article class="about-panel">
-        <div class="section-heading"><span>02</span><div><small>ABOUT THIS BOOK</small><h2>عن الكتاب</h2></div></div>
-        <p>{{ b.description || 'لا يوجد وصف متاح لهذا الكتاب.' }}</p>
-      </article>
-    </section>
-  </ng-container>
 </main>
