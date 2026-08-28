@@ -27,7 +27,13 @@ export class NavbarComponent {
   }
 
   get userInitial(): string { return this.userName.trim().charAt(0) || 'م'; }
-  logout(): void { this.auth.logout(); this.closeMenu(); this.router.navigate(['/login']); }
+
+  logout(): void {
+    this.auth.logout();
+    this.closeMenu();
+    this.router.navigate(['/login']);
+  }
+
   closeMenu(): void { this.menuOpen = false; }
   toggleMenu(): void { this.menuOpen = !this.menuOpen; }
 }
