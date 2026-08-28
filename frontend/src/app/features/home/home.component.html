@@ -1,22 +1,35 @@
 <main dir="rtl">
-  <section class="bg-dark text-white py-5">
+  <section class="bg-dark text-white">
     <div class="container py-5">
-      <div class="row align-items-center g-5">
+      <div class="row align-items-center g-5 py-lg-5">
         <div class="col-lg-7">
-          <span class="text-warning small">DIGITAL LIBRARY / GRADUATION EDITION</span>
-          <h1 class="display-2 fw-bold mt-3">اقرأ أكثر.<br><span class="text-warning">اكتشف أبعد.</span></h1>
-          <p class="lead text-light-emphasis mt-4">مكتبة رقمية تجمع الكتب والقراءة والمفضلة والإدارة في تجربة واحدة.</p>
-          <div class="d-flex flex-wrap gap-2 mt-4">
-            <a routerLink="/books" class="btn btn-warning btn-lg">استكشف المكتبة</a>
+          <span class="badge text-bg-warning mb-3">DIGITAL LIBRARY · GRADUATION EDITION</span>
+          <h1 class="display-2 fw-bold lh-1">اقرأ أكثر.<br><span class="text-warning">اكتشف أبعد.</span></h1>
+          <p class="lead text-light-emphasis my-4">مكتبة رقمية تجمع الكتب والبحث والقراءة والمفضلة وإدارة المحتوى في تجربة واحدة سهلة وواضحة.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a routerLink="/books" class="btn btn-warning btn-lg fw-bold">استكشف المكتبة</a>
             <a routerLink="/register" class="btn btn-outline-light btn-lg">أنشئ حسابًا مجانيًا</a>
+          </div>
+          <div class="row g-3 mt-5">
+            <div class="col-4"><div class="border-start border-secondary ps-3"><strong class="fs-3 d-block">01</strong><small class="text-secondary">اكتشاف</small></div></div>
+            <div class="col-4"><div class="border-start border-secondary ps-3"><strong class="fs-3 d-block">02</strong><small class="text-secondary">قراءة</small></div></div>
+            <div class="col-4"><div><strong class="fs-3 d-block">03</strong><small class="text-secondary">حفظ</small></div></div>
           </div>
         </div>
         <div class="col-lg-5">
-          <div class="card bg-secondary-subtle text-dark shadow-lg border-0">
-            <div class="card-body p-5 text-center">
-              <div class="display-1 mb-3">📚</div>
-              <h2 class="h1 fw-bold">مَكتبة</h2>
-              <p class="mb-0">READ · DISCOVER · REMEMBER</p>
+          <div class="card border-0 shadow-lg bg-body-secondary">
+            <div class="card-body p-4 p-lg-5 text-center">
+              <div class="ratio ratio-3x4 bg-dark rounded overflow-hidden">
+                <div class="d-flex flex-column align-items-center justify-content-center text-white">
+                  <span class="display-1 fw-bold text-warning">م</span>
+                  <span class="display-5 fw-bold">مَكتبة</span>
+                  <small class="text-secondary mt-2">READ · DISCOVER · REMEMBER</small>
+                </div>
+              </div>
+              <div class="row g-2 mt-3">
+                <div class="col-6"><div class="bg-dark text-white rounded p-3"><strong class="d-block text-warning">24/7</strong><small class="text-secondary">وصول دائم</small></div></div>
+                <div class="col-6"><div class="bg-dark text-white rounded p-3"><strong class="d-block text-warning">PDF</strong><small class="text-secondary">قراءة مباشرة</small></div></div>
+              </div>
             </div>
           </div>
         </div>
@@ -25,20 +38,20 @@
   </section>
 
   <section class="container py-5">
-    <div class="d-flex justify-content-between align-items-end mb-4">
-      <div><span class="text-secondary small">THE EXPERIENCE</span><h2 class="display-6 fw-bold mt-2">كل ما تحتاجه القارئ</h2></div>
-      <a routerLink="/books" class="btn btn-outline-primary">اذهب إلى المكتبة</a>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div><span class="text-secondary small">THE EXPERIENCE</span><h2 class="display-6 fw-bold mt-2 mb-0">كل ما تحتاجه القارئ</h2></div>
+      <a routerLink="/books" class="btn btn-outline-dark">اذهب إلى المكتبة</a>
     </div>
     <div class="row g-4">
-      <div class="col-md-4"><div class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-primary">01 / DISCOVER</span><h3 class="h4 mt-4">اكتشاف بلا تعقيد</h3><p class="text-secondary">ابحث وتصفح الكتب بسهولة من واجهة بسيطة ومتجاوبة.</p></div></div></div>
-      <div class="col-md-4"><div class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-success">02 / READ</span><h3 class="h4 mt-4">اقرأ في أي وقت</h3><p class="text-secondary">افتح الكتاب مباشرة من التفاصيل وواصل القراءة.</p></div></div></div>
-      <div class="col-md-4"><div class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-warning">03 / SAVE</span><h3 class="h4 mt-4">احتفظ بما تحب</h3><p class="text-secondary">أضف الكتب إلى المفضلة وارجع إليها لاحقًا.</p></div></div></div>
+      <div class="col-md-4"><article class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-primary">01 / DISCOVER</span><h3 class="h4 mt-4">اكتشاف بلا تعقيد</h3><p class="text-secondary mb-0">ابحث وتصفح الكتب بسهولة من واجهة بسيطة ومتجاوبة مع جميع الشاشات.</p></div></article></div>
+      <div class="col-md-4"><article class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-success">02 / READ</span><h3 class="h4 mt-4">اقرأ في أي وقت</h3><p class="text-secondary mb-0">انتقل من تفاصيل الكتاب إلى ملف القراءة أو التحميل بأقل عدد من الخطوات.</p></div></article></div>
+      <div class="col-md-4"><article class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-warning">03 / SAVE</span><h3 class="h4 mt-4">احتفظ بما تحب</h3><p class="text-secondary mb-0">أضف الكتب إلى المفضلة وارجع إليها لاحقًا من حسابك الشخصي.</p></div></article></div>
     </div>
   </section>
 
   <section class="bg-light py-5">
     <div class="container py-4">
-      <div class="row justify-content-center"><div class="col-lg-9 text-center"><span class="text-secondary small">OUR MANIFESTO</span><h2 class="display-5 fw-bold mt-3">الكتاب الجيد يترك أثرًا لا يزول.</h2><p class="lead text-secondary mt-3">مشروع تخرج يجمع بين هندسة البرمجيات وقاعدة البيانات والمصادقة ورفع الملفات وتجربة القراءة الرقمية.</p></div></div>
+      <div class="row justify-content-center"><div class="col-lg-9 text-center"><span class="text-secondary small">OUR MANIFESTO</span><h2 class="display-5 fw-bold mt-3">الكتاب الجيد يترك أثرًا لا يزول.</h2><p class="lead text-secondary mt-3">مشروع تخرج يجمع بين Angular وNode.js وMongoDB لبناء مكتبة رقمية عملية وسهلة الاستخدام.</p></div></div>
     </div>
   </section>
 </main>
