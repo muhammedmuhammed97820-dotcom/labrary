@@ -1,55 +1,38 @@
-<main class="profile-page" dir="rtl">
-  <section class="profile-hero">
-    <div>
-      <span class="eyebrow">MY LIBRARY / ACCOUNT</span>
-      <h1>ملفي الشخصي</h1>
-      <p>تحكم ببياناتك وصورتك ومكتبتك الشخصية من مكان واحد.</p>
-    </div>
-    <a routerLink="/books" class="back">← العودة للمكتبة</a>
-  </section>
+<main class="bg-dark text-light min-vh-100 py-5" dir="rtl">
+  <div class="container">
+    <header class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-5">
+      <div><div class="text-uppercase text-warning small fw-semibold mb-2">My Library / Account</div><h1 class="display-5 fw-bold mb-2">ملفي الشخصي</h1><p class="text-secondary mb-0">تحكم ببياناتك وصورتك ومكتبتك الشخصية من مكان واحد.</p></div>
+      <a routerLink="/books" class="btn btn-outline-light">← العودة للمكتبة</a>
+    </header>
 
-  <section class="profile-grid">
-    <article class="card identity-card">
-      <div class="avatar-wrap">
-        <img *ngIf="avatarUrl" [src]="avatarUrl" alt="صورة المستخدم">
-        <span *ngIf="!avatarUrl">{{ initial }}</span>
-        <label class="avatar-edit" title="تغيير الصورة">
-          ✎
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            (click)="resetAvatarInput($event)"
-            (change)="chooseAvatar($event)">
-        </label>
+    <div *ngIf="message" class="alert alert-success">{{ message }}</div><div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <article class="card bg-black text-light border-secondary rounded-4 h-100">
+          <div class="card-body text-center p-4 p-lg-5">
+            <div class="mx-auto mb-4 rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold display-6" style="width:120px;height:120px;overflow:hidden;">
+              <img *ngIf="avatarUrl" [src]="avatarUrl" alt="صورة المستخدم" class="w-100 h-100 object-fit-cover"><span *ngIf="!avatarUrl">{{ initial }}</span>
+            </div>
+            <div class="mb-3"><label class="btn btn-outline-warning btn-sm">تغيير الصورة<input class="d-none" type="file" accept="image/png,image/jpeg,image/webp" (click)="resetAvatarInput($event)" (change)="chooseAvatar($event)"></label></div>
+            <h2 class="h3 fw-bold mb-1">{{ name || 'المستخدم' }}</h2><p class="text-secondary mb-3">{{ user?.email }}</p>
+            <span class="badge" [class.text-bg-warning]="user?.role === 'admin'" [class.text-bg-secondary]="user?.role !== 'admin'">{{ user?.role === 'admin' ? 'ADMIN' : 'MEMBER' }}</span>
+            <div *ngIf="avatarUrl" class="mt-4"><button type="button" class="btn btn-outline-danger btn-sm" (click)="removeAvatar()">إزالة الصورة</button></div>
+          </div>
+        </article>
       </div>
-      <h2>{{ name || 'المستخدم' }}</h2>
-      <p>{{ user?.email }}</p>
-      <span class="role" [class.admin]="user?.role === 'admin'">{{ user?.role === 'admin' ? 'ADMIN' : 'MEMBER' }}</span>
-      <button *ngIf="avatarUrl" type="button" class="remove-avatar" (click)="removeAvatar()">إزالة الصورة</button>
-    </article>
 
-    <article class="card form-card">
-      <div class="card-title"><span>ACCOUNT</span><h2>معلومات الحساب</h2></div>
+      <div class="col-lg-8">
+        <article class="card bg-black text-light border-secondary rounded-4 h-100">
+          <div class="card-header bg-transparent border-secondary p-4"><div class="text-warning small text-uppercase">Account</div><h2 class="h3 mb-0 mt-1">معلومات الحساب</h2></div>
+          <div class="card-body p-4">
+            <div class="mb-4"><label class="form-label">الاسم الكامل</label><input class="form-control form-control-lg bg-dark text-light border-secondary" [(ngModel)]="name" maxlength="100" placeholder="اسمك الكامل"></div>
+            <div class="mb-4"><label class="form-label">البريد الإلكتروني</label><input class="form-control form-control-lg bg-dark text-secondary border-secondary" [value]="user?.email || ''" disabled></div>
+            <button class="btn btn-warning btn-lg px-4" type="button" (click)="save()" [disabled]="saving"><span *ngIf="saving" class="spinner-border spinner-border-sm ms-2"></span>{{ saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات' }}</button>
+          </div>
+        </article>
+      </div>
 
-      <div *ngIf="message" class="notice success">{{ message }}</div>
-      <div *ngIf="error" class="notice error">{{ error }}</div>
-
-      <label>الاسم الكامل
-        <input [(ngModel)]="name" maxlength="100" placeholder="اسمك الكامل">
-      </label>
-
-      <label>البريد الإلكتروني
-        <input [value]="user?.email || ''" disabled>
-      </label>
-
-      <button class="save" type="button" (click)="save()" [disabled]="saving">
-        {{ saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات' }}
-      </button>
-    </article>
-
-    <article class="card stats-card">
-      <div class="stat"><strong>{{ favoriteCount }}</strong><span>المفضلة</span></div>
-      <a routerLink="/favorites" class="favorites-link">♥ عرض المفضلة</a>
-    </article>
-  </section>
+      <div class="col-12"><article class="card bg-black text-light border-secondary rounded-4"><div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3"><div><div class="text-secondary small">مكتبتك الشخصية</div><div class="display-6 fw-bold text-warning">{{ favoriteCount }}</div><div class="text-secondary">كتاب في المفضلة</div></div><a routerLink="/favorites" class="btn btn-outline-warning">♥ عرض المفضلة</a></div></article></div>
+    </div>
+  </div>
 </main>
