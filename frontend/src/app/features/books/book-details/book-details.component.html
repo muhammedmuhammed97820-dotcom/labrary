@@ -1,17 +1,51 @@
-<main class="bg-dark text-light min-vh-100 py-5" dir="rtl">
-  <div class="container">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><a routerLink="/books" class="btn btn-outline-light">← العودة إلى المكتبة</a><span *ngIf="book" class="text-secondary small">BOOK / {{ bookId }}</span></div>
-    <div *ngIf="loading" class="text-center py-5"><div class="spinner-border text-warning"></div><p class="text-secondary mt-3">جاري تحميل تفاصيل الكتاب...</p></div>
-    <div *ngIf="!loading && error" class="alert alert-danger"><h2 class="h5">تعذر تحميل الكتاب</h2><p>{{ error }}</p><a routerLink="/books" class="btn btn-outline-danger">العودة إلى المكتبة</a></div>
-    <ng-container *ngIf="!loading && !error && book as b">
-      <section class="row g-5 align-items-center mb-5">
-        <div class="col-lg-4 text-center"><div class="bg-black border border-secondary rounded-4 p-3 shadow-lg mx-auto" style="max-width:350px"><img [src]="cover()" [alt]="b.title" class="img-fluid rounded-3" style="aspect-ratio:2/3;object-fit:cover"><div class="small text-warning mt-3">DIGITAL LIBRARY</div></div></div>
-        <div class="col-lg-8"><span class="badge bg-warning text-dark mb-3">{{ category() }}</span><h1 class="display-4 fw-bold lh-1 mb-3">{{ b.title || 'بدون عنوان' }}</h1><p class="lead text-secondary">بقلم <strong class="text-light">{{ author() }}</strong></p><p class="text-secondary lh-lg">{{ b.description || 'لا يوجد وصف لهذا الكتاب حتى الآن.' }}</p>
-          <div class="row row-cols-2 row-cols-md-4 g-2 my-4"><div class="col"><div class="card bg-black border-secondary h-100"><div class="card-body"><div class="text-warning h4 mb-1">{{ b.viewsCount || 0 }}</div><small class="text-secondary">مشاهدة</small></div></div></div><div class="col"><div class="card bg-black border-secondary h-100"><div class="card-body"><div class="text-warning h4 mb-1">{{ b.downloads || 0 }}</div><small class="text-secondary">تحميل</small></div></div></div><div class="col"><div class="card bg-black border-secondary h-100"><div class="card-body"><div class="text-warning h4 mb-1">{{ b.rating || 0 }}</div><small class="text-secondary">التقييم</small></div></div></div><div class="col"><div class="card bg-black border-secondary h-100"><div class="card-body"><div class="text-warning h4 mb-1">{{ b.publishedYear || '—' }}</div><small class="text-secondary">السنة</small></div></div></div></div>
-          <div class="d-flex flex-wrap gap-2"><a *ngIf="fileUrl()" [href]="fileUrl()" target="_blank" rel="noopener" class="btn btn-warning btn-lg">▶ قراءة الكتاب</a><button *ngIf="fileUrl()" type="button" class="btn btn-outline-light btn-lg" (click)="download()">↓ تحميل PDF</button><button type="button" class="btn btn-outline-warning btn-lg" [disabled]="favoriteBusy" (click)="toggleFavorite()">{{ isFavorite() ? '♥ في المفضلة' : '♡ إضافة للمفضلة' }}</button></div><div *ngIf="favoriteMessage" class="text-warning small mt-3">{{ favoriteMessage }}</div>
-        </div>
-      </section>
-      <section class="row g-4"><div class="col-lg-5"><article class="card bg-black text-light border-secondary rounded-4 h-100"><div class="card-header bg-transparent border-secondary"><span class="text-warning small">01 · BOOK INFORMATION</span><h2 class="h4 mt-1">معلومات الكتاب</h2></div><div class="list-group list-group-flush"><div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between"><span class="text-secondary">المؤلف</span><strong>{{ author() }}</strong></div><div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between"><span class="text-secondary">التصنيف</span><strong>{{ category() }}</strong></div><div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between"><span class="text-secondary">سنة النشر</span><strong>{{ b.publishedYear || 'غير محددة' }}</strong></div><div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between"><span class="text-secondary">الحالة</span><strong class="text-success" *ngIf="b.isAvailable !== false">متاح</strong><strong class="text-danger" *ngIf="b.isAvailable === false">غير متاح</strong></div></div></article></div><div class="col-lg-7"><article class="card bg-black text-light border-secondary rounded-4 h-100"><div class="card-body p-4"><span class="text-warning small">02 · ABOUT THIS BOOK</span><h2 class="h4 mt-1">عن الكتاب</h2><p class="text-secondary lh-lg mb-0">{{ b.description || 'لا يوجد وصف متاح لهذا الكتاب.' }}</p></div></article></div></section>
-    </ng-container>
+<main class="bg-light min-vh-100" dir="rtl">
+  <div class="bg-dark text-white">
+    <div class="container py-3 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+      <a routerLink="/books" class="btn btn-outline-light btn-sm">← العودة إلى المكتبة</a>
+      <small class="text-secondary" *ngIf="book">BOOK / {{ bookId }}</small>
+    </div>
   </div>
+
+  <section *ngIf="loading" class="container py-5"><div class="alert alert-secondary text-center"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>جاري تحميل تفاصيل الكتاب...</div></section>
+  <section *ngIf="!loading && error" class="container py-5"><div class="alert alert-danger"><h2 class="h4">تعذر تحميل الكتاب</h2><p class="mb-3">{{ error }}</p><a routerLink="/books" class="btn btn-danger">العودة إلى المكتبة</a></div></section>
+
+  <ng-container *ngIf="!loading && !error && book as b">
+    <section class="container py-5">
+      <div class="row g-5 align-items-start">
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-lg overflow-hidden">
+            <div class="ratio ratio-3x4 bg-dark"><img [src]="cover()" [alt]="b.title" class="w-100 h-100 object-fit-cover"></div>
+            <div class="card-body text-center"><span class="badge text-bg-dark">LIBRARY</span></div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <span class="badge text-bg-secondary mb-3">{{ category() }}</span>
+          <h1 class="display-4 fw-bold">{{ b.title || 'بدون عنوان' }}</h1>
+          <p class="lead text-secondary">بقلم <strong class="text-dark">{{ author() }}</strong></p>
+          <p class="fs-5 text-secondary mt-4">{{ b.description || 'لا يوجد وصف لهذا الكتاب حتى الآن.' }}</p>
+
+          <div class="row row-cols-2 row-cols-md-4 g-3 my-4">
+            <div class="col"><div class="card h-100 border-0 bg-white shadow-sm"><div class="card-body"><small class="text-secondary">المشاهدات</small><strong class="d-block fs-4">{{ b.viewsCount || 0 }}</strong></div></div></div>
+            <div class="col"><div class="card h-100 border-0 bg-white shadow-sm"><div class="card-body"><small class="text-secondary">التحميلات</small><strong class="d-block fs-4">{{ b.downloads || 0 }}</strong></div></div></div>
+            <div class="col"><div class="card h-100 border-0 bg-white shadow-sm"><div class="card-body"><small class="text-secondary">التقييم</small><strong class="d-block fs-4">★ {{ b.rating || 0 }}</strong></div></div></div>
+            <div class="col"><div class="card h-100 border-0 bg-white shadow-sm"><div class="card-body"><small class="text-secondary">سنة النشر</small><strong class="d-block fs-4">{{ b.publishedYear || '—' }}</strong></div></div></div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <a *ngIf="fileUrl()" class="btn btn-warning btn-lg fw-bold" [href]="fileUrl()" target="_blank" rel="noopener">▶ قراءة الكتاب</a>
+            <button *ngIf="fileUrl()" type="button" class="btn btn-dark btn-lg" (click)="download()">↓ تحميل PDF</button>
+            <button type="button" class="btn btn-outline-danger btn-lg" [disabled]="favoriteBusy" (click)="toggleFavorite()">{{ isFavorite() ? '♥ في المفضلة' : '♡ إضافة للمفضلة' }}</button>
+          </div>
+          <div *ngIf="favoriteMessage" class="alert alert-success mb-0">{{ favoriteMessage }}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container pb-5">
+      <div class="row g-4">
+        <div class="col-lg-5"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-dark text-white"><span class="small">BOOK INFORMATION</span></div><div class="card-body"><dl class="row mb-0"><dt class="col-sm-5 text-secondary">المؤلف</dt><dd class="col-sm-7">{{ author() }}</dd><dt class="col-sm-5 text-secondary">التصنيف</dt><dd class="col-sm-7">{{ category() }}</dd><dt class="col-sm-5 text-secondary">سنة النشر</dt><dd class="col-sm-7">{{ b.publishedYear || 'غير محددة' }}</dd><dt class="col-sm-5 text-secondary">الحالة</dt><dd class="col-sm-7"><span class="badge" [class.text-bg-success]="b.isAvailable !== false" [class.text-bg-danger]="b.isAvailable === false">{{ b.isAvailable === false ? 'غير متاح' : 'متاح للقراءة' }}</span></dd></dl></div></div></div>
+        <div class="col-lg-7"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-dark text-white"><span class="small">ABOUT THIS BOOK</span></div><div class="card-body"><p class="mb-0 text-secondary lh-lg">{{ b.description || 'لا يوجد وصف متاح لهذا الكتاب.' }}</p></div></div></div>
+      </div>
+    </section>
+  </ng-container>
 </main>
