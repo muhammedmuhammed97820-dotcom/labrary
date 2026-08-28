@@ -1,13 +1,8 @@
-<main class="favorites-page" dir="rtl">
-  <section class="hero"><span>MY LIBRARY / FAVORITES</span><h1>كتبك المفضلة</h1><p>كل الكتب التي اخترتها للعودة إليها لاحقًا.</p></section>
-  <div *ngIf="message" class="state favorite-notice">{{ message }}</div>
-  <div *ngIf="loading" class="state">جاري تحميل المفضلة...</div>
-  <div *ngIf="error" class="state error">{{ error }} <button type="button" (click)="load()">إعادة المحاولة</button></div>
-  <section *ngIf="!loading && !error && books.length" class="grid">
-    <article class="book" *ngFor="let book of books">
-      <a [routerLink]="['/books', id(book)]"><img [src]="cover(book)" [alt]="book.title || 'كتاب'"></a>
-      <div class="info"><h2>{{ book.title || 'بدون عنوان' }}</h2><p>{{ author(book) }}</p><div><a class="open" [routerLink]="['/books', id(book)]">عرض الكتاب</a><button type="button" [disabled]="removing.has(id(book))" (click)="remove(book)" title="إزالة من المفضلة">{{ removing.has(id(book)) ? '…' : '♥' }}</button></div></div>
-    </article>
-  </section>
-  <section *ngIf="!loading && !error && !books.length" class="empty"><div>♡</div><h2>لا توجد كتب في المفضلة</h2><p>تصفح المكتبة وأضف الكتب التي تريد العودة إليها.</p><a routerLink="/books">اكتشف الكتب</a></section>
+<main class="bg-dark text-light min-vh-100 py-5" dir="rtl">
+  <div class="container">
+    <header class="mb-5"><div class="text-uppercase text-warning small fw-semibold mb-2">My Library / Favorites</div><h1 class="display-5 fw-bold mb-2">كتبك المفضلة</h1><p class="text-secondary mb-0">كل الكتب التي اخترتها للعودة إليها لاحقًا.</p></header>
+    <div *ngIf="message" class="alert alert-warning">{{ message }}</div><div *ngIf="loading" class="text-center py-5"><div class="spinner-border text-warning"></div><p class="text-secondary mt-3">جاري تحميل المفضلة...</p></div><div *ngIf="error" class="alert alert-danger">{{ error }} <button type="button" class="btn btn-sm btn-outline-danger me-2" (click)="load()">إعادة المحاولة</button></div>
+    <section *ngIf="!loading && !error && books.length" class="row g-4"><div class="col-md-6 col-xl-4" *ngFor="let book of books"><article class="card h-100 bg-black text-light border-secondary rounded-4 overflow-hidden"><div class="row g-0 h-100"><a class="col-4" [routerLink]="['/books',id(book)]"><img [src]="cover(book)" [alt]="book.title || 'كتاب'" class="w-100 h-100 object-fit-cover" style="min-height:210px"></a><div class="col-8"><div class="card-body h-100 d-flex flex-column"><h2 class="h5 fw-bold">{{ book.title || 'بدون عنوان' }}</h2><p class="text-secondary">{{ author(book) }}</p><div class="mt-auto d-flex gap-2"><a class="btn btn-warning btn-sm" [routerLink]="['/books',id(book)]">عرض الكتاب</a><button type="button" class="btn btn-outline-warning btn-sm" [disabled]="removing.has(id(book))" (click)="remove(book)">{{ removing.has(id(book)) ? '...' : '♥' }}</button></div></div></div></div></article></div></section>
+    <section *ngIf="!loading && !error && !books.length" class="text-center py-5"><div class="display-1 text-warning">♡</div><h2 class="fw-bold">لا توجد كتب في المفضلة</h2><p class="text-secondary">تصفح المكتبة وأضف الكتب التي تريد العودة إليها.</p><a class="btn btn-warning" routerLink="/books">اكتشف الكتب</a></section>
+  </div>
 </main>
