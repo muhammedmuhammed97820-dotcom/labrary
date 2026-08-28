@@ -1,10 +1,12 @@
-<main class="container py-5" dir="rtl">
-  <div class="d-flex justify-content-between align-items-end mb-4"><div><span class="text-secondary small">MY LIBRARY / FAVORITES</span><h1 class="display-6 fw-bold mt-2">كتبك المفضلة</h1><p class="text-secondary">كل الكتب التي اخترتها للعودة إليها لاحقًا.</p></div><a routerLink="/books" class="btn btn-outline-primary">استكشف الكتب</a></div>
-  <div *ngIf="message" class="alert alert-success">{{ message }}</div>
-  <div *ngIf="loading" class="alert alert-secondary">جاري تحميل المفضلة...</div>
-  <div *ngIf="error" class="alert alert-danger d-flex justify-content-between align-items-center"><span>{{ error }}</span><button class="btn btn-danger btn-sm" type="button" (click)="load()">إعادة المحاولة</button></div>
-  <div *ngIf="!loading && !error && books.length" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-    <div class="col" *ngFor="let book of books"><div class="card h-100 shadow-sm"><div class="row g-0 h-100"><div class="col-4"><a [routerLink]="['/books',id(book)]"><img [src]="cover(book)" [alt]="book.title || 'كتاب'" class="img-fluid h-100 w-100 object-fit-cover rounded-start"></a></div><div class="col-8"><div class="card-body h-100 d-flex flex-column"><h2 class="h5">{{ book.title || 'بدون عنوان' }}</h2><p class="text-secondary small">{{ author(book) }}</p><div class="mt-auto d-flex gap-2"><a class="btn btn-primary btn-sm" [routerLink]="['/books',id(book)]">عرض الكتاب</a><button class="btn btn-outline-danger btn-sm" type="button" [disabled]="removing.has(id(book))" (click)="remove(book)">{{ removing.has(id(book)) ? '...' : 'إزالة ♥' }}</button></div></div></div></div></div></div>
-  </div>
-  <div *ngIf="!loading && !error && !books.length" class="alert alert-light border text-center py-5"><div class="display-4">♡</div><h2 class="h4">لا توجد كتب في المفضلة</h2><p class="text-secondary">تصفح المكتبة وأضف الكتب التي تريد العودة إليها.</p><a routerLink="/books" class="btn btn-primary">اكتشف الكتب</a></div>
+<main class="bg-light min-vh-100" dir="rtl">
+  <section class="bg-dark text-white"><div class="container py-5"><div class="d-flex flex-wrap justify-content-between align-items-end gap-3"><div><span class="badge text-bg-warning mb-3">MY LIBRARY / FAVORITES</span><h1 class="display-5 fw-bold mb-2">كتبك المفضلة</h1><p class="lead text-light-emphasis mb-0">كل الكتب التي اخترتها للعودة إليها لاحقًا.</p></div><a routerLink="/books" class="btn btn-outline-light">استكشف الكتب</a></div></div></section>
+  <section class="container py-4">
+    <div *ngIf="message" class="alert alert-success">{{ message }}</div>
+    <div *ngIf="loading" class="alert alert-secondary text-center">جاري تحميل المفضلة...</div>
+    <div *ngIf="!loading && error" class="alert alert-danger d-flex flex-wrap justify-content-between align-items-center gap-2"><span>{{ error }}</span><button class="btn btn-sm btn-danger" type="button" (click)="load()">إعادة المحاولة</button></div>
+    <div *ngIf="!loading && !error && books.length" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+      <div class="col" *ngFor="let book of books"><article class="card h-100 border-0 shadow-sm overflow-hidden"><div class="row g-0 h-100"><div class="col-4"><a [routerLink]="['/books', id(book)]" class="d-block h-100 bg-dark"><img [src]="cover(book)" [alt]="book.title || 'كتاب'" class="img-fluid h-100 w-100 object-fit-cover"></a></div><div class="col-8"><div class="card-body h-100 d-flex flex-column"><h2 class="h5">{{ book.title || 'بدون عنوان' }}</h2><p class="text-secondary small">{{ author(book) }}</p><div class="mt-auto d-flex flex-wrap gap-2"><a class="btn btn-dark btn-sm flex-grow-1" [routerLink]="['/books',id(book)]">عرض الكتاب</a><button class="btn btn-outline-danger btn-sm" type="button" [disabled]="removing.has(id(book))" (click)="remove(book)">{{ removing.has(id(book)) ? '...' : 'إزالة ♥' }}</button></div></div></div></div></article></div>
+    </div>
+    <div *ngIf="!loading && !error && !books.length" class="card border-0 shadow-sm text-center py-5"><div class="card-body"><div class="display-3">♡</div><h2 class="h3 mt-3">لا توجد كتب في المفضلة</h2><p class="text-secondary">تصفح المكتبة وأضف الكتب التي تريد العودة إليها.</p><a routerLink="/books" class="btn btn-primary">اكتشف الكتب</a></div></div>
+  </section>
 </main>
