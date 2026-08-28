@@ -1,0 +1,4 @@
+/* Component-level refinements; Bootstrap remains the primary UI system. */
+.books-page .book-cover { aspect-ratio: 3 / 4; object-fit: cover; }
+.books-page .book-card { transition: transform .2s ease, box-shadow .2s ease; }
+.books-page .book-card:hover { transform: translateY(-3px); }
