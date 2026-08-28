@@ -1,33 +1,40 @@
 <header class="navbar" dir="rtl">
-  <a class="brand" routerLink="/" (click)="closeMenu()"><span class="brand-icon">م</span><span><strong>مَكتبة</strong><small>DIGITAL LIBRARY</small></span></a>
-  <nav class="desktop-nav">
+  <a class="brand" routerLink="/" (click)="closeMenu()" aria-label="الصفحة الرئيسية">
+    <span class="brand-icon">م</span>
+    <span><strong>مَكتبة</strong><small>DIGITAL LIBRARY</small></span>
+  </a>
+
+  <nav class="desktop-nav" aria-label="التنقل الرئيسي">
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a>
     <a routerLink="/books" routerLinkActive="active">المكتبة</a>
     <a routerLink="/books" fragment="categories">التصنيفات</a>
-    <a routerLink="/books">اكتشف</a>
+    <a routerLink="/books">استكشف</a>
     @if (isLoggedIn) { <a routerLink="/favorites" routerLinkActive="active">المفضلة</a> }
-    @if (isAdmin) { <a routerLink="/admin/books" routerLinkActive="active">إدارة الكتب</a> }
+    @if (isAdmin) { <a routerLink="/admin" routerLinkActive="active">الإدارة</a> }
   </nav>
+
   <div class="nav-actions">
-    <a class="search-link" routerLink="/books">⌕ <span>بحث</span></a>
+    <a class="search-link" routerLink="/books" aria-label="بحث"><span>⌕</span><span>بحث</span></a>
     @if (isLoggedIn) {
       <a class="user-link" routerLink="/profile" title="الملف الشخصي">
-        @if (avatar) { <img [src]="avatar" [alt]="userName"> } @else { <span class="avatar-fallback">{{ userInitial }}</span> }
+        @if (avatar) { <img [src]="avatar" [alt]="userName"> }
+        @else { <span class="avatar-fallback">{{ userInitial }}</span> }
         <span>{{ userName }}</span>
       </a>
       <button class="logout-link" type="button" (click)="logout()">خروج</button>
     } @else {
-      <a class="login-link" routerLink="/login">تسجيل الدخول</a>
-      <a class="register-link" routerLink="/register">إنشاء حساب</a>
+      <a class="login-link" routerLink="/login">دخول</a>
+      <a class="register-link" routerLink="/register">ابدأ الآن</a>
     }
-    <button class="menu" type="button" (click)="toggleMenu()" aria-label="القائمة"><i></i><i></i></button>
+    <button class="menu" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-label="فتح القائمة"><i></i><i></i></button>
   </div>
+
   @if (menuOpen) {
-    <nav class="mobile-nav">
+    <nav class="mobile-nav" aria-label="قائمة الهاتف">
       <a routerLink="/" (click)="closeMenu()">الرئيسية</a>
       <a routerLink="/books" (click)="closeMenu()">المكتبة</a>
       <a routerLink="/books" fragment="categories" (click)="closeMenu()">التصنيفات</a>
-      <a routerLink="/books" (click)="closeMenu()">اكتشف</a>
+      <a routerLink="/books" (click)="closeMenu()">استكشف</a>
       @if (isLoggedIn) {
         <a routerLink="/profile" (click)="closeMenu()">الملف الشخصي</a>
         <a routerLink="/favorites" (click)="closeMenu()">المفضلة</a>
