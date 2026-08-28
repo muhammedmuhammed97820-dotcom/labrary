@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Book {
@@ -22,8 +22,12 @@ export class BookApiService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:5000/api/books';
 
-  getAll(_page = 1, _limit = 24, _search = ''): Observable<Book[]> {
-    return this.http.get<Book[]>(this.api);
+  getAll(page = 1, limit = 24, search = ''): Observable<Book[]> {
+    let params = new HttpParams();
+    if (page > 1) params = params.set('page', page);
+    if (limit > 0) params = params.set('limit', limit);
+    if (search.trim()) params = params.set('search', search.trim());
+    return this.http.get<Book[]>(this.api, { params });
   }
 
   getById(id: string): Observable<Book> {
