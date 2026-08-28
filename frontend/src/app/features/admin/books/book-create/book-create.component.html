@@ -1,18 +1,13 @@
-<main class="create-page" dir="rtl">
-  <header><a routerLink="/admin" class="back">← لوحة الإدارة</a><span class="eyebrow">DIGITAL LIBRARY / NEW BOOK</span><h1>إضافة كتاب جديد</h1><p>أضف الكتاب إلى مجموعتك الرقمية مع بياناته وملفاته.</p></header>
-  <form (ngSubmit)="submit()" class="form-card">
-    <section><h2>بيانات الكتاب</h2><div class="grid">
-      <label>عنوان الكتاب *<input name="title" [(ngModel)]="form.title" placeholder="مثال: فن اللامبالاة"></label>
-      <label>المؤلف *<input name="author" [(ngModel)]="form.author" placeholder="اسم المؤلف"></label>
-      <label>التصنيف *<input name="category" [(ngModel)]="form.category" placeholder="روايات، علوم، تاريخ..."></label>
-      <label>سنة النشر<input name="year" [(ngModel)]="form.publishedYear" type="number" placeholder="2026"></label>
-      <label>التقييم<input name="rating" [(ngModel)]="form.rating" type="number" min="0" max="5" step=".1"></label>
-    </div><label>الوصف<textarea name="description" [(ngModel)]="form.description" rows="6" placeholder="نبذة عن الكتاب..."></textarea></label></section>
-    <section><h2>ملفات الكتاب</h2><div class="files">
-      <label class="drop">📄 <strong>ملف PDF</strong><small>{{bookFile?.name || 'اختر ملف الكتاب'}}</small><input type="file" accept="application/pdf" (change)="onBookFile($event)"></label>
-      <label class="drop">🖼️ <strong>غلاف الكتاب</strong><small>{{coverImage?.name || 'اختر صورة الغلاف'}}</small><input type="file" accept="image/*" (change)="onCover($event)"></label>
-    </div></section>
-    <p class="error" *ngIf="error">{{error}}</p><p class="success" *ngIf="success">{{success}}</p>
-    <footer><button type="submit" [disabled]="submitting">{{submitting ? 'جاري الحفظ...' : 'حفظ ونشر الكتاب'}}</button><a routerLink="/admin">إلغاء</a></footer>
-  </form>
+<main class="bg-light min-vh-100 py-5" dir="rtl">
+  <div class="container">
+    <header class="mb-4"><a routerLink="/admin" class="btn btn-outline-dark btn-sm mb-3">← لوحة الإدارة</a><span class="badge text-bg-warning">DIGITAL LIBRARY / NEW BOOK</span><h1 class="display-6 fw-bold mt-3">إضافة كتاب جديد</h1><p class="text-secondary">أضف الكتاب إلى مجموعتك الرقمية مع بياناته وملفاته.</p></header>
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div><div *ngIf="success" class="alert alert-success">{{ success }}</div>
+    <form (ngSubmit)="submit()" class="card border-0 shadow-sm" enctype="multipart/form-data">
+      <div class="card-body p-4 p-lg-5">
+        <section class="mb-5"><h2 class="h3 border-bottom pb-3 mb-4">بيانات الكتاب</h2><div class="row g-3"><div class="col-md-6"><label class="form-label">عنوان الكتاب *</label><input class="form-control form-control-lg" name="title" [(ngModel)]="form.title" placeholder="مثال: فن اللامبالاة" required></div><div class="col-md-6"><label class="form-label">المؤلف *</label><input class="form-control form-control-lg" name="author" [(ngModel)]="form.author" placeholder="اسم المؤلف" required></div><div class="col-md-6"><label class="form-label">التصنيف *</label><input class="form-control form-control-lg" name="category" [(ngModel)]="form.category" placeholder="روايات، علوم، تاريخ..." required></div><div class="col-md-3"><label class="form-label">سنة النشر</label><input class="form-control form-control-lg" name="year" [(ngModel)]="form.publishedYear" type="number" placeholder="2026"></div><div class="col-md-3"><label class="form-label">التقييم</label><input class="form-control form-control-lg" name="rating" [(ngModel)]="form.rating" type="number" min="0" max="5" step=".1"></div><div class="col-12"><label class="form-label">الوصف</label><textarea class="form-control" name="description" [(ngModel)]="form.description" rows="6" placeholder="نبذة عن الكتاب..."></textarea></div></div></section>
+        <section><h2 class="h3 border-bottom pb-3 mb-4">ملفات الكتاب</h2><div class="row g-3"><div class="col-md-6"><label class="form-label">ملف PDF *</label><div class="border rounded bg-body p-4"><input class="form-control" type="file" accept="application/pdf" (change)="onBookFile($event)"><div class="small text-secondary mt-2">{{ bookFile?.name || 'اختر ملف الكتاب PDF' }}</div></div></div><div class="col-md-6"><label class="form-label">غلاف الكتاب *</label><div class="border rounded bg-body p-4"><input class="form-control" type="file" accept="image/*" (change)="onCover($event)"><div class="small text-secondary mt-2">{{ coverImage?.name || 'اختر صورة الغلاف' }}</div></div></div></div></section>
+      </div>
+      <div class="card-footer bg-body border-top p-4 d-flex flex-wrap justify-content-end gap-2"><a routerLink="/admin" class="btn btn-outline-secondary">إلغاء</a><button type="submit" class="btn btn-primary" [disabled]="submitting"><span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>{{ submitting ? 'جاري الحفظ...' : 'حفظ ونشر الكتاب' }}</button></div>
+    </form>
+  </div>
 </main>
