@@ -1,7 +1,6 @@
 import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -13,6 +12,7 @@ import { environment } from '../../../environments/environment';
 export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly serverOrigin = 'http://localhost:5000';
   menuOpen = false;
 
   get isAdmin(): boolean { return this.auth.isAdmin; }
@@ -23,17 +23,11 @@ export class NavbarComponent {
     const value = this.auth.currentUser?.avatar;
     if (!value) return null;
     if (/^data:|^blob:|^https?:\/\//i.test(value)) return value;
-    return `${environment.apiOrigin}${value.startsWith('/') ? value : `/${value}`}`;
+    return `${this.serverOrigin}${value.startsWith('/') ? value : `/${value}`}`;
   }
 
   get userInitial(): string { return this.userName.trim().charAt(0) || 'م'; }
-
-  logout(): void {
-    this.auth.logout();
-    this.closeMenu();
-    this.router.navigate(['/login']);
-  }
-
+  logout(): void { this.auth.logout(); this.closeMenu(); this.router.navigate(['/login']); }
   closeMenu(): void { this.menuOpen = false; }
   toggleMenu(): void { this.menuOpen = !this.menuOpen; }
 }
