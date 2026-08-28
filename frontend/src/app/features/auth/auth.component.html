@@ -1,28 +1,8 @@
 <main class="min-vh-100 bg-dark d-flex align-items-center py-5" dir="rtl">
   <div class="container">
-    <div class="row justify-content-center align-items-center g-4">
-      <div class="col-lg-5 d-none d-lg-block text-white">
-        <span class="text-warning small">DIGITAL LIBRARY</span>
-        <h1 class="display-4 fw-bold mt-3">عالم كامل من <span class="text-warning">المعرفة</span> بانتظارك.</h1>
-        <p class="lead text-light-emphasis">اكتشف الكتب، احفظ ما تحب، وواصل القراءة من المكان الذي توقفت عنده.</p>
-      </div>
-      <div class="col-12 col-md-8 col-lg-5">
-        <div class="card shadow-lg border-0">
-          <div class="card-body p-4 p-lg-5">
-            <a routerLink="/" class="text-decoration-none h4 text-dark">مَكتبة</a>
-            <div class="mt-4 mb-4"><span class="text-secondary small">{{ mode === 'login' ? 'مرحباً بعودتك' : 'ابدأ رحلتك' }}</span><h2 class="h2 fw-bold">{{ mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد' }}</h2><p class="text-secondary mb-0">{{ mode === 'login' ? 'أدخل بياناتك للوصول إلى مكتبتك.' : 'أنشئ حسابك وابدأ ببناء مكتبتك الشخصية.' }}</p></div>
-            <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-            <div *ngIf="success" class="alert alert-success">{{ success }}</div>
-            <form (ngSubmit)="submit()">
-              <div class="mb-3" *ngIf="mode === 'register'"><label class="form-label">الاسم</label><input class="form-control form-control-lg" name="name" [(ngModel)]="name" required></div>
-              <div class="mb-3"><label class="form-label">البريد الإلكتروني</label><input class="form-control form-control-lg" name="email" [(ngModel)]="email" type="email" required></div>
-              <div class="mb-4"><label class="form-label">كلمة المرور</label><div class="input-group input-group-lg"><input class="form-control" name="password" [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" required><button class="btn btn-outline-secondary" type="button" (click)="showPassword=!showPassword">{{ showPassword ? 'إخفاء' : 'إظهار' }}</button></div></div>
-              <button class="btn btn-primary btn-lg w-100" type="submit" [disabled]="loading">{{ loading ? 'جاري المعالجة...' : (mode === 'login' ? 'دخول إلى المكتبة' : 'إنشاء الحساب') }}</button>
-            </form>
-            <hr class="my-4"><p class="text-center mb-0">{{ mode === 'login' ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟' }} <button class="btn btn-link p-0" type="button" (click)="switchMode()">{{ mode === 'login' ? 'إنشاء حساب' : 'تسجيل الدخول' }}</button></p>
-          </div>
-        </div>
-      </div>
+    <div class="row justify-content-center align-items-stretch g-4">
+      <div class="col-lg-6 d-none d-lg-flex"><section class="card bg-black text-white border-secondary shadow-lg h-100"><div class="card-body p-5 d-flex flex-column justify-content-center"><span class="badge text-bg-warning align-self-start mb-3">DIGITAL LIBRARY · 2026</span><h1 class="display-4 fw-bold">عالم كامل من<br><span class="text-warning">المعرفة</span> بانتظارك.</h1><p class="lead text-light-emphasis mt-3">اكتشف الكتب، احفظ ما تحب، وواصل القراءة من المكان الذي توقفت عنده.</p><div class="alert alert-dark border-secondary mt-4 mb-0">« الكتاب الجيد يفتح لك أبوابًا لم تكن تعرف أنها موجودة »</div></div></section></div>
+      <div class="col-12 col-md-9 col-lg-6 col-xl-5"><section class="card shadow-lg border-0 h-100"><div class="card-body p-4 p-lg-5"><a routerLink="/" class="text-decoration-none text-dark d-inline-flex align-items-center gap-2 mb-4"><span class="badge text-bg-warning rounded-circle p-2">م</span><strong>مَكتبة</strong></a><div class="mb-4"><span class="text-secondary small">{{ mode === 'login' ? 'مرحباً بعودتك' : 'ابدأ رحلتك' }}</span><h2 class="display-6 fw-bold mb-2">{{ mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد' }}</h2><p class="text-secondary mb-0">{{ mode === 'login' ? 'أدخل بياناتك للوصول إلى مكتبتك.' : 'أنشئ حسابك وابدأ ببناء مكتبتك الشخصية.' }}</p></div><div *ngIf="error" class="alert alert-danger">{{ error }}</div><div *ngIf="success" class="alert alert-success">{{ success }}</div><form (ngSubmit)="submit()"><div *ngIf="mode === 'register'" class="mb-3"><label class="form-label fw-semibold">الاسم</label><input class="form-control form-control-lg" name="name" [(ngModel)]="name" placeholder="اسمك الكامل"></div><div class="mb-3"><label class="form-label fw-semibold">البريد الإلكتروني</label><input class="form-control form-control-lg" name="email" [(ngModel)]="email" type="email" placeholder="you@example.com" required></div><div class="mb-4"><label class="form-label fw-semibold">كلمة المرور</label><div class="input-group input-group-lg"><input class="form-control" name="password" [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" placeholder="••••••••" required><button class="btn btn-outline-secondary" type="button" (click)="showPassword=!showPassword">{{ showPassword ? 'إخفاء' : 'إظهار' }}</button></div></div><button class="btn btn-primary btn-lg w-100" type="submit" [disabled]="loading"><span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>{{ loading ? 'جاري المعالجة...' : (mode === 'login' ? 'دخول إلى المكتبة' : 'إنشاء الحساب') }}</button></form><hr class="my-4"><p class="text-center mb-0 text-secondary">{{ mode === 'login' ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟' }} <button class="btn btn-link p-0" type="button" (click)="switchMode()">{{ mode === 'login' ? 'إنشاء حساب' : 'تسجيل الدخول' }}</button></p></div></section></div>
     </div>
   </div>
 </main>
