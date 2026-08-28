@@ -19,11 +19,16 @@ export interface Book {
 
 @Injectable({ providedIn: 'root' })
 export class BookApiService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:5000/api/books';
 
-  getAll(): Observable<Book[]> { return this.http.get<Book[]>(this.api); }
-  getById(id: string): Observable<Book> { return this.http.get<Book>(`${this.api}/${id}`); }
+  getAll(_page = 1, _limit = 24, _search = ''): Observable<Book[]> {
+    return this.http.get<Book[]>(this.api);
+  }
+
+  getById(id: string): Observable<Book> {
+    return this.http.get<Book>(`${this.api}/${id}`);
+  }
 
   create(data: FormData): Observable<{ message: string; book: Book }> {
     return this.http.post<{ message: string; book: Book }>(this.api, data);
@@ -37,6 +42,15 @@ export class BookApiService {
     return this.http.delete<{ message: string }>(`${this.api}/${id}`);
   }
 
-  addView(id: string) { return this.http.post(`${this.api}/${id}/views`, {}); }
-  addDownload(id: string) { return this.http.post(`${this.api}/${id}/downloads`, {}); }
+  addView(id: string): Observable<{ viewsCount?: number; views?: number }> {
+    return this.http.post<{ viewsCount?: number; views?: number }>(`${this.api}/${id}/views`, {});
+  }
+
+  getFileUrl(filePath: string): string {
+    if (/^https?:\/\//i.test(filePath)) return filePath;
+    return `http://localhost:5000${filePath.startsWith('/') ? filePath : `/${filePath}`}`;
+  }
+
+  getReaderUrl(id: string): string { return `${this.api}/${id}/read`; }
+  getDownloadUrl(id: string): string { return `${this.api}/${id}/download`; }
 }
