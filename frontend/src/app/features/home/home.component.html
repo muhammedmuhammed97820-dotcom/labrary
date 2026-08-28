@@ -1,97 +1,47 @@
-<main class="home-v2" dir="rtl">
-  <style>
-    .home-v2{--gold:#d7b477;--gold2:#f0d8a5;--ink:#07080b;--panel:#0e1117;--panel2:#121620;--muted:#8e96a5;--line:rgba(255,255,255,.09);min-height:calc(100vh - 76px);background:radial-gradient(900px 500px at 12% 8%,rgba(215,180,119,.11),transparent 62%),radial-gradient(700px 500px at 88% 45%,rgba(95,77,160,.09),transparent 65%),var(--ink);color:#f6f2e9;overflow:hidden}
-    .home-v2 *{box-sizing:border-box}.home-v2 a{text-decoration:none;color:inherit}.home-v2 .wrap{width:min(1380px,calc(100% - 48px));margin:auto}
-    .home-v2 .hero{position:relative;min-height:720px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:70px;padding:78px 0 65px}
-    .home-v2 .hero-copy{position:relative;z-index:3}.home-v2 .eyebrow{display:inline-flex;align-items:center;gap:10px;color:#aeb4c0;font-size:10px;letter-spacing:2px;direction:ltr}.home-v2 .eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 22px rgba(215,180,119,.75)}
-    .home-v2 h1{font-size:clamp(62px,8vw,122px);line-height:.91;letter-spacing:-6px;margin:25px 0 28px;font-weight:800}.home-v2 h1 span{display:block;font-family:'DM Serif Display',serif;font-weight:400;font-style:italic;color:var(--gold2);letter-spacing:-3px}
-    .home-v2 .lead{max-width:610px;color:var(--muted);font-size:15px;line-height:2.05;margin:0 0 34px}.home-v2 .actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.home-v2 .primary{display:inline-flex;align-items:center;gap:25px;padding:16px 20px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#111;border-radius:11px;font-weight:800;font-size:11px;transition:.25s}.home-v2 .primary:hover{transform:translateY(-3px);box-shadow:0 20px 55px rgba(215,180,119,.2)}.home-v2 .primary b{font-size:20px}.home-v2 .ghost{padding:15px 19px;border:1px solid var(--line);border-radius:11px;color:#ddd;font-size:10px;transition:.25s}.home-v2 .ghost:hover{border-color:rgba(215,180,119,.5);background:rgba(255,255,255,.025)}
-    .home-v2 .mini-stats{display:flex;gap:34px;margin-top:48px}.home-v2 .mini-stats div{padding-right:18px;border-right:1px solid var(--line)}.home-v2 .mini-stats div:first-child{padding-right:0;border-right:0}.home-v2 .mini-stats b{display:block;font-family:'DM Serif Display',serif;font-size:24px;font-weight:400}.home-v2 .mini-stats span{color:#747c8a;font-size:8px}
-    .home-v2 .visual{position:relative;height:590px;display:grid;place-items:center}.home-v2 .visual:before{content:"";position:absolute;width:430px;height:430px;border-radius:50%;border:1px solid rgba(215,180,119,.16);box-shadow:0 0 100px rgba(215,180,119,.07) inset}.home-v2 .visual:after{content:"";position:absolute;width:570px;height:570px;border-radius:50%;border:1px dashed rgba(255,255,255,.07);transform:rotate(17deg)}
-    .home-v2 .book-stage{position:relative;z-index:2;width:310px;height:440px;padding:24px;background:linear-gradient(145deg,#1a1d25,#090b0f 78%);border:1px solid rgba(255,255,255,.13);border-radius:4px;transform:rotate(5deg);box-shadow:38px 45px 100px rgba(0,0,0,.7)}.home-v2 .book-stage:before{content:"";position:absolute;inset:11px;border:1px solid rgba(215,180,119,.18);pointer-events:none}.home-v2 .book-head{display:flex;justify-content:space-between;color:#737b88;font-size:8px;letter-spacing:2px;direction:ltr}.home-v2 .book-art{position:absolute;left:24px;right:24px;top:82px;height:230px;overflow:hidden;border:1px solid rgba(255,255,255,.09);background:radial-gradient(circle at 50% 50%,rgba(215,180,119,.14),transparent 45%)}.home-v2 .book-art:before,.home-v2 .book-art:after{content:"";position:absolute;left:10%;right:10%;top:50%;height:1px;background:linear-gradient(90deg,transparent,rgba(215,180,119,.75),transparent)}.home-v2 .book-art:before{transform:rotate(37deg)}.home-v2 .book-art:after{transform:rotate(-37deg)}.home-v2 .orb{position:absolute;width:28px;height:28px;border-radius:50%;left:calc(50% - 14px);top:calc(50% - 14px);background:var(--gold);box-shadow:0 0 55px rgba(215,180,119,.8)}
-    .home-v2 .book-title{position:absolute;left:24px;right:24px;bottom:27px}.home-v2 .book-title small{display:block;color:#858d99;font-size:8px;letter-spacing:3px}.home-v2 .book-title strong{display:block;font-size:43px;line-height:.95;margin-top:5px;letter-spacing:-2px}.home-v2 .book-title em{display:block;color:#777f8c;font-style:normal;font-size:7px;letter-spacing:2px;margin-top:12px;direction:ltr}
-    .home-v2 .float{position:absolute;z-index:4;padding:13px 16px;background:rgba(16,19,25,.88);border:1px solid var(--line);backdrop-filter:blur(18px);border-radius:12px;box-shadow:0 18px 45px rgba(0,0,0,.45)}.home-v2 .float strong{display:block;font-family:'DM Serif Display',serif;font-size:23px;font-weight:400;color:var(--gold2)}.home-v2 .float span{display:block;color:#858d99;font-size:8px;margin-top:2px}.home-v2 .f1{top:12%;right:0}.home-v2 .f2{bottom:10%;left:0}
-    .home-v2 .section{padding:35px 0 105px}.home-v2 .section-head{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:25px}.home-v2 .label{color:#717988;font-size:8px;letter-spacing:3px;direction:ltr}.home-v2 .section h2{font-family:'DM Serif Display',serif;font-size:42px;font-weight:400;letter-spacing:-1px;margin:8px 0 0}.home-v2 .section-head a{font-size:10px;color:var(--gold);padding-bottom:5px;border-bottom:1px solid rgba(215,180,119,.35)}
-    .home-v2 .category-grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.home-v2 .category{position:relative;min-height:190px;padding:27px;border-left:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;transition:.3s;overflow:hidden}.home-v2 .category:last-child{border-left:0}.home-v2 .category:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;left:-45px;bottom:-55px;background:rgba(215,180,119,.07);transition:.3s}.home-v2 .category:hover{background:linear-gradient(145deg,rgba(255,255,255,.04),transparent)}.home-v2 .category:hover:after{transform:scale(1.5)}.home-v2 .category small{color:#707887;font-size:8px;direction:ltr}.home-v2 .category h3{font-size:21px;margin:0;font-weight:700}.home-v2 .category p{font-size:9px;line-height:1.8;color:#737b88;margin:7px 0 0}.home-v2 .category b{font-family:'DM Serif Display',serif;font-size:32px;font-weight:400;color:rgba(215,180,119,.6);align-self:flex-end}
-    .home-v2 .feature{display:grid;grid-template-columns:.9fr 1.1fr;min-height:390px;background:linear-gradient(120deg,#11151d,#0b0d12);border:1px solid var(--line);overflow:hidden;border-radius:18px}.home-v2 .feature-art{position:relative;min-height:390px;background:radial-gradient(circle at 50% 45%,rgba(215,180,119,.2),transparent 20%),linear-gradient(145deg,#181c25,#080a0e);display:grid;place-items:center;overflow:hidden}.home-v2 .feature-art:before{content:"";width:260px;height:330px;border:1px solid rgba(215,180,119,.25);transform:rotate(-9deg);box-shadow:0 35px 80px #000}.home-v2 .feature-art:after{content:"BOOK";position:absolute;font-family:'DM Serif Display',serif;font-size:70px;color:rgba(255,255,255,.05);letter-spacing:8px}.home-v2 .feature-copy{padding:55px 55px 45px}.home-v2 .feature-copy .label{color:var(--gold)}.home-v2 .feature-copy h3{font-size:38px;line-height:1.2;margin:17px 0 13px}.home-v2 .feature-copy p{max-width:480px;color:var(--muted);font-size:11px;line-height:2}.home-v2 .feature-points{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:28px 0}.home-v2 .feature-points div{padding:14px;border:1px solid var(--line);border-radius:10px}.home-v2 .feature-points b{display:block;font-size:12px}.home-v2 .feature-points span{display:block;color:#737b88;font-size:8px;margin-top:3px}.home-v2 .feature-copy a{display:inline-flex;gap:12px;align-items:center;color:var(--gold2);font-size:10px}
-    .home-v2 .steps{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}.home-v2 .step{padding:30px 25px;border-left:1px solid var(--line)}.home-v2 .step:last-child{border-left:0}.home-v2 .step-no{color:var(--gold);font-size:9px;direction:ltr}.home-v2 .step h3{font-size:20px;margin:20px 0 7px}.home-v2 .step p{color:#737b88;font-size:9px;line-height:1.9;margin:0}
-    .home-v2 .final{position:relative;padding:95px 0 125px;border-top:1px solid var(--line);text-align:center}.home-v2 .final:before{content:"";position:absolute;width:520px;height:220px;left:50%;top:20px;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(215,180,119,.11),transparent 70%);filter:blur(20px)}.home-v2 .final>*{position:relative}.home-v2 .final .label{display:block}.home-v2 .final h2{font-size:clamp(42px,6vw,78px);line-height:1;margin:20px 0}.home-v2 .final h2 span{font-family:'DM Serif Display',serif;font-style:italic;color:var(--gold2)}.home-v2 .final p{max-width:550px;margin:0 auto 27px;color:#7f8794;font-size:10px;line-height:2}.home-v2 .final a{display:inline-flex;padding:14px 20px;background:var(--gold);color:#111;border-radius:9px;font-size:10px;font-weight:800}
-    @media(max-width:1000px){.home-v2 .hero{grid-template-columns:1fr;gap:20px;padding-top:55px}.home-v2 .visual{height:510px}.home-v2 .category-grid{grid-template-columns:1fr 1fr}.home-v2 .category:nth-child(2){border-left:0}.home-v2 .category:nth-child(n+3){border-top:1px solid var(--line)}.home-v2 .feature{grid-template-columns:1fr}.home-v2 .feature-art{min-height:280px}.home-v2 .feature-copy{padding:40px}.home-v2 .steps{grid-template-columns:1fr}.home-v2 .step{border-left:0;border-bottom:1px solid var(--line)}}
-    @media(max-width:620px){.home-v2 .wrap{width:min(100% - 34px,1380px)}.home-v2 .hero{min-height:auto;padding:45px 0 35px}.home-v2 h1{font-size:58px;letter-spacing:-4px}.home-v2 .lead{font-size:12px}.home-v2 .visual{height:430px}.home-v2 .visual:before{width:300px;height:300px}.home-v2 .visual:after{width:370px;height:370px}.home-v2 .book-stage{width:245px;height:350px}.home-v2 .book-art{top:68px;height:180px;left:18px;right:18px}.home-v2 .book-title{left:18px;right:18px;bottom:20px}.home-v2 .book-title strong{font-size:34px}.home-v2 .f1{right:-3px;top:5%}.home-v2 .f2{left:-3px;bottom:5%}.home-v2 .mini-stats{gap:18px}.home-v2 .section{padding-bottom:75px}.home-v2 .section-head{display:block}.home-v2 .section-head a{display:inline-block;margin-top:15px}.home-v2 .section h2{font-size:34px}.home-v2 .category-grid{grid-template-columns:1fr}.home-v2 .category{border-left:0;border-bottom:1px solid var(--line);min-height:150px}.home-v2 .category:last-child{border-bottom:0}.home-v2 .feature-copy{padding:30px 24px}.home-v2 .feature-copy h3{font-size:30px}.home-v2 .feature-points{grid-template-columns:1fr}.home-v2 .final{padding:75px 0 95px}.home-v2 .final h2{font-size:44px}}
-  </style>
-
-  <div class="wrap">
-    <section class="hero">
-      <div class="hero-copy">
-        <div class="eyebrow"><i></i> DIGITAL LIBRARY / 2026</div>
-        <h1>اقرأ أكثر.<span>اكتشف أبعد.</span></h1>
-        <p class="lead">مساحة رقمية هادئة لعشّاق المعرفة. اكتشف الكتب، تعرّف على أفكار جديدة، واحفظ ما يستحق أن يعود إليه.</p>
-        <div class="actions">
-          <a routerLink="/books" class="primary"><span>استكشف المكتبة</span><b>↗</b></a>
-          <a routerLink="/books" class="ghost">تصفح جميع الكتب</a>
+<main class="thesis-home" dir="rtl">
+  <div class="thesis-wrap">
+    <section class="thesis-hero">
+      <div class="thesis-copy">
+        <div class="thesis-kicker"><i></i> DIGITAL LIBRARY / GRADUATION EDITION</div>
+        <h1 class="thesis-title">اقرأ أكثر.<em>اكتشف أبعد.</em></h1>
+        <p class="thesis-lead">مكتبة رقمية مصممة لتجمع بين جمال الكتاب وسهولة الوصول إليه. اكتشف أعمالًا جديدة، اقرأ بهدوء، وابنِ مجموعتك الشخصية في مكان واحد.</p>
+        <div class="thesis-actions">
+          <a routerLink="/books" class="thesis-primary"><span>استكشف المكتبة</span><b>↗</b></a>
+          <a routerLink="/register" class="thesis-secondary">أنشئ مساحتك المجانية</a>
         </div>
-        <div class="mini-stats">
-          <div><b>01</b><span>اكتشاف</span></div>
-          <div><b>02</b><span>قراءة</span></div>
-          <div><b>03</b><span>حفظ</span></div>
+        <div class="thesis-metrics">
+          <article><b>01</b><span>اكتشاف</span></article>
+          <article><b>02</b><span>قراءة</span></article>
+          <article><b>03</b><span>حفظ</span></article>
         </div>
       </div>
 
-      <div class="visual" aria-hidden="true">
-        <div class="book-stage">
-          <div class="book-head"><span>LIBRARY</span><span>VOL. 01</span></div>
-          <div class="book-art"><span class="orb"></span></div>
-          <div class="book-title"><small>YOUR DIGITAL SPACE</small><strong>LIBRARY</strong><em>READ / DISCOVER / GROW</em></div>
+      <div class="thesis-stage" aria-hidden="true">
+        <div class="thesis-book">
+          <div class="thesis-book-top"><span>LIBRARY</span><span>VOL. 01</span></div>
+          <div class="thesis-book-art"><div class="thesis-orb"></div></div>
+          <div class="thesis-book-title"><small>THE DIGITAL COLLECTION</small><strong>مَكتبة</strong><em>READ • DISCOVER • REMEMBER</em></div>
         </div>
-        <div class="float f1"><strong>READ</strong><span>خذ وقتك مع المعرفة</span></div>
-        <div class="float f2"><strong>SAVE</strong><span>احتفظ بما تحب</span></div>
+        <div class="thesis-float a"><strong>24 / 7</strong><span>معرفة متاحة دائمًا</span></div>
+        <div class="thesis-float b"><strong>PDF + EPUB</strong><span>تجربة قراءة مرنة</span></div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-head">
-        <div><span class="label">EXPLORE BY MOOD</span><h2>اختر طريقك.</h2></div>
-        <a routerLink="/books">عرض المكتبة كاملة ↗</a>
-      </div>
-      <div class="category-grid">
-        <a routerLink="/books" class="category"><div><small>01 / DISCOVER</small><h3>اكتشاف</h3><p>تجوّل بين الكتب وابحث عن شيء جديد.</p></div><b>01</b></a>
-        <a routerLink="/books" class="category"><div><small>02 / LEARN</small><h3>تعلّم</h3><p>أفكار ومعلومات توسّع رؤيتك.</p></div><b>02</b></a>
-        <a routerLink="/books" class="category"><div><small>03 / READ</small><h3>قراءة</h3><p>كتب تستحق جلسة هادئة وتركيزًا كاملًا.</p></div><b>03</b></a>
-        <a routerLink="/favorites" class="category"><div><small>04 / KEEP</small><h3>مفضلتك</h3><p>احفظ الكتب التي تريد العودة إليها.</p></div><b>04</b></a>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head"><div><span class="label">THE EXPERIENCE</span><h2>مصممة حول القارئ.</h2></div></div>
-      <div class="feature">
-        <div class="feature-art" aria-hidden="true"></div>
-        <div class="feature-copy">
-          <span class="label">01 / A BETTER WAY TO READ</span>
-          <h3>مكتبتك ليست قائمة كتب.<br>إنها ذوقك.</h3>
-          <p>كل شيء في التجربة مصمم ليقربك من الكتاب: واجهة واضحة، تفاصيل مرتبة، وصول سريع، ومكان خاص للكتب التي اخترتها بنفسك.</p>
-          <div class="feature-points">
-            <div><b>اكتشاف سريع</b><span>اعثر على الكتاب المناسب بسهولة</span></div>
-            <div><b>مفضلة شخصية</b><span>احفظ ما تريد قراءته لاحقًا</span></div>
-          </div>
-          <a routerLink="/books">ابدأ الاستكشاف <span>→</span></a>
-        </div>
+    <section class="thesis-section">
+      <header class="thesis-head">
+        <div><div class="thesis-label">THE EXPERIENCE</div><h2>كل ما تحتاجه القارئ.</h2></div>
+        <a routerLink="/books">اذهب إلى المكتبة ↗</a>
+      </header>
+      <div class="thesis-cards">
+        <article class="thesis-card"><small>01 / DISCOVER</small><h3>اكتشاف بلا تعقيد</h3><p>ابحث وتصفح الكتب بسهولة من خلال واجهة هادئة تساعدك على التركيز على المحتوى.</p><b>01</b></article>
+        <article class="thesis-card"><small>02 / READ</small><h3>اقرأ في أي وقت</h3><p>افتح الكتاب مباشرة من صفحة التفاصيل وانتقل إلى تجربة قراءة مريحة ومتكاملة.</p><b>02</b></article>
+        <article class="thesis-card"><small>03 / SAVE</small><h3>احتفظ بما تحب</h3><p>أضف كتبك المفضلة إلى مكتبتك الشخصية وارجع إليها متى شئت.</p><b>03</b></article>
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-head"><div><span class="label">SIMPLE FLOW</span><h2>ثلاث خطوات فقط.</h2></div></div>
-      <div class="steps">
-        <div class="step"><span class="step-no">01</span><h3>اكتشف</h3><p>افتح المكتبة وابحث وتصفح حتى تجد شيئًا يلفت انتباهك.</p></div>
-        <div class="step"><span class="step-no">02</span><h3>اقرأ</h3><p>ادخل إلى تفاصيل الكتاب وابدأ رحلتك مع المحتوى الذي اخترته.</p></div>
-        <div class="step"><span class="step-no">03</span><h3>احتفظ</h3><p>أضف الكتب التي تحبها إلى المفضلة لتعود إليها في أي وقت.</p></div>
-      </div>
-    </section>
-
-    <section class="final">
-      <span class="label">YOUR NEXT CHAPTER</span>
-      <h2>الكتاب القادم<br><span>بانتظارك.</span></h2>
-      <p>لا تحتاج إلا إلى فضول بسيط. الباقي ستجده بين صفحات مكتبتك الرقمية.</p>
-      <a routerLink="/books">افتح المكتبة ↗</a>
+    <section class="thesis-manifesto">
+      <div><div class="thesis-label">OUR MANIFESTO</div><h2>الكتاب الجيد<br>يترك أثرًا <span>لا يزول.</span></h2></div>
+      <p>صُممت مَكتبة كمشروع تخرج يجمع بين هندسة البرمجيات وتجربة المستخدم: نظام إدارة، قاعدة بيانات، مصادقة، رفع ملفات، بحث، وواجهة قراءة رقمية ضمن هوية بصرية واحدة.</p>
     </section>
   </div>
 </main>
