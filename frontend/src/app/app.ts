@@ -17,15 +17,24 @@ export class App {
   private document = inject(DOCUMENT);
 
   constructor() {
-    // مراقبة تغييرات الثيم وتطبيق الكلاس مباشرة على الـ body الخاص بالمتصفح
+    // Keep the theme state synchronized on both html and body so the
+    // page background, the area around the sticky navbar, and every
+    // top-level element follow the same theme without white gaps.
     effect(() => {
       const isDark = this.themeService.isDarkMode();
+      const html = this.document.documentElement;
+      const body = this.document.body;
+
       if (isDark) {
-        this.document.body.classList.add('dark-mode');
-        this.document.body.classList.remove('light-mode');
+        html.classList.add('dark-mode');
+        html.classList.remove('light-mode');
+        body.classList.add('dark-mode');
+        body.classList.remove('light-mode');
       } else {
-        this.document.body.classList.remove('dark-mode');
-        this.document.body.classList.add('light-mode');
+        html.classList.remove('dark-mode');
+        html.classList.add('light-mode');
+        body.classList.remove('dark-mode');
+        body.classList.add('light-mode');
       }
     });
   }
