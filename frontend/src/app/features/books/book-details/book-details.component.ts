@@ -11,10 +11,10 @@ import { environment } from '../../../../environments/environment';
 interface FavoriteResponse { favorite: boolean; favorites: string[]; }
 
 @Component({
-  selector: 'app-book-details', 
-  standalone: true, 
+  selector: 'app-book-details',
+  standalone: true,
   imports: [CommonModule, RouterLink],
-  encapsulation: ViewEncapsulation.None, 
+  encapsulation: ViewEncapsulation.None,
   templateUrl: './book-details.component.html',
   styleUrl: './book-details.component.scss'
 })
@@ -27,27 +27,46 @@ export class BookDetailsComponent implements OnInit {
   readonly auth = inject(AuthService);
   readonly themeService = inject(ThemeService);
 
-  bookId = ''; 
-  book: Book | null = null; 
-  loading = true; 
-  error = ''; 
-  favoriteBusy = false; 
+  bookId = '';
+  book: Book | null = null;
+  loading = true;
+  error = '';
+  favoriteBusy = false;
 
   ngOnInit(): void {
     this.bookId = this.route.snapshot.paramMap.get('id') ?? '';
-    if (!this.bookId) { this.error = 'معرّف الكتاب غير موجود.'; this.loading = false; return; }
+    if (!this.bookId) {
+      this.error = 'معرّف الكتاب غير موجود.';
+      this.loading = false;
+      return;
+    }
     this.loadBookDetails();
   }
 
   private loadBookDetails(): void {
     this.api.getById(this.bookId).subscribe({
       next: book => {
-        this.book = book; this.loading = false; this.cdr.detectChanges();
-        this.api.addView(this.bookId).subscribe({ error: (err: unknown) => console.warn('Failed to register view count:', err) });
+        this.book = book;
+        this.loading = false;
+        this.cdr.detectChanges();
+
+        // The backend identifies the browser with a persistent anonymous ID,
+        // so refreshing this page does not create another view for the same book.
+        this.api.addView(this.bookId).subscribe({
+          next: result => {
+            if (this.book && result.counted) {
+              this.book.viewsCount = result.viewsCount;
+              this.cdr.detectChanges();
+            }
+          },
+          error: (err: unknown) => console.warn('Failed to register view count:', err)
+        });
       },
       error: (err: unknown) => {
         const httpError = err as { error?: { message?: string } };
-        this.error = httpError.error?.message || 'تعذر تحميل تفاصيل الكتاب.'; this.loading = false; this.cdr.detectChanges();
+        this.error = httpError.error?.message || 'تعذر تحميل تفاصيل الكتاب.';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -63,28 +82,28 @@ export class BookDetailsComponent implements OnInit {
     const id = String(this.book?._id || '');
     if (!id || this.favoriteBusy) return;
 
-    if (!this.auth.isLoggedIn) { 
-      this.notify.show('سجّل الدخول أولًا لإضافة الكتب إلى المفضلة.', 'error'); 
-      return; 
+    if (!this.auth.isLoggedIn) {
+      this.notify.show('سجّل الدخول أولًا لإضافة الكتب إلى المفضلة.', 'error');
+      return;
     }
 
-    this.favoriteBusy = true; 
+    this.favoriteBusy = true;
     this.http.post<FavoriteResponse>(`${environment.apiUrl}/auth/favorites/${id}/toggle`, {}).subscribe({
       next: response => {
         const user = this.auth.currentUser;
         if (user) this.auth.updateUser({ ...user, favorites: (response.favorites || []).map(String) });
-        
+
         const msg = response.favorite ? 'تمت إضافة الكتاب إلى المفضلة ✓' : 'تمت إزالة الكتاب من المفضلة ✓';
         this.notify.show(msg, 'success');
-        
-        this.favoriteBusy = false; 
+
+        this.favoriteBusy = false;
         this.cdr.detectChanges();
       },
-      error: (err: unknown) => { 
-        console.error('Favorite error:', err); 
-        this.notify.show('تعذر تحديث المفضلة. حاول مرة أخرى.', 'error'); 
-        this.favoriteBusy = false; 
-        this.cdr.detectChanges(); 
+      error: (err: unknown) => {
+        console.error('Favorite error:', err);
+        this.notify.show('تعذر تحديث المفضلة. حاول مرة أخرى.', 'error');
+        this.favoriteBusy = false;
+        this.cdr.detectChanges();
       }
     });
   }
