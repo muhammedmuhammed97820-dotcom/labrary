@@ -24,7 +24,12 @@ fs.mkdirSync(path.join(uploadsPath, "books"), { recursive: true });
 fs.mkdirSync(path.join(uploadsPath, "covers"), { recursive: true });
 fs.mkdirSync(path.join(uploadsPath, "avatars"), { recursive: true });
 
-app.use(cors({ origin: frontendUrl, methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization"], credentials: true }));
+app.use(cors({
+  origin: frontendUrl,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Viewer-Id"],
+  credentials: true
+}));
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" }, crossOriginEmbedderPolicy: false }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 500, standardHeaders: true, legacyHeaders: false }));
 app.use(express.json({ limit: "10mb" }));
