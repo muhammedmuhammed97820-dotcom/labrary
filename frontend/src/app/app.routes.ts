@@ -8,11 +8,17 @@ import { AdminBooksComponent } from './features/admin/books/admin-books.componen
 import { BookEditComponent } from './features/admin/books/book-edit/book-edit.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { adminGuard } from './core/guards/admin.guard';
+import { CategoriesComponent } from './features/categories/categories.component';
+import { AuthorsComponent } from './features/authors/authors.component';
+import { AuthorDetailsComponent } from './features/authors/author-details.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'books', loadComponent: () => import('./features/books/books.component').then(m => m.BooksComponent) },
   { path: 'books/:id', component: BookDetailsComponent },
+  { path: 'categories', component: CategoriesComponent },
+  { path: 'authors', component: AuthorsComponent },
+  { path: 'authors/:id', component: AuthorDetailsComponent },
   { path: 'login', component: AuthComponent },
   { path: 'register', component: AuthComponent },
   { path: 'profile', component: ProfileComponent },
