@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Book {
@@ -21,6 +21,7 @@ export interface Book {
 export class BookApiService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:5000/api/books';
+  private readonly viewerStorageKey = 'electronic_library_viewer_id';
 
   getAll(page = 1, limit = 24, search = ''): Observable<Book[]> {
     let params = new HttpParams();
@@ -43,11 +44,29 @@ export class BookApiService {
   }
 
   remove(id: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.api}/${id}`);
+    return this.http.delete<{ message: string }>(this.api + `/${id}`);
   }
 
-  addView(id: string): Observable<{ viewsCount?: number; views?: number }> {
-    return this.http.post<{ viewsCount?: number; views?: number }>(`${this.api}/${id}/views`, {});
+  addView(id: string): Observable<{ viewsCount: number; counted: boolean }> {
+    const viewerId = this.getViewerId();
+    const headers = new HttpHeaders({ 'X-Viewer-Id': viewerId });
+    return this.http.post<{ viewsCount: number; counted: boolean }>(`${this.api}/${id}/views`, {}, { headers });
+  }
+
+  private getViewerId(): string {
+    try {
+      const existing = localStorage.getItem(this.viewerStorageKey);
+      if (existing) return existing;
+
+      const generated = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+
+      localStorage.setItem(this.viewerStorageKey, generated);
+      return generated;
+    } catch {
+      return `temporary-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
   }
 
   getFileUrl(filePath: string): string {
