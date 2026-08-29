@@ -7,9 +7,12 @@
   --card-bg: #ffffff;
   --border-color: #e2e8f0;
   --accent-color: #d97706;
+  color-scheme: light;
 }
 
-/* عندما يكون الـ body في الوضع الليلي */
+/* Global dark theme: applied to both html and body so no white strip
+   remains around the sticky navbar or the Angular root element. */
+html.dark-mode,
 body.dark-mode {
   --bg-primary: #0f172a;
   --text-primary: #f8fafc;
@@ -17,17 +20,50 @@ body.dark-mode {
   --card-bg: #1e293b;
   --border-color: #334155;
   --accent-color: #f59e0b;
+  color-scheme: dark;
 }
 
-/* تطبيق الخلفية على الصفحة بأكملها بلا استثناء */
-html, body {
+html,
+body {
   font-family: 'Cairo', sans-serif;
   background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  min-height: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body.light-mode,
+html.light-mode {
+  background-color: #f8f9fa !important;
+}
+
+body.dark-mode,
+html.dark-mode {
+  background-color: #0f172a !important;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.app-main-container {
+  min-height: 100vh;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
 }
 
 main {
