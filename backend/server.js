@@ -39,6 +39,7 @@ app.use(morgan("dev"));
 app.use("/uploads", (req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", frontendUrl);
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Viewer-Id");
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
