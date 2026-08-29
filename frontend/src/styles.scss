@@ -1,0 +1,39 @@
+@import "bootstrap/scss/bootstrap";
+
+:root {
+  --bg-primary: #f8f9fa;
+  --text-primary: #1e293b;
+  --text-muted: #64748b;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --accent-color: #d97706;
+}
+
+/* عندما يكون الـ body في الوضع الليلي */
+body.dark-mode {
+  --bg-primary: #0f172a;
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+  --accent-color: #f59e0b;
+}
+
+/* تطبيق الخلفية على الصفحة بأكملها بلا استثناء */
+html, body {
+  font-family: 'Cairo', sans-serif;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+main {
+  background-color: transparent !important;
+}
+
+img {
+  max-width: 100%;
+}

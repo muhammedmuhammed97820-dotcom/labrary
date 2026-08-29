@@ -1,41 +1,133 @@
-<main class="bg-light min-vh-100" dir="rtl">
-  <section class="bg-dark text-white">
-    <div class="container py-5">
-      <div class="row align-items-end g-4">
-        <div class="col-lg-8">
-          <span class="badge text-bg-warning mb-3">DIGITAL LIBRARY / COLLECTION</span>
-          <h1 class="display-4 fw-bold mb-3">اكتشف ما يستحق القراءة.</h1>
-          <p class="lead text-light-emphasis mb-0">تصفح الكتب، ابحث باسم الكتاب أو المؤلف، واحفظ المفضلة للعودة إليها لاحقًا.</p>
+<main class="admin-books-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
+
+    <!-- HEADER SECTION -->
+    <header class="admin-header">
+      <div class="header-info">
+        <span class="admin-badge">
+          <i class="fa-solid fa-book-open-reader"></i>
+          DIGITAL LIBRARY · COLLECTION
+        </span>
+        <h1 class="header-title">اكتشف ما يستحق القراءة</h1>
+        <p class="header-subtitle">مكتبة رقمية حقيقية تجمع كتبك المفضلة في تجربة بسيطة، سريعة وحديثة.</p>
+      </div>
+    </header>
+
+    <!-- SEARCH & FILTER TOOLBAR -->
+    <section class="toolbar-glass-card">
+      <div class="search-input-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input 
+          type="text" 
+          class="glass-control" 
+          [(ngModel)]="query" 
+          placeholder="ابحث عن كتاب، مؤلف، تصنيف أو وصف..."
+        >
+        @if (query) {
+          <button class="clear-search-btn" (click)="query = ''" title="مسح البحث">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        }
+      </div>
+
+      <div class="toolbar-side-actions">
+        <button class="refresh-btn" type="button" (click)="load(true)" [disabled]="loading">
+          <i class="fa-solid fa-rotate-right" [class.spin]="loading"></i>
+          <span>تحديث</span>
+        </button>
+        <div class="count-pill">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>{{ filteredBooks.length }} كتاب</span>
         </div>
-        <div class="col-lg-4"><div class="bg-black bg-opacity-25 border border-secondary rounded-3 p-4"><small class="text-secondary">LIBRARY</small><strong class="d-block fs-5 mt-1">معرفتك في مكان واحد</strong></div></div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="container py-4">
-    <div class="card shadow-sm border-0 mb-4"><div class="card-body p-3 p-lg-4"><div class="row g-2"><div class="col-lg-10"><div class="input-group input-group-lg"><span class="input-group-text">⌕</span><input class="form-control" [(ngModel)]="search" (input)="filter()" type="search" placeholder="ابحث عن عنوان، مؤلف أو تصنيف..." aria-label="بحث"><button *ngIf="search" class="btn btn-outline-secondary" type="button" (click)="search='';filter()">مسح</button></div></div><div class="col-lg-2"><button class="btn btn-outline-dark btn-lg w-100" type="button" (click)="loadBooks()" [disabled]="loading">↻ تحديث</button></div></div></div></div>
+    <!-- LOADING STATE -->
+    @if (loading) {
+      <div class="admin-state-box loading-box">
+        <div class="glass-spinner"></div>
+        <p>جارِ تحميل المكتبة الرقمية...</p>
+      </div>
+    }
 
-    <div *ngIf="favoriteMessage" class="alert alert-success shadow-sm">{{ favoriteMessage }}</div>
-    <div *ngIf="loading" class="alert alert-secondary text-center">جاري تحميل المكتبة...</div>
-    <div *ngIf="!loading && error" class="alert alert-danger d-flex flex-wrap justify-content-between align-items-center gap-2"><span>{{ error }}</span><button class="btn btn-sm btn-danger" type="button" (click)="loadBooks()">إعادة المحاولة</button></div>
+    <!-- ERROR STATE -->
+    @else if (error) {
+      <div class="admin-state-box error-box">
+        <div class="error-content">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>{{ error }}</span>
+        </div>
+        <button class="retry-btn" type="button" (click)="load(true)">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة المحاولة</span>
+        </button>
+      </div>
+    }
 
-    <div *ngIf="!loading && !error && filtered.length" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-      <div class="col" *ngFor="let book of filtered">
-        <article class="card h-100 border-0 shadow-sm overflow-hidden">
-          <a [routerLink]="['/books',id(book)]" class="ratio ratio-4x3 bg-dark text-decoration-none"><img [src]="cover(book)" [alt]="book.title || 'كتاب'" class="w-100 h-100 object-fit-cover" loading="lazy"></a>
-          <div class="card-body d-flex flex-column p-4">
-            <span class="badge text-bg-secondary align-self-start mb-2">{{ category(book) }}</span>
-            <h2 class="h4 mb-1">{{ book.title || 'بدون عنوان' }}</h2>
-            <p class="text-secondary mb-3">{{ author(book) }}</p>
-            <div class="d-flex flex-wrap gap-3 small text-secondary border-top pt-3 mb-3"><span>👁 {{ views(book) }} مشاهدة</span><span>↓ {{ book.downloads || 0 }} تحميل</span></div>
-            <div class="d-flex gap-2 mt-auto"><a class="btn btn-dark flex-grow-1" [routerLink]="['/books',id(book)]">عرض الكتاب</a><button class="btn btn-outline-danger" type="button" [disabled]="isFavoriteBusy(book)" (click)="toggleFavorite(book)">{{ isFavorite(book) ? '♥' : '♡' }}</button></div>
+    <!-- EMPTY STATE -->
+    @else if (!filteredBooks.length) {
+      <div class="admin-state-box empty-box">
+        <i class="fa-solid fa-box-open empty-icon"></i>
+        <h2>لم نجد ما تبحث عنه</h2>
+        <p>{{ query ? 'لا توجد نتائج مطابقة لخصائص بحثك الحالية.' : 'لا توجد كتب متاحة في المكتبة حالياً.' }}</p>
+      </div>
+    }
+
+    <!-- BOOKS GRID -->
+    @else {
+      <div class="books-grid-container">
+        @for (book of filteredBooks; track getBookId(book)) {
+          <div class="glass-book-card" [routerLink]="['/books', getBookId(book)]">
+            
+            <!-- صورة الغلاف وزر المفضلة العلوي -->
+            <div class="card-media-header">
+              <div class="book-cover-wrapper">
+                @if (getBookCover(book)) {
+                  <img [src]="getBookCover(book)" [alt]="book.title" class="book-cover-img">
+                } @else {
+                  <span class="cover-fallback">{{ book.title ? book.title.slice(0, 1) : 'ك' }}</span>
+                }
+              </div>
+
+              <!-- زر المفضلة العُلوي العائم -->
+              <button 
+                type="button" 
+                class="top-favorite-btn" 
+                [class.active]="isFavorite(book)"
+                (click)="toggleFavorite(book); $event.stopPropagation()" 
+                [disabled]="isFavoriteBusy(book)"
+                [title]="isFavorite(book) ? 'إزالة من المفضلة' : 'إضافة للمفضلة'"
+              >
+                <i class="fa-solid fa-heart"></i>
+              </button>
+
+              <span class="category-floating-badge">
+                {{ categoryName(book) }}
+              </span>
+            </div>
+
+            <!-- تفاصيل الكتاب والنصوص -->
+            <div class="card-body-content">
+              <h3 class="book-title-text" [title]="book.title">{{ book.title || 'بدون عنوان' }}</h3>
+              
+              <div class="author-row">
+                <i class="fa-solid fa-pen-nib"></i>
+                <span>{{ authorName(book) }}</span>
+              </div>
+
+              <p class="book-desc-text">{{ book.description || 'لا يوجد وصف مختصر متوفر لهذا الكتاب حالياً...' }}</p>
+            </div>
+
+            <!-- إحصائيات الكتاب (تم تصحيح المشاهدات لتطابق viewsCount) -->
+            <div class="card-stats-footer">
+              <span class="stat-item"><i class="fa-solid fa-eye"></i> {{ book.viewsCount || book.views || 0 }} مشاهدة</span>
+              <span class="stat-item"><i class="fa-solid fa-download"></i> {{ book.downloads || 0 }} تحميل</span>
+            </div>
+
           </div>
-        </article>
+        }
       </div>
-    </div>
+    }
 
-    <div *ngIf="!loading && !error && !filtered.length" class="card border-0 shadow-sm text-center py-5"><div class="card-body"><div class="display-4 mb-3">⌕</div><h2 class="h4">لم نجد ما تبحث عنه</h2><p class="text-secondary mb-0">جرّب عنوانًا أو اسم مؤلف مختلفًا.</p></div></div>
-
-    <nav *ngIf="!loading && !error && totalPages > 1" aria-label="ترقيم صفحات الكتب" class="mt-4"><ul class="pagination justify-content-center mb-0"><li class="page-item"><button class="page-link" type="button" (click)="previousPage()" [disabled]="page === 1">السابق</button></li><li class="page-item active"><span class="page-link">{{ page }} / {{ totalPages }}</span></li><li class="page-item"><button class="page-link" type="button" (click)="nextPage()" [disabled]="page === totalPages">التالي</button></li></ul></nav>
-  </section>
+  </div>
 </main>

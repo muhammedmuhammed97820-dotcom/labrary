@@ -4,22 +4,34 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Book, BookApiService } from '../../../core/services/book-api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { environment } from '../../../../environments/environment';
 
 interface FavoriteResponse { favorite: boolean; favorites: string[]; }
 
 @Component({
-  selector: 'app-book-details', standalone: true, imports: [CommonModule, RouterLink],
-  encapsulation: ViewEncapsulation.None, templateUrl: './book-details.component.html'
+  selector: 'app-book-details', 
+  standalone: true, 
+  imports: [CommonModule, RouterLink],
+  encapsulation: ViewEncapsulation.None, 
+  templateUrl: './book-details.component.html',
+  styleUrl: './book-details.component.scss'
 })
 export class BookDetailsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(BookApiService);
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly notify = inject(NotificationService);
   readonly auth = inject(AuthService);
+  readonly themeService = inject(ThemeService);
 
-  bookId = ''; book: Book | null = null; loading = true; error = ''; favoriteBusy = false; favoriteMessage = '';
+  bookId = ''; 
+  book: Book | null = null; 
+  loading = true; 
+  error = ''; 
+  favoriteBusy = false; 
 
   ngOnInit(): void {
     this.bookId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -50,17 +62,30 @@ export class BookDetailsComponent implements OnInit {
   toggleFavorite(): void {
     const id = String(this.book?._id || '');
     if (!id || this.favoriteBusy) return;
-    if (!this.auth.isLoggedIn) { this.favoriteMessage = 'سجّل الدخول أولًا لإضافة الكتاب إلى المفضلة.'; return; }
-    this.favoriteBusy = true; this.favoriteMessage = '';
+
+    if (!this.auth.isLoggedIn) { 
+      this.notify.show('سجّل الدخول أولًا لإضافة الكتب إلى المفضلة.', 'error'); 
+      return; 
+    }
+
+    this.favoriteBusy = true; 
     this.http.post<FavoriteResponse>(`${environment.apiUrl}/auth/favorites/${id}/toggle`, {}).subscribe({
       next: response => {
         const user = this.auth.currentUser;
         if (user) this.auth.updateUser({ ...user, favorites: (response.favorites || []).map(String) });
-        this.favoriteMessage = response.favorite ? 'تمت إضافة الكتاب إلى المفضلة ✓' : 'تمت إزالة الكتاب من المفضلة ✓';
-        this.favoriteBusy = false; this.cdr.detectChanges();
-        setTimeout(() => { this.favoriteMessage = ''; this.cdr.detectChanges(); }, 2500);
+        
+        const msg = response.favorite ? 'تمت إضافة الكتاب إلى المفضلة ✓' : 'تمت إزالة الكتاب من المفضلة ✓';
+        this.notify.show(msg, 'success');
+        
+        this.favoriteBusy = false; 
+        this.cdr.detectChanges();
       },
-      error: (err: unknown) => { console.error('Favorite error:', err); this.favoriteMessage = 'تعذر تحديث المفضلة. حاول مرة أخرى.'; this.favoriteBusy = false; this.cdr.detectChanges(); }
+      error: (err: unknown) => { 
+        console.error('Favorite error:', err); 
+        this.notify.show('تعذر تحديث المفضلة. حاول مرة أخرى.', 'error'); 
+        this.favoriteBusy = false; 
+        this.cdr.detectChanges(); 
+      }
     });
   }
 

@@ -1,12 +1,101 @@
-<main class="bg-light min-vh-100" dir="rtl">
-  <section class="bg-dark text-white"><div class="container py-5"><div class="d-flex flex-wrap justify-content-between align-items-end gap-3"><div><span class="badge text-bg-warning mb-3">MY LIBRARY / FAVORITES</span><h1 class="display-5 fw-bold mb-2">كتبك المفضلة</h1><p class="lead text-light-emphasis mb-0">كل الكتب التي اخترتها للعودة إليها لاحقًا.</p></div><a routerLink="/books" class="btn btn-outline-light">استكشف الكتب</a></div></div></section>
-  <section class="container py-4">
-    <div *ngIf="message" class="alert alert-success">{{ message }}</div>
-    <div *ngIf="loading" class="alert alert-secondary text-center">جاري تحميل المفضلة...</div>
-    <div *ngIf="!loading && error" class="alert alert-danger d-flex flex-wrap justify-content-between align-items-center gap-2"><span>{{ error }}</span><button class="btn btn-sm btn-danger" type="button" (click)="load()">إعادة المحاولة</button></div>
-    <div *ngIf="!loading && !error && books.length" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-      <div class="col" *ngFor="let book of books"><article class="card h-100 border-0 shadow-sm overflow-hidden"><div class="row g-0 h-100"><div class="col-4"><a [routerLink]="['/books', id(book)]" class="d-block h-100 bg-dark"><img [src]="cover(book)" [alt]="book.title || 'كتاب'" class="img-fluid h-100 w-100 object-fit-cover"></a></div><div class="col-8"><div class="card-body h-100 d-flex flex-column"><h2 class="h5">{{ book.title || 'بدون عنوان' }}</h2><p class="text-secondary small">{{ author(book) }}</p><div class="mt-auto d-flex flex-wrap gap-2"><a class="btn btn-dark btn-sm flex-grow-1" [routerLink]="['/books',id(book)]">عرض الكتاب</a><button class="btn btn-outline-danger btn-sm" type="button" [disabled]="removing.has(id(book))" (click)="remove(book)">{{ removing.has(id(book)) ? '...' : 'إزالة ♥' }}</button></div></div></div></div></article></div>
-    </div>
-    <div *ngIf="!loading && !error && !books.length" class="card border-0 shadow-sm text-center py-5"><div class="card-body"><div class="display-3">♡</div><h2 class="h3 mt-3">لا توجد كتب في المفضلة</h2><p class="text-secondary">تصفح المكتبة وأضف الكتب التي تريد العودة إليها.</p><a routerLink="/books" class="btn btn-primary">اكتشف الكتب</a></div></div>
-  </section>
+<main class="admin-dashboard-wrapper favorites-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
+
+    <!-- رأس الصفحة -->
+    <header class="admin-header">
+      <div class="header-info">
+        <span class="admin-badge">
+          <i class="fa-solid fa-heart"></i>
+          مكتبتي · المفضلة
+        </span>
+        <h1 class="header-title">كتبك المفضلة</h1>
+        <p class="header-subtitle">كل الكتب التي اخترتها للعودة إليها لاحقًا في منصتك الرقمية.</p>
+      </div>
+      <a routerLink="/books" class="back-nav-btn text-decoration-none">
+        <i class="fa-solid fa-compass"></i>
+        <span>استكشف الكتب</span>
+      </a>
+    </header>
+
+    <!-- حالة التحميل -->
+    @if (loading) {
+      <div class="admin-state-box loading-box">
+        <div class="glass-spinner"></div>
+        <p>جاري تحميل المفضلة...</p>
+      </div>
+    }
+
+    <!-- حالة الخطأ -->
+    @else if (error) {
+      <div class="admin-state-box error-box">
+        <div class="error-content">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>{{ error }}</span>
+        </div>
+        <button class="retry-btn" type="button" (click)="load()">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة المحاولة</span>
+        </button>
+      </div>
+    }
+
+    <!-- شبكة الكتب -->
+    @else if (books.length) {
+      <div class="books-grid-container">
+        @for (book of books; track getBookId(book)) {
+          <div class="glass-book-card">
+            
+            <div class="card-media-header">
+              <div class="book-cover-wrapper">
+                <img [src]="getBookCover(book)" [alt]="book.title || 'كتاب'" class="book-cover-img">
+              </div>
+
+              <!-- زر إزالة سريع من المفضلة -->
+              <button 
+                type="button" 
+                class="top-favorite-btn active" 
+                [disabled]="removing.has(getBookId(book))"
+                (click)="remove(book)" 
+                title="إزالة من المفضلة"
+              >
+                <i class="fa-solid fa-heart-crack"></i>
+              </button>
+            </div>
+
+            <div class="card-body-content">
+              <h3 class="book-title-text" [title]="book.title">{{ book.title || 'بدون عنوان' }}</h3>
+              <div class="author-row">
+                <i class="fa-solid fa-pen-nib"></i>
+                <span>{{ authorName(book) }}</span>
+              </div>
+            </div>
+
+            <div class="card-stats-footer">
+              <a class="add-book-btn text-decoration-none w-100 text-center justify-content-center" [routerLink]="['/books', getBookId(book)]">
+                <i class="fa-solid fa-book-open"></i>
+                <span>عرض التفاصيل</span>
+              </a>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+    <!-- حالة الفراغ -->
+    @else {
+      <div class="admin-state-box empty-box">
+        <div class="empty-icon-wrapper mb-3">
+          <i class="fa-regular fa-heart"></i>
+        </div>
+        <h2>لا توجد كتب في المفضلة</h2>
+        <p>تصفح المكتبة وأضف الكتب التي تريد العودة إليها لاحقاً.</p>
+        <a routerLink="/books" class="add-book-btn text-decoration-none mt-3 d-inline-flex">
+          <i class="fa-solid fa-compass"></i>
+          <span>اكتشف الكتب الآن</span>
+        </a>
+      </div>
+    }
+
+  </div>
 </main>

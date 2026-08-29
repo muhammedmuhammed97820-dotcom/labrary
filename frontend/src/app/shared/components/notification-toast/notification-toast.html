@@ -1,0 +1,17 @@
+<div class="toast-wrapper" dir="rtl">
+  @for (toast of notifyService.toasts$ | async; track toast.id) {
+    <div class="glass-toast" [ngClass]="toast.type">
+      <i class="fa-solid icon" [ngClass]="{
+        'fa-circle-check': toast.type === 'success',
+        'fa-circle-exclamation': toast.type === 'error',
+        'fa-circle-info': toast.type === 'info'
+      }"></i>
+
+      <span class="toast-text">{{ toast.message }}</span>
+
+      <button type="button" class="close-btn" (click)="notifyService.remove(toast.id)">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  }
+</div>

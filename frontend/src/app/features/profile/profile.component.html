@@ -1,11 +1,118 @@
-<main class="bg-dark text-light min-vh-100 py-5" dir="rtl">
-  <div class="container">
-    <header class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-5"><div><span class="badge text-bg-warning mb-3">MY LIBRARY / ACCOUNT</span><h1 class="display-5 fw-bold">ملفي الشخصي</h1><p class="text-secondary mb-0">تحكم ببياناتك وصورتك ومكتبتك الشخصية من مكان واحد.</p></div><a routerLink="/books" class="btn btn-outline-light">← العودة للمكتبة</a></header>
-    <div *ngIf="message" class="alert alert-success">{{ message }}</div><div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<main class="profile-page-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="profile-container">
+    
+    <!-- HEADER -->
+    <header class="profile-header">
+      <div class="header-info">
+        <span class="admin-badge">
+          <i class="fa-solid fa-user-gear"></i>
+          MY LIBRARY · ACCOUNT
+        </span>
+        <h1 class="header-title">ملفي الشخصي</h1>
+        <p class="header-subtitle">تحكم ببياناتك الشخصية، صورتك، وإحصائيات مكتبتك من مكان واحد.</p>
+      </div>
+      <a routerLink="/books" class="back-btn">
+        <i class="fa-solid fa-arrow-right"></i>
+        <span>العودة للمكتبة</span>
+      </a>
+    </header>
+
+    <!-- ERROR ALERT (If any) -->
+    @if (error) {
+      <div class="glass-alert error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ error }}</span>
+      </div>
+    }
+
+    <!-- GRID CONTENT -->
     <div class="row g-4">
-      <div class="col-lg-4"><article class="card bg-black text-light border-secondary h-100"><div class="card-body text-center p-4"><div class="ratio ratio-1x1 mx-auto mb-4 w-50 bg-warning text-dark rounded-circle overflow-hidden"><img *ngIf="avatarUrl" [src]="avatarUrl" alt="صورة المستخدم" class="w-100 h-100 object-fit-cover"><span *ngIf="!avatarUrl" class="d-flex align-items-center justify-content-center w-100 h-100 display-6 fw-bold">{{ initial }}</span></div><label class="btn btn-outline-warning btn-sm mb-3">تغيير الصورة<input class="d-none" type="file" accept="image/png,image/jpeg,image/webp" (click)="resetAvatarInput($event)" (change)="chooseAvatar($event)"></label><h2 class="h3 fw-bold mb-1">{{ name || 'المستخدم' }}</h2><p class="text-secondary mb-3">{{ user?.email }}</p><span class="badge" [class.text-bg-warning]="user?.role === 'admin'" [class.text-bg-secondary]="user?.role !== 'admin'">{{ user?.role === 'admin' ? 'ADMIN' : 'MEMBER' }}</span><div *ngIf="avatarUrl" class="mt-3"><button type="button" class="btn btn-outline-danger btn-sm" (click)="removeAvatar()">إزالة الصورة</button></div></div></article></div>
-      <div class="col-lg-8"><article class="card bg-black text-light border-secondary h-100"><div class="card-header bg-transparent border-secondary p-4"><span class="text-warning small">ACCOUNT</span><h2 class="h3 mb-0 mt-1">معلومات الحساب</h2></div><div class="card-body p-4"><div class="mb-4"><label class="form-label">الاسم الكامل</label><input class="form-control form-control-lg bg-dark text-light" [(ngModel)]="name" maxlength="100" placeholder="اسمك الكامل"></div><div class="mb-4"><label class="form-label">البريد الإلكتروني</label><input class="form-control form-control-lg bg-dark text-secondary" [value]="user?.email || ''" disabled></div><button class="btn btn-warning btn-lg" type="button" (click)="save()" [disabled]="saving"><span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>{{ saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات' }}</button></div></article></div>
-      <div class="col-12"><article class="card bg-black text-light border-secondary"><div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3"><div><small class="text-secondary">مكتبتك الشخصية</small><div class="display-6 fw-bold text-warning">{{ favoriteCount }}</div><span class="text-secondary">كتاب في المفضلة</span></div><a routerLink="/favorites" class="btn btn-outline-warning">♥ عرض المفضلة</a></div></article></div>
+      
+      <!-- USER CARD & AVATAR -->
+      <div class="col-lg-4">
+        <article class="glass-card">
+          <div class="card-body-box">
+            
+            <div class="avatar-preview-box">
+              @if (avatarUrl) {
+                <img [src]="avatarUrl" alt="صورة المستخدم" class="avatar-image">
+              } @else {
+                <span>{{ initial }}</span>
+              }
+            </div>
+
+            <label class="btn-outline-custom mb-3">
+              <i class="fa-solid fa-camera me-1"></i> تغيير الصورة
+              <input class="d-none" type="file" accept="image/png,image/jpeg,image/webp" (click)="resetAvatarInput($event)" (change)="chooseAvatar($event)">
+            </label>
+
+            <h2 class="user-name-text">{{ name || 'المستخدم' }}</h2>
+            <p class="user-email-text">{{ user?.email }}</p>
+            
+            <span class="role-badge" [class.admin]="user?.role === 'admin'" [class.member]="user?.role !== 'admin'">
+              {{ user?.role === 'admin' ? 'ADMINISTRATOR' : 'MEMBER' }}
+            </span>
+
+            @if (avatarUrl) {
+              <div class="mt-3">
+                <button type="button" class="btn-outline-danger-custom" (click)="removeAvatar()">
+                  <i class="fa-solid fa-trash-can me-1"></i> إزالة الصورة
+                </button>
+              </div>
+            }
+
+          </div>
+        </article>
+      </div>
+
+      <!-- ACCOUNT INFO FORM -->
+      <div class="col-lg-8">
+        <article class="glass-card">
+          <div class="card-header-box">
+            <span class="card-tag">SETTINGS</span>
+            <h2 class="card-title">معلومات الحساب</h2>
+          </div>
+          
+          <div class="card-body-box text-start">
+            <div class="form-group-box">
+              <label class="form-label-text">الاسم الكامل</label>
+              <input class="glass-control" [(ngModel)]="name" maxlength="100" placeholder="اسمك الكامل">
+            </div>
+
+            <div class="form-group-box">
+              <label class="form-label-text">البريد الإلكتروني (غير قابل للتعديل)</label>
+              <input class="glass-control" [value]="user?.email || ''" disabled>
+            </div>
+
+            <button class="btn-gold" type="button" (click)="save()" [disabled]="saving">
+              @if (saving) {
+                <i class="fa-solid fa-spinner spin"></i>
+                <span>جارٍ الحفظ...</span>
+              } @else {
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>حفظ التغييرات</span>
+              }
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <!-- FAVORITES STATS BANNER -->
+      <div class="col-12">
+        <article class="stats-banner-card">
+          <div class="banner-info">
+            <span class="banner-tag">مكتبتك الشخصية</span>
+            <div class="banner-number">{{ favoriteCount }}</div>
+            <span class="banner-sub">كتاب محفوظ في قائمة المفضلة لديك</span>
+          </div>
+          <a routerLink="/favorites" class="banner-action-btn">
+            <i class="fa-solid fa-heart"></i>
+            <span>عرض المفضلة</span>
+          </a>
+        </article>
+      </div>
+
     </div>
+
   </div>
 </main>

@@ -1,34 +1,112 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm" dir="rtl">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" routerLink="/" (click)="closeMenu()">
-      <span class="badge bg-warning text-dark rounded-circle p-2">م</span>
-      <span><strong class="d-block">مَكتبة</strong><small class="d-block text-secondary" style="font-size:.65rem">DIGITAL LIBRARY</small></span>
-    </a>
-    <button class="navbar-toggler" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-controls="mainNavbar" aria-label="القائمة">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" [class.show]="menuOpen" id="mainNavbar">
-      <ul class="navbar-nav mx-auto mb-2 mb-lg-0 text-center">
-        <li class="nav-item"><a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">الرئيسية</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/books" routerLinkActive="active" (click)="closeMenu()">المكتبة</a></li>
-        <li class="nav-item"><a class="nav-link" routerLink="/books" fragment="categories" (click)="closeMenu()">التصنيفات</a></li>
-        @if (isLoggedIn) { <li class="nav-item"><a class="nav-link" routerLink="/favorites" routerLinkActive="active" (click)="closeMenu()">المفضلة</a></li> }
-        @if (isAdmin) { <li class="nav-item"><a class="nav-link" routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">الإدارة</a></li> }
-      </ul>
-      <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2">
-        <a class="btn btn-outline-light btn-sm" routerLink="/books" (click)="closeMenu()">بحث</a>
-        @if (isLoggedIn) {
-          <a class="btn btn-outline-warning btn-sm d-flex align-items-center justify-content-center gap-2" routerLink="/profile" (click)="closeMenu()">
-            @if (avatar) { <img [src]="avatar" [alt]="userName" class="rounded-circle object-fit-cover" width="28" height="28"> }
-            @else { <span class="badge bg-warning text-dark rounded-circle">{{ userInitial }}</span> }
-            <span>{{ userName }}</span>
-          </a>
-          <button class="btn btn-outline-danger btn-sm" type="button" (click)="logout()">خروج</button>
-        } @else {
-          <a class="btn btn-outline-light btn-sm" routerLink="/login" (click)="closeMenu()">دخول</a>
-          <a class="btn btn-warning btn-sm fw-bold" routerLink="/register" (click)="closeMenu()">ابدأ الآن</a>
-        }
+<nav class="navbar-glass-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="navbar-glass-container">
+    
+    <!-- BRAND LOGO -->
+    <a class="brand-link" routerLink="/" (click)="closeMenu()">
+      <div class="brand-icon-box">
+        <span>م</span>
       </div>
+      <div class="brand-text">
+        <span class="brand-title">مَكتبة الحكمة</span>
+        <span class="brand-sub">DIGITAL LIBRARY</span>
+      </div>
+    </a>
+
+    <!-- DESKTOP NAV LINKS -->
+    <div class="nav-links-desktop">
+      <a class="nav-item-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a>
+      <a class="nav-item-link" routerLink="/books" routerLinkActive="active">المكتبة</a>
+      <a class="nav-item-link" routerLink="/books" fragment="categories">التصنيفات</a>
+      @if (isLoggedIn) {
+        <a class="nav-item-link" routerLink="/favorites" routerLinkActive="active">المفضلة</a>
+      }
+      @if (isAdmin) {
+        <a class="nav-item-link admin-link" routerLink="/admin" routerLinkActive="active">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>الإدارة</span>
+        </a>
+      }
     </div>
+
+    <!-- ACTIONS AREA -->
+    <div class="nav-actions">
+      
+      <!-- SEARCH BUTTON -->
+      <a class="action-btn search-btn" routerLink="/books" (click)="closeMenu()" title="بحث">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span class="d-none d-xl-inline">بحث</span>
+      </a>
+
+      <!-- THEME TOGGLE BUTTON (زر التحكم المركزي للوضع الليلي والنهاري) -->
+      <button class="action-btn theme-toggle-btn" (click)="toggleTheme()" [title]="themeService.isDarkMode() ? 'الوضع النهاري' : 'الوضع الليلي'">
+        @if (themeService.isDarkMode()) {
+          <i class="fa-solid fa-sun icon-sun"></i>
+        } @else {
+          <i class="fa-solid fa-moon icon-moon"></i>
+        }
+      </button>
+
+      <!-- AUTH / USER PROFILE -->
+      @if (isLoggedIn) {
+        <div class="user-pill-wrapper">
+          <a class="user-profile-btn" routerLink="/profile" (click)="closeMenu()">
+            @if (avatar) {
+              <img [src]="avatar" [alt]="userName" class="user-avatar-img">
+            } @else {
+              <div class="user-avatar-placeholder">{{ userInitial }}</div>
+            }
+            <span class="user-name-text">{{ userName }}</span>
+          </a>
+          <button class="logout-btn" (click)="logout()" title="تسجيل الخروج">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      } @else {
+        <div class="auth-btns-group">
+          <a class="btn-login" routerLink="/login" (click)="closeMenu()">دخول</a>
+          <a class="btn-register" routerLink="/register" (click)="closeMenu()">ابدأ الآن</a>
+        </div>
+      }
+
+      <!-- MOBILE TOGGLER -->
+      <button class="mobile-toggle-btn" (click)="toggleMenu()" [class.is-open]="menuOpen" aria-label="القائمة">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+
   </div>
+
+  <!-- MOBILE GLASS DRAWER -->
+  <div class="mobile-glass-drawer" [class.show]="menuOpen">
+    <div class="drawer-header">
+      <span>القائمة الرئيسية</span>
+      <button class="drawer-close" (click)="closeMenu()">&times;</button>
+    </div>
+    
+    <div class="drawer-links">
+      <a class="drawer-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">الرئيسية</a>
+      <a class="drawer-link" routerLink="/books" routerLinkActive="active" (click)="closeMenu()">المكتبة</a>
+      <a class="drawer-link" routerLink="/books" fragment="categories" (click)="closeMenu()">التصنيفات</a>
+      @if (isLoggedIn) {
+        <a class="drawer-link" routerLink="/favorites" routerLinkActive="active" (click)="closeMenu()">المفضلة</a>
+      }
+      @if (isAdmin) {
+        <a class="drawer-link admin" routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">لوحة الإدارة</a>
+      }
+    </div>
+
+    @if (!isLoggedIn) {
+      <div class="drawer-auth">
+        <a class="btn-register w-100 text-center" routerLink="/register" (click)="closeMenu()">ابدأ الآن</a>
+        <a class="btn-login w-100 text-center" routerLink="/login" (click)="closeMenu()">دخول</a>
+      </div>
+    }
+  </div>
+  
+  @if (menuOpen) {
+    <div class="mobile-overlay" (click)="closeMenu()"></div>
+  }
 </nav>

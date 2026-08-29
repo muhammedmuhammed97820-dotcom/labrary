@@ -1,57 +1,111 @@
-<main dir="rtl">
-  <section class="bg-dark text-white">
-    <div class="container py-5">
-      <div class="row align-items-center g-5 py-lg-5">
-        <div class="col-lg-7">
-          <span class="badge text-bg-warning mb-3">DIGITAL LIBRARY · GRADUATION EDITION</span>
-          <h1 class="display-2 fw-bold lh-1">اقرأ أكثر.<br><span class="text-warning">اكتشف أبعد.</span></h1>
-          <p class="lead text-light-emphasis my-4">مكتبة رقمية تجمع الكتب والبحث والقراءة والمفضلة وإدارة المحتوى في تجربة واحدة سهلة وواضحة.</p>
-          <div class="d-flex flex-wrap gap-2">
-            <a routerLink="/books" class="btn btn-warning btn-lg fw-bold">استكشف المكتبة</a>
-            <a routerLink="/register" class="btn btn-outline-light btn-lg">أنشئ حسابًا مجانيًا</a>
+<main class="admin-dashboard-wrapper home-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
+
+    <!-- القسم الرئيسي (الهيرو) -->
+    <section class="hero-glass-section">
+      <div class="hero-grid">
+        
+        <div class="hero-content">
+          <span class="admin-badge">
+            <i class="fa-solid fa-graduation-cap"></i>
+            المكتبة الرقمية · نسخة مشروع التخرج
+          </span>
+          <h1 class="hero-title">اقرأ أكثر.<br><span class="highlight-text">اكتشف أبعد.</span></h1>
+          <p class="hero-subtitle">مكتبة رقمية تجمع الكتب والبحث والقراءة والمفضلة وإدارة المحتوى في تجربة واحدة سهلة وواضحة.</p>
+          
+          <div class="hero-actions">
+            <a routerLink="/books" class="add-book-btn text-decoration-none">
+              <i class="fa-solid fa-compass"></i>
+              <span>استكشف المكتبة</span>
+            </a>
+            <a routerLink="/register" class="retry-btn-outline text-decoration-none">
+              <i class="fa-solid fa-user-plus"></i>
+              <span>أنشئ حسابًا مجانيًا</span>
+            </a>
           </div>
-          <div class="row g-3 mt-5">
-            <div class="col-4"><div class="border-start border-secondary ps-3"><strong class="fs-3 d-block">01</strong><small class="text-secondary">اكتشاف</small></div></div>
-            <div class="col-4"><div class="border-start border-secondary ps-3"><strong class="fs-3 d-block">02</strong><small class="text-secondary">قراءة</small></div></div>
-            <div class="col-4"><div><strong class="fs-3 d-block">03</strong><small class="text-secondary">حفظ</small></div></div>
+
+          <div class="hero-steps-grid">
+            <div class="step-card">
+              <span class="step-num">01</span>
+              <span class="step-label">اكتشاف</span>
+            </div>
+            <div class="step-card">
+              <span class="step-num">02</span>
+              <span class="step-label">قراءة</span>
+            </div>
+            <div class="step-card">
+              <span class="step-num">03</span>
+              <span class="step-label">حفظ</span>
+            </div>
           </div>
         </div>
-        <div class="col-lg-5">
-          <div class="card border-0 shadow-lg bg-body-secondary">
-            <div class="card-body p-4 p-lg-5 text-center">
-              <div class="ratio ratio-3x4 bg-dark rounded overflow-hidden">
-                <div class="d-flex flex-column align-items-center justify-content-center text-white">
-                  <span class="display-1 fw-bold text-warning">م</span>
-                  <span class="display-5 fw-bold">مَكتبة</span>
-                  <small class="text-secondary mt-2">READ · DISCOVER · REMEMBER</small>
-                </div>
+
+        <div class="hero-visual">
+          <div class="panel-glass-card text-center p-4">
+            <div class="visual-box">
+              <div class="brand-logo-circle">
+                <span class="logo-char">م</span>
               </div>
-              <div class="row g-2 mt-3">
-                <div class="col-6"><div class="bg-dark text-white rounded p-3"><strong class="d-block text-warning">24/7</strong><small class="text-secondary">وصول دائم</small></div></div>
-                <div class="col-6"><div class="bg-dark text-white rounded p-3"><strong class="d-block text-warning">PDF</strong><small class="text-secondary">قراءة مباشرة</small></div></div>
+              <h2 class="logo-name">مَكتبة</h2>
+              <span class="logo-sub">قراءة · اكتشاف · تذكّر</span>
+            </div>
+            <div class="visual-badges-row">
+              <div class="mini-badge">
+                <i class="fa-solid fa-clock text-warning"></i>
+                <strong>24/7</strong>
+                <span>وصول دائم</span>
+              </div>
+              <div class="mini-badge">
+                <i class="fa-solid fa-file-pdf text-danger"></i>
+                <strong>PDF</strong>
+                <span>قراءة مباشرة</span>
               </div>
             </div>
           </div>
         </div>
+
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
-      <div><span class="text-secondary small">THE EXPERIENCE</span><h2 class="display-6 fw-bold mt-2 mb-0">كل ما تحتاجه القارئ</h2></div>
-      <a routerLink="/books" class="btn btn-outline-dark">اذهب إلى المكتبة</a>
-    </div>
-    <div class="row g-4">
-      <div class="col-md-4"><article class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-primary">01 / DISCOVER</span><h3 class="h4 mt-4">اكتشاف بلا تعقيد</h3><p class="text-secondary mb-0">ابحث وتصفح الكتب بسهولة من واجهة بسيطة ومتجاوبة مع جميع الشاشات.</p></div></article></div>
-      <div class="col-md-4"><article class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-success">02 / READ</span><h3 class="h4 mt-4">اقرأ في أي وقت</h3><p class="text-secondary mb-0">انتقل من تفاصيل الكتاب إلى ملف القراءة أو التحميل بأقل عدد من الخطوات.</p></div></article></div>
-      <div class="col-md-4"><article class="card h-100 shadow-sm"><div class="card-body p-4"><span class="badge text-bg-warning">03 / SAVE</span><h3 class="h4 mt-4">احتفظ بما تحب</h3><p class="text-secondary mb-0">أضف الكتب إلى المفضلة وارجع إليها لاحقًا من حسابك الشخصي.</p></div></article></div>
-    </div>
-  </section>
+    <!-- قسم التجربة والخدمات -->
+    <section class="experience-section py-5">
+      <div class="section-header-row mb-4">
+        <div>
+          <span class="sub-tag">التجربة والخصائص</span>
+          <h2 class="section-title">كل ما يحتاجه القارئ</h2>
+        </div>
+   
+      </div>
 
-  <section class="bg-light py-5">
-    <div class="container py-4">
-      <div class="row justify-content-center"><div class="col-lg-9 text-center"><span class="text-secondary small">OUR MANIFESTO</span><h2 class="display-5 fw-bold mt-3">الكتاب الجيد يترك أثرًا لا يزول.</h2><p class="lead text-secondary mt-3">مشروع تخرج يجمع بين Angular وNode.js وMongoDB لبناء مكتبة رقمية عملية وسهلة الاستخدام.</p></div></div>
-    </div>
-  </section>
+      <div class="features-grid">
+        <div class="panel-glass-card feature-card">
+          <span class="feature-badge blue">01 / اكتشاف</span>
+          <h3 class="feature-title">اكتشاف بلا تعقيد</h3>
+          <p class="feature-desc">ابحث وتصفح الكتب بسهولة من واجهة بسيطة ومتجاوبة مع جميع الشاشات والأجهزة.</p>
+        </div>
+
+        <div class="panel-glass-card feature-card">
+          <span class="feature-badge green">02 / قراءة</span>
+          <h3 class="feature-title">اقرأ في أي وقت</h3>
+          <p class="feature-desc">انتقل من تفاصيل الكتاب إلى ملف القراءة أو التحميل بأقل عدد ممكن من الخطوات.</p>
+        </div>
+
+        <div class="panel-glass-card feature-card">
+          <span class="feature-badge orange">03 / حفظ</span>
+          <h3 class="feature-title">احتفظ بما تحب</h3>
+          <p class="feature-desc">أضف الكتب إلى المفضلة الخاصة بك وارجع إليها لاحقًا بكل سهولة من حسابك الشخصي.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم نبذة عن المشروع (المانيفستو) -->
+    <section class="manifesto-section my-5">
+      <div class="panel-glass-card text-center p-5">
+        <span class="sub-tag">حول المشروع</span>
+        <h2 class="manifesto-title mt-2">الكتاب الجيد يترك أثرًا لا يزول.</h2>
+        <p class="manifesto-desc mt-3">مشروع تخرج متكامل يجمع بين تقنيات الحديثة لبناء مكتبة رقمية عملية، سريعة، وسهلة الاستخدام.</p>
+      </div>
+    </section>
+
+  </div>
 </main>
