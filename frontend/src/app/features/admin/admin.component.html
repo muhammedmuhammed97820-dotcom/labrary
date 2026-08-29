@@ -1,187 +1,28 @@
 <main class="admin-dashboard-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="admin-container">
-
-    <!-- DASHBOARD HEADER -->
-    <header class="admin-header">
-      <div class="header-info">
-        <span class="admin-badge">
-          <i class="fa-solid fa-shield-halved"></i>
-          DIGITAL LIBRARY · ADMIN
-        </span>
-        <h1 class="header-title">لوحة التحكم الإدارية</h1>
-        <p class="header-subtitle">مراقبة الإحصائيات الشاملة وإدارة الكتب والمحتوى الرقمي</p>
-      </div>
-
-      <div class="header-actions">
-        <!-- ADD BOOK CTA -->
-        <a routerLink="/admin/books/create" class="add-book-btn">
-          <i class="fa-solid fa-plus"></i>
-          <span>إضافة كتاب جديد</span>
-        </a>
-      </div>
-    </header>
-
-    <!-- LOADING STATE -->
-    @if (loading) {
-      <div class="admin-state-box loading-box">
-        <div class="glass-spinner"></div>
-        <p>جارِ تحميل إحصائيات وبيانات المكتبة...</p>
-      </div>
-    }
-
-    <!-- ERROR STATE -->
-    @else if (error) {
-      <div class="admin-state-box error-box">
-        <div class="error-content">
-          <i class="fa-solid fa-circle-exclamation error-icon"></i>
-          <span>{{ error }}</span>
-        </div>
-        <button class="retry-btn" type="button" (click)="load()">
-          <i class="fa-solid fa-rotate-right"></i>
-          <span>إعادة المحاولة</span>
-        </button>
-      </div>
-    }
-
-    <!-- DASHBOARD CONTENT -->
+    <header class="admin-header"><div class="header-info"><span class="admin-badge"><i class="fa-solid fa-shield-halved"></i> DIGITAL LIBRARY · ADMIN</span><h1 class="header-title">لوحة التحكم الإدارية</h1><p class="header-subtitle">مراقبة الإحصائيات الشاملة وإدارة الكتب والمحتوى الرقمي</p></div><div class="header-actions"><a routerLink="/admin/books/create" class="add-book-btn"><i class="fa-solid fa-plus"></i><span>إضافة كتاب جديد</span></a></div></header>
+    @if (loading) { <div class="admin-state-box loading-box"><div class="glass-spinner"></div><p>جارِ تحميل إحصائيات وبيانات المكتبة...</p></div> }
+    @else if (error) { <div class="admin-state-box error-box"><div class="error-content"><i class="fa-solid fa-circle-exclamation error-icon"></i><span>{{ error }}</span></div><button class="retry-btn" type="button" (click)="load()"><i class="fa-solid fa-rotate-right"></i><span>إعادة المحاولة</span></button></div> }
     @else {
-      <!-- STATS GRID (6 CARDS) -->
       <section class="stats-grid">
-        <article class="stat-glass-card">
-          <div class="stat-icon-wrapper blue">
-            <i class="fa-solid fa-book"></i>
-          </div>
-          <div class="stat-details">
-            <span class="stat-label">إجمالي الكتب</span>
-            <strong class="stat-value">{{ total }}</strong>
-          </div>
-        </article>
-
-        <article class="stat-glass-card">
-          <div class="stat-icon-wrapper green">
-            <i class="fa-solid fa-circle-check"></i>
-          </div>
-          <div class="stat-details">
-            <span class="stat-label">الكتب المتاحة</span>
-            <strong class="stat-value">{{ available }}</strong>
-          </div>
-        </article>
-
-        <article class="stat-glass-card">
-          <div class="stat-icon-wrapper purple">
-            <i class="fa-solid fa-eye"></i>
-          </div>
-          <div class="stat-details">
-            <span class="stat-label">إجمالي المشاهدات</span>
-            <strong class="stat-value">{{ views }}</strong>
-          </div>
-        </article>
-
-        <article class="stat-glass-card">
-          <div class="stat-icon-wrapper orange">
-            <i class="fa-solid fa-download"></i>
-          </div>
-          <div class="stat-details">
-            <span class="stat-label">إجمالي التحميلات</span>
-            <strong class="stat-value">{{ downloads }}</strong>
-          </div>
-        </article>
-
-        <article class="stat-glass-card">
-          <div class="stat-icon-wrapper teal">
-            <i class="fa-solid fa-user-pen"></i>
-          </div>
-          <div class="stat-details">
-            <span class="stat-label">المؤلفون</span>
-            <strong class="stat-value">{{ authors }}</strong>
-          </div>
-        </article>
-
-        <article class="stat-glass-card">
-          <div class="stat-icon-wrapper gold">
-            <i class="fa-solid fa-layer-group"></i>
-          </div>
-          <div class="stat-details">
-            <span class="stat-label">التصنيفات</span>
-            <strong class="stat-value">{{ categories }}</strong>
-          </div>
-        </article>
+        <article class="stat-glass-card"><div class="stat-icon-wrapper blue"><i class="fa-solid fa-book"></i></div><div class="stat-details"><span class="stat-label">إجمالي الكتب</span><strong class="stat-value">{{ total }}</strong></div></article>
+        <article class="stat-glass-card"><div class="stat-icon-wrapper green"><i class="fa-solid fa-circle-check"></i></div><div class="stat-details"><span class="stat-label">الكتب المتاحة</span><strong class="stat-value">{{ available }}</strong></div></article>
+        <article class="stat-glass-card"><div class="stat-icon-wrapper purple"><i class="fa-solid fa-eye"></i></div><div class="stat-details"><span class="stat-label">إجمالي المشاهدات</span><strong class="stat-value">{{ views }}</strong></div></article>
+        <article class="stat-glass-card"><div class="stat-icon-wrapper orange"><i class="fa-solid fa-download"></i></div><div class="stat-details"><span class="stat-label">إجمالي التحميلات</span><strong class="stat-value">{{ downloads }}</strong></div></article>
+        <article class="stat-glass-card"><div class="stat-icon-wrapper teal"><i class="fa-solid fa-user-pen"></i></div><div class="stat-details"><span class="stat-label">المؤلفون</span><strong class="stat-value">{{ authors }}</strong></div></article>
+        <article class="stat-glass-card"><div class="stat-icon-wrapper gold"><i class="fa-solid fa-layer-group"></i></div><div class="stat-details"><span class="stat-label">التصنيفات</span><strong class="stat-value">{{ categories }}</strong></div></article>
       </section>
 
-      <!-- MAIN MANAGEMENT PANELS -->
-      <div class="panels-grid">
-        
-        <!-- CONTENT MANAGEMENT CARD -->
-        <article class="panel-glass-card">
-          <div class="panel-header">
-            <span class="panel-tag">MANAGEMENT</span>
-            <h2 class="panel-title">إدارة المحتوى والمكتبة</h2>
-          </div>
-          <div class="panel-actions-grid">
-            <a routerLink="/admin/books" class="quick-action-card">
-              <div class="quick-icon-box">
-                <i class="fa-solid fa-book-open-reader"></i>
-              </div>
-              <div class="quick-info">
-                <span class="quick-title">عرض كل الكتب</span>
-                <small class="quick-sub">عرض، تعديل، وحذف الكتب</small>
-              </div>
-            </a>
+      <section class="directory-management-grid">
+        <a routerLink="/admin/library" class="directory-card authors-card"><div class="directory-icon"><i class="fa-solid fa-user-pen"></i></div><div class="directory-copy"><span>AUTHOR DIRECTORY</span><h2>إدارة المؤلفين</h2><p>إضافة مؤلف، تعديل الصورة والسيرة والبيانات، أو حذف مؤلف.</p><strong>{{ authors }} مؤلف <b>↗</b></strong></div></a>
+        <a routerLink="/admin/library" class="directory-card categories-card"><div class="directory-icon"><i class="fa-solid fa-layer-group"></i></div><div class="directory-copy"><span>COLLECTIONS</span><h2>إدارة التصنيفات</h2><p>إنشاء التصنيفات وتعديلها وتنظيم المجموعات التي تضم كتب المكتبة.</p><strong>{{ categories }} تصنيف <b>↗</b></strong></div></a>
+      </section>
 
-            <a routerLink="/admin/books/create" class="quick-action-card highlight">
-              <div class="quick-icon-box gold">
-                <i class="fa-solid fa-file-circle-plus"></i>
-              </div>
-              <div class="quick-info">
-                <span class="quick-title">إضافة كتاب جديد</span>
-                <small class="quick-sub">ملف PDF + غلاف + التفاصيل</small>
-              </div>
-            </a>
-          </div>
-        </article>
-
-        <!-- RECENT BOOKS CARD -->
-        <article class="panel-glass-card">
-          <div class="panel-header">
-            <span class="panel-tag">RECENT ACTIVITY</span>
-            <h2 class="panel-title">آخر الكتب المضافة</h2>
-          </div>
-
-          <div class="recent-books-list">
-            @if (!recent.length) {
-              <div class="empty-list-state">
-                <i class="fa-solid fa-box-open"></i>
-                <span>لا توجد كتب مضافة حتى الآن في النظام.</span>
-              </div>
-            } @else {
-              @for (book of recent; track book._id) {
-                <div class="recent-book-item">
-                  <div class="book-avatar">
-                    @if (getBookCover(book)) {
-                      <img [src]="getBookCover(book)" [alt]="book.title" class="book-cover-img">
-                    } @else {
-                      <span>{{ book.title.slice(0, 1) }}</span>
-                    }
-                  </div>
-                  <div class="book-details">
-                    <strong class="book-title">{{ book.title }}</strong>
-                    <small class="book-author">
-                      <i class="fa-solid fa-pen-nib me-1"></i>
-                      {{ getAuthorName(book.author) }}
-                    </small>
-                  </div>
-                  <a [routerLink]="['/admin/books', book._id, 'edit']" class="edit-btn">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    <span>تعديل</span>
-                  </a>
-                </div>
-              }
-            }
-          </div>
-        </article>
-
-      </div>
+      <div class="panels-grid"><article class="panel-glass-card"><div class="panel-header"><span class="panel-tag">MANAGEMENT</span><h2 class="panel-title">إدارة المحتوى والمكتبة</h2></div><div class="panel-actions-grid"><a routerLink="/admin/books" class="quick-action-card"><div class="quick-icon-box"><i class="fa-solid fa-book-open-reader"></i></div><div class="quick-info"><span class="quick-title">عرض كل الكتب</span><small class="quick-sub">عرض، تعديل، وحذف الكتب</small></div></a><a routerLink="/admin/books/create" class="quick-action-card highlight"><div class="quick-icon-box gold"><i class="fa-solid fa-file-circle-plus"></i></div><div class="quick-info"><span class="quick-title">إضافة كتاب جديد</span><small class="quick-sub">ملف PDF + غلاف + التفاصيل</small></div></a></div></article>
+        <article class="panel-glass-card"><div class="panel-header"><span class="panel-tag">RECENT ACTIVITY</span><h2 class="panel-title">آخر الكتب المضافة</h2></div><div class="recent-books-list">@if (!recent.length) {<div class="empty-list-state"><i class="fa-solid fa-box-open"></i><span>لا توجد كتب مضافة حتى الآن في النظام.</span></div>} @else {@for (book of recent; track book._id) {<div class="recent-book-item"><div class="book-avatar">@if (getBookCover(book)) {<img [src]="getBookCover(book)" [alt]="book.title" class="book-cover-img">} @else {<span>{{ book.title.slice(0, 1) }}</span>}</div><div class="book-details"><strong class="book-title">{{ book.title }}</strong><small class="book-author"><i class="fa-solid fa-pen-nib me-1"></i>{{ getAuthorName(book.author) }}</small></div><a [routerLink]="['/admin/books', book._id, 'edit']" class="edit-btn"><i class="fa-solid fa-pen-to-square"></i><span>تعديل</span></a></div>}} </div></article></div>
     }
-
   </div>
 </main>
+<style>
+.directory-management-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:24px 0}.directory-card{position:relative;display:flex;align-items:center;gap:22px;padding:28px;text-decoration:none;color:inherit;border:1px solid rgba(100,100,100,.16);border-radius:5px;background:rgba(255,255,255,.52);overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}.dark-theme .directory-card{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.1)}.directory-card:hover{transform:translateY(-5px);border-color:rgba(100,100,100,.4);box-shadow:0 22px 50px rgba(0,0,0,.1)}.directory-icon{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(100,100,100,.18);font-size:22px;flex:none}.directory-copy{flex:1}.directory-copy>span{font-size:8px;letter-spacing:2px;opacity:.4}.directory-copy h2{margin:7px 0;font-size:23px}.directory-copy p{font-size:11px;line-height:1.8;opacity:.5;margin:0 0 12px}.directory-copy strong{font-size:10px;opacity:.6}.directory-copy b{font-size:17px;margin-right:8px}.authors-card:after,.categories-card:after{content:"";position:absolute;width:170px;height:170px;border-radius:50%;left:-70px;bottom:-100px;background:rgba(100,100,100,.06)}@media(max-width:700px){.directory-management-grid{grid-template-columns:1fr}.directory-card{padding:22px}.directory-icon{width:54px;height:54px}}
+</style>
