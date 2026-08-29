@@ -1,52 +1,9 @@
 const Category = require("../models/Category");
 const Book = require("../models/Book");
-
-async function getCategories(req, res) {
-  try {
-    const categories = await Category.find().sort({ name: 1 }).lean();
-    const counts = await Book.aggregate([
-      { $group: { _id: "$category", booksCount: { $sum: 1 } } }
-    ]);
-    const countMap = new Map(counts.map(item => [String(item._id), item.booksCount]));
-    res.json(categories.map(category => ({ ...category, booksCount: countMap.get(String(category._id)) || 0 })));
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to load categories." });
-  }
-}
-
-async function getCategory(req, res) {
-  try {
-    const category = await Category.findById(req.params.id).lean();
-    if (!category) return res.status(404).json({ message: "Category not found." });
-    const books = await Book.find({ category: category._id })
-      .populate("author")
-      .populate("category")
-      .sort({ createdAt: -1 })
-      .lean();
-    res.json({ ...category, booksCount: books.length, books });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to load category." });
-  }
-}
-
-async function createCategory(req, res) {
-  try {
-    const name = String(req.body.name || "").trim();
-    if (!name) return res.status(400).json({ message: "Category name is required." });
-    const existing = await Category.findOne({ name: { $regex: `^${escapeRegex(name)}$`, $options: "i" } });
-    if (existing) return res.status(200).json({ message: "Category already exists.", category: existing });
-    const category = await Category.create({ name, description: req.body.description || "" });
-    res.status(201).json({ message: "Category created.", category });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to create category." });
-  }
-}
-
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-module.exports = { getCategories, getCategory, createCategory };
+async function getCategories(req,res){try{const categories=await Category.find().sort({name:1}).lean();const counts=await Book.aggregate([{$group:{_id:"$category",booksCount:{$sum:1}}}]);const map=new Map(counts.map(x=>[String(x._id),x.booksCount]));res.json(categories.map(c=>({...c,booksCount:map.get(String(c._id))||0})));}catch(e){console.error(e);res.status(500).json({message:"Failed to load categories."});}}
+async function getCategory(req,res){try{const category=await Category.findById(req.params.id).lean();if(!category)return res.status(404).json({message:"Category not found."});const books=await Book.find({category:category._id}).populate("author").populate("category").sort({createdAt:-1}).lean();res.json({...category,booksCount:books.length,books});}catch(e){console.error(e);res.status(500).json({message:"Failed to load category."});}}
+async function createCategory(req,res){try{const name=String(req.body.name||"").trim();if(!name)return res.status(400).json({message:"Category name is required."});const existing=await Category.findOne({name:{$regex:`^${escapeRegex(name)}$`,$options:"i"}});if(existing)return res.status(409).json({message:"Category already exists."});const category=await Category.create({name,description:req.body.description||""});res.status(201).json({message:"Category created.",category});}catch(e){console.error(e);res.status(500).json({message:e.message||"Failed to create category."});}}
+async function updateCategory(req,res){try{const name=String(req.body.name||"").trim();if(!name)return res.status(400).json({message:"Category name is required."});const duplicate=await Category.findOne({name:{$regex:`^${escapeRegex(name)}$`,$options:"i"},_id:{$ne:req.params.id}});if(duplicate)return res.status(409).json({message:"Another category has this name."});const category=await Category.findByIdAndUpdate(req.params.id,{name,description:req.body.description||""},{new:true,runValidators:true}).lean();if(!category)return res.status(404).json({message:"Category not found."});res.json({message:"Category updated.",category});}catch(e){console.error(e);res.status(500).json({message:e.message||"Failed to update category."});}}
+async function deleteCategory(req,res){try{const used=await Book.exists({category:req.params.id});if(used)return res.status(409).json({message:"Cannot delete a category that contains books. Reassign the books first."});const category=await Category.findByIdAndDelete(req.params.id);if(!category)return res.status(404).json({message:"Category not found."});res.json({message:"Category deleted."});}catch(e){console.error(e);res.status(500).json({message:"Failed to delete category."});}}
+function escapeRegex(v){return v.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
+module.exports={getCategories,getCategory,createCategory,updateCategory,deleteCategory};
