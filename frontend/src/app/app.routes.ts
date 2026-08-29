@@ -11,6 +11,7 @@ import { adminGuard } from './core/guards/admin.guard';
 import { CategoriesComponent } from './features/categories/categories.component';
 import { AuthorsComponent } from './features/authors/authors.component';
 import { AuthorDetailsComponent } from './features/authors/author-details.component';
+import { LibraryManagementComponent } from './features/admin/library-management/library-management.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -27,5 +28,6 @@ export const routes: Routes = [
   { path: 'admin/books', component: AdminBooksComponent, canActivate: [adminGuard] },
   { path: 'admin/books/create', component: BookCreateComponent, canActivate: [adminGuard] },
   { path: 'admin/books/:id/edit', component: BookEditComponent, canActivate: [adminGuard] },
+  { path: 'admin/library', component: LibraryManagementComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: '' }
 ];
