@@ -1,19 +1,10 @@
-﻿const express = require("express");
+const express = require("express");
+const router = express.Router();
+const upload = require("../middleware/upload.middleware");
+const controller = require("../controllers/author.controller");
 
-const router =
-  express.Router();
-
-const controller =
-  require("../controllers/author.controller");
-
-router.get(
-  "/",
-  controller.getAuthors
-);
-
-router.post(
-  "/",
-  controller.createAuthor
-);
+router.get("/", controller.getAuthors);
+router.get("/:id", controller.getAuthor);
+router.post("/", upload.single("avatar"), controller.createAuthor);
 
 module.exports = router;
