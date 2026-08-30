@@ -29,5 +29,7 @@ export const routes: Routes = [
   { path: 'admin/books/create', component: BookCreateComponent, canActivate: [adminGuard] },
   { path: 'admin/books/:id/edit', component: BookEditComponent, canActivate: [adminGuard] },
   { path: 'admin/library', component: LibraryManagementComponent, canActivate: [adminGuard] },
+  { path: 'admin/authors', component: LibraryManagementComponent, canActivate: [adminGuard] },
+  { path: 'admin/categories', component: LibraryManagementComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: '' }
 ];
