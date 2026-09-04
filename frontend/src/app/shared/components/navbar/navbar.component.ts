@@ -14,7 +14,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  public readonly themeService = inject(ThemeService); // حقن خدمة الثيم المركزية
+  public readonly themeService = inject(ThemeService);
   private readonly serverOrigin = 'http://localhost:5000';
   
   menuOpen = false;
@@ -32,7 +32,6 @@ export class NavbarComponent {
 
   get userInitial(): string { return this.userName.trim().charAt(0) || 'م'; }
   
-  // دالة تغيير الثيم أصبحت تتحكم بالخدمة المركزية مباشرة لتعم على التطبيق كله
   toggleTheme(): void {
     this.themeService.toggleTheme();
   }

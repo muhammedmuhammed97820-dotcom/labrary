@@ -1,86 +1,72 @@
-/* ==========================================================================
-   Home Component Styling (Live Autonomous Animations & Glassmorphism)
-   ========================================================================== */
-
 $font-amiri: 'Amiri', serif;
 $font-cairo: 'Cairo', sans-serif;
 
 .admin-dashboard-wrapper.home-page {
   --admin-bg: #f1f5f9;
   --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.8);
-  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
   --text-primary: #0f172a;
   --text-secondary: #64748b;
   --accent-gold: #d97706;
   --accent-gold-hover: #b45309;
-  --card-inner-bg: rgba(248, 250, 252, 0.8);
-  --visual-box-bg: #0f172a;
-  --visual-box-text: #fff;
+  --card-inner-bg: rgba(248, 250, 252, 0.9);
 
-  /* دعم الوضع الليلي */
   &.dark-theme {
     --admin-bg: #0b0f17;
-    --glass-bg: rgba(18, 24, 38, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.06);
-    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(18, 24, 38, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.07);
+    --glass-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --accent-gold: #f59e0b;
     --accent-gold-hover: #fbbf24;
-    --card-inner-bg: rgba(15, 23, 42, 0.6);
-    --visual-box-bg: #0f172a;
-    --visual-box-text: #fff;
+    --card-inner-bg: rgba(15, 23, 42, 0.7);
   }
 
   min-height: 100vh;
   background-color: var(--admin-bg);
   color: var(--text-primary);
   font-family: $font-cairo;
-  padding: 40px 20px;
-  margin-top: 70px;
+  padding: 50px 20px 100px;
+  margin-top: 65px;
   transition: background-color 0.4s ease, color 0.4s ease;
 
   .admin-container {
-    max-width: 1400px;
+    max-width: 1350px;
     margin: 0 auto;
   }
 
-  /* --- الـ Badges تتحرك بنبض خفيف تلقائياً --- */
   .admin-badge, .sub-tag {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(245, 158, 11, 0.12);
     color: var(--accent-gold);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    padding: 6px 14px;
+    padding: 6px 16px;
     border-radius: 20px;
-    margin-bottom: 14px;
-    letter-spacing: 0.5px;
+    margin-bottom: 18px;
     animation: badge-pulse 3s infinite ease-in-out;
-
-    &:hover {
-      transform: scale(1.05);
-    }
   }
 
-  /* --- HERO SECTION --- */
   .hero-glass-section {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
     border-radius: 28px;
-    padding: 40px;
+    padding: 50px;
     margin-bottom: 40px;
-    animation: section-fade-in 1s ease-out;
+    position: relative;
+    overflow: hidden;
 
     .hero-grid {
       display: grid;
-      grid-template-columns: 1fr 420px;
-      gap: 40px;
+      grid-template-columns: 1fr 450px;
+      gap: 50px;
       align-items: center;
 
       @media (max-width: 992px) {
@@ -91,10 +77,10 @@ $font-cairo: 'Cairo', sans-serif;
     .hero-content {
       .hero-title {
         font-family: $font-amiri;
-        font-size: 3.2rem;
+        font-size: clamp(3rem, 5vw, 4.2rem);
         font-weight: 800;
-        line-height: 1.2;
-        margin: 0 0 16px 0;
+        line-height: 1.15;
+        margin: 0 0 20px 0;
         color: var(--text-primary);
 
         .highlight-text {
@@ -107,35 +93,35 @@ $font-cairo: 'Cairo', sans-serif;
       .hero-subtitle {
         font-size: 1.15rem;
         color: var(--text-secondary);
-        line-height: 1.8;
-        margin-bottom: 24px;
+        line-height: 1.9;
+        margin-bottom: 30px;
+        max-width: 650px;
       }
 
       .hero-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 35px;
+        gap: 15px;
+        margin-bottom: 40px;
 
-        /* أزرار تقفز وتتحرك تلقائياً بخفة لتبدو حية */
         .add-book-btn {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
           background: var(--accent-gold);
           color: #fff;
-          padding: 12px 24px;
-          border-radius: 14px;
+          padding: 14px 28px;
+          border-radius: 16px;
           font-weight: 700;
-          font-size: 1rem;
-          box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3);
+          font-size: 1.05rem;
+          box-shadow: 0 8px 25px rgba(217, 119, 6, 0.3);
           animation: button-bounce 2.5s infinite ease-in-out;
-          transition: transform 0.3s ease;
+          transition: transform 0.3s ease, background 0.3s ease;
 
           &:hover { 
             background: var(--accent-gold-hover); 
-            transform: translateY(-5px) scale(1.05); 
-            animation: none; /* إيقاف الحركة التلقائية عند وضع الماوس لتركيز التفاعل */
+            transform: translateY(-5px) scale(1.03); 
+            animation: none;
           }
         }
 
@@ -143,13 +129,13 @@ $font-cairo: 'Cairo', sans-serif;
           background: var(--card-inner-bg);
           border: 1px solid var(--glass-border);
           color: var(--text-primary);
-          padding: 12px 24px;
-          border-radius: 14px;
+          padding: 14px 28px;
+          border-radius: 16px;
           font-weight: 700;
-          font-size: 1rem;
+          font-size: 1.05rem;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
           transition: all 0.3s ease;
 
           &:hover { 
@@ -163,32 +149,31 @@ $font-cairo: 'Cairo', sans-serif;
       .hero-steps-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
+        gap: 20px;
         border-top: 1px solid var(--glass-border);
-        padding-top: 24px;
+        padding-top: 25px;
 
         .step-card {
-          border-right: 2px solid var(--accent-gold);
-          padding-right: 12px;
+          border-right: 3px solid var(--accent-gold);
+          padding-right: 14px;
           transition: transform 0.3s ease;
 
-          &:hover {
-            transform: translateX(-5px);
-          }
+          &:hover { transform: translateX(-5px); }
 
           .step-num {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: var(--text-primary);
             display: block;
             line-height: 1;
+            font-family: $font-amiri;
           }
 
           .step-label {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--text-secondary);
             font-weight: 600;
-            margin-top: 4px;
+            margin-top: 6px;
             display: block;
           }
         }
@@ -196,89 +181,144 @@ $font-cairo: 'Cairo', sans-serif;
     }
 
     .hero-visual {
-      .panel-glass-card {
+      position: relative;
+      height: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .floating-books-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      .loading-mini-state {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: var(--text-secondary);
+
+        .glass-spinner {
+          width: 40px;
+          height: 40px;
+          border: 3px solid var(--glass-border);
+          border-top-color: var(--accent-gold);
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+      }
+
+      .floating-book-card {
+        position: absolute;
+        width: 220px;
         background: var(--card-inner-bg);
         border: 1px solid var(--glass-border);
-        border-radius: 20px;
-        padding: 30px;
-        animation: float-card 4s infinite ease-in-out; /* يطفو ويهتز تلقائياً بلا توقف */
+        backdrop-filter: blur(12px);
+        border-radius: 18px;
+        padding: 12px;
+        box-shadow: var(--glass-shadow);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 
-        .visual-box {
-          background: var(--visual-box-bg);
-          border-radius: 16px;
-          padding: 40px 20px;
-          color: var(--visual-box-text);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        &:hover {
+          border-color: var(--accent-gold);
+          transform: translateY(-8px) scale(1.03) !important;
+          box-shadow: 0 15px 30px rgba(217, 119, 6, 0.2);
+          z-index: 20;
+        }
 
-          .brand-logo-circle {
-            width: 70px;
-            height: 70px;
-            background: rgba(245, 158, 11, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            animation: pulse-slow 2s infinite ease-in-out; /* نبض سريع نسبياً كل ثانية ثانية ونصف */
+        .book-cover-thumb {
+          width: 45px;
+          height: 60px;
+          border-radius: 6px;
+          overflow: hidden;
+          flex-shrink: 0;
+          background: rgba(0,0,0,0.05);
+          display: grid;
+          place-items: center;
 
-            .logo-char {
-              font-size: 2.2rem;
-              font-weight: 800;
-              color: var(--accent-gold);
-              font-family: $font-amiri;
-            }
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
           }
 
-          .logo-name {
-            font-family: $font-amiri;
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0 0 6px 0;
-            color: #fff;
-          }
-
-          .logo-sub {
-            font-size: 0.78rem;
-            color: #94a3b8;
-            letter-spacing: 1px;
+          .book-thumb-fallback {
+            color: var(--accent-gold);
+            font-size: 1.1rem;
           }
         }
 
-        .visual-badges-row {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-          margin-top: 16px;
+        .book-info {
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
 
-          .mini-badge {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            padding: 12px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            transition: transform 0.3s ease, border-color 0.3s ease;
-
-            &:hover {
-              transform: translateY(-4px);
-              border-color: var(--accent-gold);
-            }
-
-            strong { font-size: 1.1rem; color: var(--text-primary); }
-            span { font-size: 0.78rem; color: var(--text-secondary); }
+          h4 { 
+            font-family: $font-amiri; 
+            font-size: 1.05rem; 
+            font-weight: 700; 
+            margin: 0 0 4px 0; 
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
+
+          .b-footer { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            font-size: 0.72rem; 
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; 
+          }
+        }
+
+        &.book-1 {
+          top: 10px;
+          left: 5px;
+          animation: float-book-1 6s infinite ease-in-out;
+        }
+
+        &.book-2 {
+          top: 130px;
+          right: 5px;
+          width: 235px;
+          animation: float-book-2 5s infinite ease-in-out;
+        }
+
+        &.book-3 {
+          bottom: 10px;
+          left: 20px;
+          animation: float-book-3 7s infinite ease-in-out;
+        }
+
+        &.book-4 {
+          top: 260px;
+          left: 100px;
+          animation: float-book-1 5.5s infinite ease-in-out;
+        }
+
+        &.book-5 {
+          top: 70px;
+          right: 80px;
+          animation: float-book-2 6.5s infinite ease-in-out;
         }
       }
     }
   }
 
-  /* --- EXPERIENCE SECTION --- */
   .experience-section {
     .section-header-row {
       display: flex;
@@ -289,7 +329,7 @@ $font-cairo: 'Cairo', sans-serif;
 
       .section-title {
         font-family: $font-amiri;
-        font-size: 2.2rem;
+        font-size: 2.3rem;
         font-weight: 700;
         margin: 0;
         color: var(--text-primary);
@@ -298,81 +338,77 @@ $font-cairo: 'Cairo', sans-serif;
 
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 24px;
 
-      /* كاردات تتحرك بتموج تلقائي متتابع (Staggered Animation) */
       .feature-card {
         background: var(--glass-bg);
-        backdrop-filter: blur(16px);
+        backdrop-filter: blur(20px);
         border: 1px solid var(--glass-border);
         box-shadow: var(--glass-shadow);
-        border-radius: 22px;
-        padding: 30px;
-        animation: card-float-slow 5s infinite ease-in-out;
+        border-radius: 24px;
+        padding: 32px;
+        animation: card-float-slow 6s infinite ease-in-out;
         transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.3s ease;
 
         &:nth-child(1) { animation-delay: 0s; }
-        &:nth-child(2) { animation-delay: 1.5s; } /* يتأخر بثوانٍ ليتحرك بشكل منفصل وتلقائي */
-        &:nth-child(3) { animation-delay: 3s; }
+        &:nth-child(2) { animation-delay: 2s; }
+        &:nth-child(3) { animation-delay: 4s; }
 
         &:hover {
-          transform: translateY(-12px) scale(1.03);
+          transform: translateY(-10px) scale(1.02);
           border-color: var(--accent-gold);
-          box-shadow: 0 20px 40px rgba(217, 119, 6, 0.15);
-          animation-play-state: paused; /* يوقف الحركة التلقائية مؤقتاً لتتمكن من القراءة بتركيز */
+          box-shadow: 0 25px 50px rgba(217, 119, 6, 0.12);
         }
 
         .feature-badge {
-          font-size: 0.75rem;
+          font-size: 0.78rem;
           font-weight: 700;
-          padding: 4px 10px;
-          border-radius: 8px;
+          padding: 5px 12px;
+          border-radius: 10px;
           display: inline-block;
-          margin-bottom: 14px;
+          margin-bottom: 16px;
 
-          &.blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-          &.green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-          &.orange { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+          &.blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+          &.green { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+          &.orange { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
         }
 
         .feature-title {
           font-family: $font-amiri;
-          font-size: 1.4rem;
+          font-size: 1.5rem;
           font-weight: 700;
           margin: 0 0 10px 0;
           color: var(--text-primary);
         }
 
         .feature-desc {
-          font-size: 0.98rem;
+          font-size: 1rem;
           color: var(--text-secondary);
-          line-height: 1.7;
+          line-height: 1.8;
           margin: 0;
         }
       }
     }
   }
 
-  /* --- MANIFESTO SECTION --- */
   .manifesto-section {
     .panel-glass-card {
       background: var(--glass-bg);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow);
-      border-radius: 24px;
-      animation: pulse-slow 6s infinite ease-in-out;
+      border-radius: 26px;
       transition: transform 0.4s ease;
 
       &:hover {
-        transform: translateY(-6px);
+        transform: translateY(-5px);
         border-color: var(--accent-gold);
       }
 
       .manifesto-title {
         font-family: $font-amiri;
-        font-size: 2.2rem;
+        font-size: 2.3rem;
         font-weight: 700;
         color: var(--text-primary);
         margin: 0;
@@ -380,70 +416,50 @@ $font-cairo: 'Cairo', sans-serif;
 
       .manifesto-desc {
         max-width: 750px;
-        margin: 12px auto 0 auto;
-        font-size: 1.1rem;
+        margin: 14px auto 0 auto;
+        font-size: 1.12rem;
         color: var(--text-secondary);
-        line-height: 1.8;
+        line-height: 1.9;
       }
     }
   }
 }
 
-/* --- الحركات التلقائية المستمرة (Autonomous Keyframes) --- */
+@keyframes float-book-1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-1.5deg); }
+}
 
-@keyframes float-card {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px); /* يرتفع وينزل ببطء كل بضع ثوانٍ */
-  }
+@keyframes float-book-2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(1.5deg); }
+}
+
+@keyframes float-book-3 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-1deg); }
 }
 
 @keyframes card-float-slow {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
 }
 
 @keyframes button-bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px); /* قفزة خفيفة كل ثوانٍ معدودة للبوتون الرئيسي */
-  }
-}
-
-@keyframes pulse-slow {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-  }
-  50% {
-    transform: scale(1.01);
-    box-shadow: 0 15px 35px rgba(245, 158, 11, 0.08);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
 @keyframes badge-pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.03);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
 }
 
 @keyframes text-glow {
-  0% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 1;
-    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
-  }
+  0% { opacity: 0.9; }
+  100% { opacity: 1; text-shadow: 0 0 15px rgba(245, 158, 11, 0.35); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

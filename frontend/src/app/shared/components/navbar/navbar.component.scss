@@ -29,9 +29,9 @@ $font-cairo: 'Cairo', sans-serif;
   }
 
   position: sticky;
-  top: 15px;
+  top: 0; /* تم تعديلها لتلصق بحافة الشاشة تماماً ويختفي الفراغ الأبيض */
   z-index: 1000;
-  padding: 0 20px;
+  padding: 15px 20px 0 20px; /* نقلنا المساحة لتكون مساحة داخلية علوية تحافظ على التصميم بدون فراغ */
   font-family: $font-cairo;
   transition: all 0.3s ease;
 

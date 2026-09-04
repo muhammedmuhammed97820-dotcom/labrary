@@ -1,21 +1,82 @@
 <nav class="navbar-glass-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="navbar-glass-container">
-    <a class="brand-link" routerLink="/" (click)="closeMenu()"><div class="brand-icon-box"><span>م</span></div><div class="brand-text"><span class="brand-title">مَكتبة الحكمة</span><span class="brand-sub">DIGITAL LIBRARY</span></div></a>
+    <a class="brand-link" routerLink="/" (click)="closeMenu()">
+      <div class="brand-icon-box"><span>م</span></div>
+      <div class="brand-text">
+        <span class="brand-title">مكتبتي</span>
+        <span class="brand-sub">DIGITAL LIBRARY</span>
+      </div>
+    </a>
     <div class="nav-links-desktop">
       <a class="nav-item-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a>
       <a class="nav-item-link" routerLink="/books" routerLinkActive="active">المكتبة</a>
       <a class="nav-item-link" routerLink="/categories" routerLinkActive="active">التصنيفات</a>
       <a class="nav-item-link" routerLink="/authors" routerLinkActive="active">المؤلفون</a>
-      @if (isLoggedIn) { <a class="nav-item-link" routerLink="/favorites" routerLinkActive="active">المفضلة</a> }
-      @if (isAdmin) { <a class="nav-item-link admin-link" routerLink="/admin" routerLinkActive="active"><i class="fa-solid fa-shield-halved"></i><span>الإدارة</span></a> }
+      @if (isLoggedIn) { 
+        <a class="nav-item-link" routerLink="/favorites" routerLinkActive="active">المفضلة</a> 
+      }
+      @if (isAdmin) { 
+        <a class="nav-item-link admin-link" routerLink="/admin" routerLinkActive="active">
+          <i class="fa-solid fa-shield-halved"></i><span>الإدارة</span>
+        </a> 
+      }
     </div>
     <div class="nav-actions">
-      <a class="action-btn search-btn" routerLink="/books" (click)="closeMenu()" title="بحث"><i class="fa-solid fa-magnifying-glass"></i><span class="d-none d-xl-inline">بحث</span></a>
-      <button class="action-btn theme-toggle-btn" (click)="toggleTheme()" [title]="themeService.isDarkMode() ? 'الوضع النهاري' : 'الوضع الليلي'">@if (themeService.isDarkMode()) {<i class="fa-solid fa-sun icon-sun"></i>} @else {<i class="fa-solid fa-moon icon-moon"></i>}</button>
-      @if (isLoggedIn) { <div class="user-pill-wrapper"><a class="user-profile-btn" routerLink="/profile" (click)="closeMenu()">@if (avatar) {<img [src]="avatar" [alt]="userName" class="user-avatar-img">} @else {<div class="user-avatar-placeholder">{{ userInitial }}</div>}<span class="user-name-text">{{ userName }}</span></a><button class="logout-btn" (click)="logout()" title="تسجيل الخروج"><i class="fa-solid fa-right-from-bracket"></i></button></div> } @else { <div class="auth-btns-group"><a class="btn-login" routerLink="/login" (click)="closeMenu()">دخول</a><a class="btn-register" routerLink="/register" (click)="closeMenu()">ابدأ الآن</a></div> }
-      <button class="mobile-toggle-btn" (click)="toggleMenu()" [class.is-open]="menuOpen" aria-label="القائمة"><span></span><span></span><span></span></button>
+      <button class="action-btn theme-toggle-btn" (click)="toggleTheme()" [title]="themeService.isDarkMode() ? 'الوضع النهاري' : 'الوضع الليلي'">
+        @if (themeService.isDarkMode()) {
+          <i class="fa-solid fa-sun icon-sun"></i>
+        } @else {
+          <i class="fa-solid fa-moon icon-moon"></i>
+        }
+      </button>
+      @if (isLoggedIn) { 
+        <div class="user-pill-wrapper">
+          <a class="user-profile-btn" routerLink="/profile" (click)="closeMenu()">
+            @if (avatar) {
+              <img [src]="avatar" [alt]="userName" class="user-avatar-img">
+            } @else {
+              <div class="user-avatar-placeholder">{{ userInitial }}</div>
+            }
+            <span class="user-name-text">{{ userName }}</span>
+          </a>
+          <button class="logout-btn" (click)="logout()" title="تسجيل الخروج">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div> 
+      } @else { 
+        <div class="auth-btns-group">
+          <a class="btn-register btn-login" routerLink="/login" (click)="closeMenu()">تسجيل الدخول</a>
+        </div> 
+      }
+      <button class="mobile-toggle-btn" (click)="toggleMenu()" [class.is-open]="menuOpen" aria-label="القائمة">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
-  <div class="mobile-glass-drawer" [class.show]="menuOpen"><div class="drawer-header"><span>القائمة الرئيسية</span><button class="drawer-close" (click)="closeMenu()">&times;</button></div><div class="drawer-links"><a class="drawer-link" routerLink="/" (click)="closeMenu()">الرئيسية</a><a class="drawer-link" routerLink="/books" (click)="closeMenu()">المكتبة</a><a class="drawer-link" routerLink="/categories" (click)="closeMenu()">التصنيفات</a><a class="drawer-link" routerLink="/authors" (click)="closeMenu()">المؤلفون</a>@if (isLoggedIn) {<a class="drawer-link" routerLink="/favorites" (click)="closeMenu()">المفضلة</a>}@if (isAdmin) {<a class="drawer-link admin" routerLink="/admin" (click)="closeMenu()">لوحة الإدارة</a>}</div>@if (!isLoggedIn) {<div class="drawer-auth"><a class="btn-register w-100 text-center" routerLink="/register" (click)="closeMenu()">ابدأ الآن</a><a class="btn-login w-100 text-center" routerLink="/login" (click)="closeMenu()">دخول</a></div>}</div>
-  @if (menuOpen) {<div class="mobile-overlay" (click)="closeMenu()"></div>}
+  <div class="mobile-glass-drawer" [class.show]="menuOpen">
+    <div class="drawer-header">
+      <span>القائمة الرئيسية</span>
+      <button class="drawer-close" (click)="closeMenu()">&times;</button>
+    </div>
+    <div class="drawer-links">
+      <a class="drawer-link" routerLink="/" (click)="closeMenu()">الرئيسية</a>
+      <a class="drawer-link" routerLink="/books" (click)="closeMenu()">المكتبة</a>
+      <a class="drawer-link" routerLink="/categories" (click)="closeMenu()">التصنيفات</a>
+      <a class="drawer-link" routerLink="/authors" (click)="closeMenu()">المؤلفون</a>
+      @if (isLoggedIn) {
+        <a class="drawer-link" routerLink="/favorites" (click)="closeMenu()">المفضلة</a>
+      }
+      @if (isAdmin) {
+        <a class="drawer-link admin" routerLink="/admin" (click)="closeMenu()">لوحة الإدارة</a>
+      }
+    </div>
+    @if (!isLoggedIn) {
+      <div class="drawer-auth">
+        <a class="btn-register w-100 text-center" routerLink="/login" (click)="closeMenu()">تسجيل الدخول</a>
+      </div>
+    }
+  </div>
+  @if (menuOpen) {
+    <div class="mobile-overlay" (click)="closeMenu()"></div>
+  }
 </nav>

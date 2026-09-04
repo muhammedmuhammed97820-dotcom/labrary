@@ -1,1 +1,146 @@
-<section class="author-detail" [class.dark]="theme.isDarkMode()" dir="rtl"><div class="shell"><a routerLink="/authors" class="back">← <span>العودة إلى المؤلفين</span></a><div *ngIf="author;else loading" class="profile"><aside class="portrait-column"><div class="portrait"><img *ngIf="author.image" [src]="imageUrl(author.image)" [alt]="author.name"><span *ngIf="!author.image">{{author.name?.charAt(0)}}</span></div><div class="portrait-caption"><span>ARCHIVE</span><strong>AUTHOR</strong></div></aside><main class="content"><span class="eyebrow">ملف المؤلف · {{author.booksCount||0}} كتاب</span><h1>{{author.name}}</h1><p class="bio">{{author.bio||'لا توجد سيرة ذاتية مضافة بعد.'}}</p><div class="facts"><div *ngIf="author.birthDate"><small>الميلاد</small><strong>{{author.birthDate|date:'d MMMM yyyy'}}</strong></div><div *ngIf="author.deathDate"><small>الوفاة</small><strong>{{author.deathDate|date:'d MMMM yyyy'}}</strong></div><div *ngIf="author.birthPlace"><small>مكان الميلاد</small><strong>{{author.birthPlace}}</strong></div><div *ngIf="author.nationality"><small>الجنسية</small><strong>{{author.nationality}}</strong></div><div *ngIf="author.occupation"><small>المهنة</small><strong>{{author.occupation}}</strong></div><div><small>المؤلفات</small><strong>{{author.booksCount||0}} كتاب</strong></div></div><a *ngIf="author.website" class="website" [href]="author.website" target="_blank" rel="noopener">زيارة الموقع الرسمي ↗</a></main></div><section class="works" *ngIf="author"><div class="works-head"><div><span>SELECTED WORKS</span><h2>أعمال {{author.name}}</h2></div><strong>{{author.booksCount||0}}</strong></div><div class="books"><a class="book" *ngFor="let b of author.books;let i=index" [routerLink]="['/books',b._id]"><span class="book-index">{{(i+1).toString().padStart(2,'0')}}</span><img [src]="imageUrl(b.coverImage)" [alt]="b.title"><div><strong>{{b.title}}</strong><small>{{b.category?.name||'عام'}}</small></div></a></div></section><ng-template #loading><div class="state">جارٍ تحميل ملف المؤلف...</div></ng-template><div class="state error" *ngIf="error">{{error}}</div></div></section>
+<section class="author-detail-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="author-container">
+    
+    <!-- زر العودة الفاخر -->
+    <nav class="breadcrumb-nav">
+      <a routerLink="/authors" class="back-link">
+        <i class="fa-solid fa-arrow-right"></i>
+        <span>العودة إلى أرشيف المؤلفين</span>
+      </a>
+    </nav>
+
+    <!-- حالة التحميل -->
+    @if (loading) {
+      <div class="state-container loading-state">
+        <div class="glass-spinner"></div>
+        <p>جاري استحضار السيرة المعرفية للمؤلف من الأرشيف...</p>
+      </div>
+    }
+
+    <!-- حالة الخطأ -->
+    @else if (error) {
+      <div class="state-container error-state">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ error }}</span>
+        <a routerLink="/authors" class="retry-link">العودة للأرشيف</a>
+      </div>
+    }
+
+    <!-- محتوى ملف المؤلف -->
+    @else if (author; as a) {
+      <div class="profile-hero-card">
+        
+        <!-- عمود الصورة الشخصية -->
+        <div class="portrait-column">
+          <div class="portrait-frame">
+            @if (a.image) {
+              <img [src]="imageUrl(a.image)" [alt]="a.name">
+            } @else {
+              <span class="portrait-initial">{{ a.name?.charAt(0) || 'م' }}</span>
+            }
+          </div>
+          <div class="portrait-badge">
+            <span class="badge-tag">ARCHIVE</span>
+            <strong class="badge-title">MASTER AUTHOR</strong>
+          </div>
+        </div>
+
+        <!-- عمود المعلومات والسيرة -->
+        <div class="profile-info-column">
+          <div class="eyebrow-badge">
+            <i class="fa-solid fa-feather-pointed"></i>
+            <span>ملف المؤلف المعرفي · {{ a.booksCount || a.books?.length || 0 }} كتاب موثق</span>
+          </div>
+
+          <h1 class="author-main-title">{{ a.name }}</h1>
+          
+          <p class="author-bio-text">
+            {{ a.bio || 'لا توجد سيرة ذاتية مضافة لهذا المؤلف في الأرشيف حتى الآن.' }}
+          </p>
+
+          <!-- شبكة الحقائق والبيانات -->
+          <div class="facts-matrix-grid">
+            @if (a.birthDate) {
+              <div class="fact-card">
+                <i class="fa-regular fa-calendar-days"></i>
+                <div class="fact-data">
+                  <small>تاريخ الميلاد</small>
+                  <strong>{{ a.birthDate | date:'yyyy' }}</strong>
+                </div>
+              </div>
+            }
+            @if (a.deathDate) {
+              <div class="fact-card">
+                <i class="fa-solid fa-hourglass-end"></i>
+                <div class="fact-data">
+                  <small>تاريخ الوفاة</small>
+                  <strong>{{ a.deathDate | date:'yyyy' }}</strong>
+                </div>
+              </div>
+            }
+            @if (a.nationality) {
+              <div class="fact-card">
+                <i class="fa-solid fa-earth-americas"></i>
+                <div class="fact-data">
+                  <small>الجنسية / المنهج</small>
+                  <strong>{{ a.nationality }}</strong>
+                </div>
+              </div>
+            }
+            <div class="fact-card">
+              <i class="fa-solid fa-book-bookmark"></i>
+              <div class="fact-data">
+                <small>إجمالي المؤلّفات</small>
+                <strong>{{ a.booksCount || a.books?.length || 0 }} مؤلف</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- قسم مؤلفات المؤلف -->
+      <section class="author-works-section">
+        <div class="works-header-flex">
+          <div>
+            <span class="section-tag">SELECTED WORKS & PUBLICATIONS</span>
+            <h2>مؤلفات وأعمال {{ a.name }}</h2>
+          </div>
+          <div class="works-count-badge">
+            <i class="fa-solid fa-book"></i>
+            <span>{{ a.books?.length || 0 }} كتاب متاح</span>
+          </div>
+        </div>
+
+        @if (a.books && a.books.length > 0) {
+          <div class="books-grid-showcase">
+            @for (b of a.books; track b._id || b.id; let i = $index) {
+              <a [routerLink]="['/books', b._id || b.id]" class="book-showcase-card">
+                <span class="book-index-badge">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                <div class="book-cover-wrapper">
+                  @if (b.coverImage) {
+                    <img [src]="imageUrl(b.coverImage)" [alt]="b.title">
+                  } @else {
+                    <div class="cover-placeholder">
+                      <i class="fa-solid fa-book"></i>
+                    </div>
+                  }
+                </div>
+                <div class="book-card-details">
+                  <strong>{{ b.title }}</strong>
+                  <small>{{ b.category?.name || 'عام' }}</small>
+                </div>
+              </a>
+            }
+          </div>
+        } @else {
+          <div class="empty-works-box">
+            <i class="fa-solid fa-folder-open"></i>
+            <p>لا توجد كتب مرتبطة حالياً ضمن أرشيف هذا المؤلف.</p>
+          </div>
+        }
+      </section>
+    }
+
+  </div>
+</section>

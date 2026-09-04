@@ -1,1 +1,157 @@
-<main class="management" [class.dark]="theme.isDarkMode()" dir="rtl"><div class="shell"><header><div><span>ADMIN · CATEGORIES</span><h1>إدارة <em>التصنيفات</em></h1><p>تنظيم مجالات الكتب وإدارة أوصافها.</p></div><button (click)="new()">＋ تصنيف جديد</button></header><section class="layout"><div class="list"><h2>التصنيفات <small>{{categories.length}}</small></h2><article *ngFor="let c of categories"><div class="icon">✦</div><div><strong>{{c.name}}</strong><small>{{c.booksCount||0}} كتاب · {{c.description||'بدون وصف'}}</small></div><aside><button (click)="edit(c)">تعديل</button><button class="danger" (click)="remove(c)">حذف</button></aside></article></div><div class="form"><h2>{{editing?'تعديل التصنيف':'إضافة تصنيف'}}</h2><form #f="ngForm" (ngSubmit)="save()"><label>اسم التصنيف<input name="name" [(ngModel)]="category.name" required></label><label>الوصف<textarea name="description" rows="7" [(ngModel)]="category.description"></textarea></label><div class="preview"><span>✦</span><div><strong>{{category.name||'اسم التصنيف'}}</strong><small>{{category.description||'وصف التصنيف سيظهر للزوار.'}}</small></div></div><footer><button type="button" (click)="new()">إلغاء</button><button type="submit" [disabled]="f.invalid||saving">{{saving?'جارٍ الحفظ...':'حفظ التصنيف'}}</button></footer></form><p>{{message||error}}</p></div></section></div></main>
+<main class="admin-dashboard-wrapper categories-management-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
+
+    <!-- رأس الصفحة الفاخر -->
+    <header class="admin-header">
+      <div class="header-info">
+        <span class="admin-badge">
+          <i class="fa-solid fa-layer-group"></i>
+          DIGITAL LIBRARY · CATEGORIES MANAGEMENT
+        </span>
+        <h1 class="header-title">إدارة التصنيفات</h1>
+        <p class="header-subtitle">تنظيم تصنيفات ومجالات الكتب وأوساطها الأدبية والعلمية في المكتبة.</p>
+      </div>
+      <button class="add-book-btn border-0 cursor-pointer" type="button" (click)="newCategory()">
+        <i class="fa-solid fa-plus-circle"></i>
+        <span>تصنيف جديد</span>
+      </button>
+    </header>
+
+    <!-- حالات التحميل والأخطاء -->
+    @if (loading) {
+      <div class="admin-state-box loading-box">
+        <div class="glass-spinner"></div>
+        <p>جاري استحضار قائمة التصنيفات...</p>
+      </div>
+    } @else if (error) {
+      <div class="admin-state-box error-box">
+        <div class="error-content">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>{{ error }}</span>
+        </div>
+        <button class="retry-btn" type="button" (click)="load()">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة المحاولة</span>
+        </button>
+      </div>
+    } @else {
+      
+      <!-- التخطيط العام المزدوج -->
+      <div class="management-layout-grid">
+        
+        <!-- قائمة التصنيفات -->
+        <div class="panel-glass-card">
+          <div class="panel-header-flex">
+            <div>
+              <span class="panel-tag">DIRECTORY</span>
+              <h2 class="panel-title">دليل التصنيفات</h2>
+            </div>
+            <span class="count-badge">{{ categories.length }} تصنيف</span>
+          </div>
+
+          @if (!categories.length) {
+            <div class="empty-list-state">
+              <i class="fa-solid fa-folder-open"></i>
+              <span>لا توجد أي تصنيفات مضافة في النظام حتى الآن.</span>
+            </div>
+          } @else {
+            <div class="authors-items-stack">
+              @for (c of categories; track c._id) {
+                <div class="author-item-row" [class.active-edit]="editing?._id === c._id">
+                  <div class="author-avatar-box">
+                    <i class="fa-solid fa-bookmark"></i>
+                  </div>
+
+                  <div class="author-info-box">
+                    <strong class="author-name">{{ c.name }}</strong>
+                    <small class="author-meta">
+                      <i class="fa-solid fa-book"></i> {{ c.booksCount || 0 }} كتاب 
+                      <span class="dot-separator">•</span> 
+                      {{ c.description || 'بدون وصف تعريفي' }}
+                    </small>
+                  </div>
+
+                  <div class="author-actions-box">
+                    @if (deletingId !== c._id) {
+                      <button class="action-btn edit-btn" type="button" (click)="edit(c)" title="تعديل التصنيف">
+                        <i class="fa-solid fa-pen-nib"></i>
+                      </button>
+                      <button class="action-btn delete-btn" type="button" (click)="promptDelete(c)" title="حذف التصنيف">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    } @else {
+                      <button class="action-btn confirm-delete-btn animate-pulse" type="button" (click)="promptDelete(c)">
+                        تأكيد الحذف؟
+                      </button>
+                      <button class="action-btn cancel-btn" type="button" (click)="cancelDelete()">
+                        إلغاء
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- لوحة النموذج التفاعلي (إضافة / تعديل) -->
+        <div class="panel-glass-card author-form-panel">
+          <div class="panel-header-flex">
+            <div>
+              <span class="panel-tag">EDITOR PANEL</span>
+              <h2 class="panel-title">{{ editing ? 'تعديل بيانات التصنيف' : 'إضافة تصنيف جديد' }}</h2>
+            </div>
+            @if (editing) {
+              <button class="clear-edit-mode-btn" type="button" (click)="newCategory()" title="إلغاء وضع التعديل">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            }
+          </div>
+
+          <form #f="ngForm" (ngSubmit)="save()" class="glass-form-content">
+            
+            <div class="form-group">
+              <label class="glass-label">اسم التصنيف <span class="required">*</span></label>
+              <input type="text" class="glass-input" name="name" [(ngModel)]="category.name" required placeholder="مثال: الفلسفة الإسلامية، الأدب المقارن...">
+            </div>
+
+            <div class="form-group">
+              <label class="glass-label">وصف التصنيف</label>
+              <textarea class="glass-textarea" name="description" rows="4" [(ngModel)]="category.description" placeholder="اكتب وصفاً مختصراً يوضح محتوى هذا التصنيف ومجال الكتب التابعة له..."></textarea>
+            </div>
+
+            <!-- معاينة حيّة متطورة -->
+            <div class="preview-box">
+              <span class="preview-tag">معاينة مباشرة للبطاقة</span>
+              <div class="preview-content">
+                <div class="author-avatar-box sm">
+                  <i class="fa-solid fa-bookmark"></i>
+                </div>
+                <div class="preview-text-stack">
+                  <strong>{{ category.name || 'اسم التصنيف التجريبي' }}</strong>
+                  <small>{{ category.description || 'وصف التصنيف سيظهر للباحثين والقرّاء هنا...' }}</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions-footer">
+              <button class="btn-secondary-action" type="button" (click)="newCategory()">إلغاء التغييرات</button>
+              <button class="add-book-btn border-0 cursor-pointer" type="submit" [disabled]="f.invalid || saving">
+                @if (saving) {
+                  <i class="fa-solid fa-circle-notch spin"></i>
+                  <span>جاري الحفظ...</span>
+                } @else {
+                  <i class="fa-solid fa-floppy-disk"></i>
+                  <span>{{ editing ? 'تحديث بيانات التصنيف' : 'حفظ التصنيف الجديد' }}</span>
+                }
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</main>

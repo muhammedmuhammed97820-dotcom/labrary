@@ -1,1 +1,99 @@
-<section class="authors-page" [class.dark]="theme.isDarkMode()" dir="rtl"><div class="authors-shell"><header class="hero"><div class="hero-copy"><span class="eyebrow"><i></i>مَكتبة الحكمة · أرشيف الكُتّاب</span><h1>وجوه صنعت<br><em>عالم الكتب.</em></h1><p>تعرّف على المؤلفين الذين تركوا أثرًا في الأدب والفكر والمعرفة، واكتشف أعمالهم وسيرهم في مكان واحد.</p></div><div class="hero-stamp"><strong>أ</strong><span>AUTHORS</span><small>02</small></div></header><div class="toolbar" *ngIf="!loading"><div><span>المؤلفون</span><strong>{{authors.length}}</strong></div><span class="hint">اختر مؤلفًا لاستكشاف سيرته وأعماله</span></div><div class="authors-grid" *ngIf="!loading;else wait"><a class="author-card" *ngFor="let a of authors;let i=index" [routerLink]="['/authors',a._id]"><div class="portrait-wrap"><div class="portrait"><img *ngIf="a.image" [src]="imageUrl(a.image)" [alt]="a.name"><span *ngIf="!a.image">{{initial(a.name)}}</span></div><span class="index">{{(i+1).toString().padStart(2,'0')}}</span></div><div class="author-info"><div class="name-row"><h2>{{a.name}}</h2><span>↗</span></div><p>{{a.bio||'كاتب ومؤلف ضمن أرشيف مكتبة الحكمة.'}}</p><div class="meta"><span>{{a.booksCount||0}} كتاب</span><span *ngIf="a.nationality">{{a.nationality}}</span></div></div></a></div><ng-template #wait><div class="state"><span class="loader"></span><p>نستحضر أرشيف المؤلفين...</p></div></ng-template><div class="state error" *ngIf="error">{{error}}</div></div></section>
+<section class="authors-archive-page" [class.dark-theme]="theme.isDarkMode()" dir="rtl">
+  <div class="authors-container">
+    
+    <!-- رأس الصفحة الفاخر -->
+    <header class="authors-hero-section">
+      <div class="hero-copy-box">
+        <span class="eyebrow-badge">
+          <i class="fa-solid fa-feather-pointed"></i>
+          مَكتبة الحكمة · أرشيف الكُتّاب والمفكرين
+        </span>
+        <h1 class="hero-main-title">وجوه صنعت<br><em>عالم الكتب والمعرفة.</em></h1>
+        <p class="hero-subtitle">تعرّف على المؤلفين والأعلام الذين تركوا أثرًا خالداً في الأدب والفكر، واكتشف أعمالهم وسيرهم الذاتية في مكان واحد.</p>
+      </div>
+      <div class="hero-signature-stamp">
+        <strong>أ</strong>
+        <span>AUTHORS</span>
+        <small>ARCHIVE</small>
+      </div>
+    </header>
+
+    <!-- شريط المعلومات والتحكم -->
+    @if (!loading) {
+      <div class="authors-toolbar">
+        <div class="toolbar-counter">
+          <span>إجمالي المؤلفين الموثقين</span>
+          <strong>{{ authors.length }} كاتب ومؤلف</strong>
+        </div>
+        <div class="toolbar-hint">
+          <i class="fa-solid fa-hand-pointer"></i>
+          <span>انقر على أي مؤلف لاستكشاف سيرته ومؤلفاته الكاملة</span>
+        </div>
+      </div>
+    }
+
+    <!-- شبكة المؤلفين الفاخرة -->
+    @if (!loading) {
+      @if (authors.length > 0) {
+        <div class="authors-grid-showcase">
+          @for (a of authors; track a._id; let i = $index) {
+            <a [routerLink]="['/authors', a._id]" class="author-glass-card">
+              <div class="portrait-wrapper">
+                <div class="portrait-frame">
+                  @if (a.image) {
+                    <img [src]="imageUrl(a.image)" [alt]="a.name">
+                  } @else {
+                    <span class="portrait-fallback">{{ initial(a.name) }}</span>
+                  }
+                </div>
+                <span class="card-index-badge">{{ (i + 1).toString().padStart(2, '0') }}</span>
+              </div>
+
+              <div class="author-content-box">
+                <div class="name-row-flex">
+                  <h2>{{ a.name }}</h2>
+                  <i class="fa-solid fa-arrow-up-left arrow-icon"></i>
+                </div>
+                
+                <p class="author-bio-snippet">{{ a.bio || 'كاتب ومؤلف بارز ضمن أرشيف مكتبة الحكمة الرقمية.' }}</p>
+
+                <div class="author-meta-footer">
+                  <span class="meta-tag books">
+                    <i class="fa-solid fa-book"></i>
+                    {{ a.booksCount || 0 }} كتاب موثق
+                  </span>
+                  @if (a.nationality) {
+                    <span class="meta-tag nationality">
+                      <i class="fa-solid fa-earth-americas"></i>
+                      {{ a.nationality }}
+                    </span>
+                  }
+                </div>
+              </div>
+            </a>
+          }
+        </div>
+      } @else {
+        <div class="empty-authors-state">
+          <i class="fa-solid fa-users-slash"></i>
+          <p>لا توجد أي بيانات للمؤلفين مسجلة في الأرشيف حالياً.</p>
+        </div>
+      }
+    } @else {
+      <!-- حالة التحميل الفاخرة -->
+      <div class="state-container loading-state">
+        <div class="glass-spinner"></div>
+        <p>جاري استحضار أرشيف المؤلفين والأعلام...</p>
+      </div>
+    }
+
+    <!-- حالة الخطأ -->
+    @if (error) {
+      <div class="state-container error-state">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ error }}</span>
+      </div>
+    }
+
+  </div>
+</section>

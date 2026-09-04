@@ -183,6 +183,18 @@ $font-cairo: 'Cairo', sans-serif;
       align-items: center;
       gap: 16px;
 
+      &.stat-link-card {
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        transition: all 0.25s ease;
+
+        &:hover {
+          transform: translateY(-3px);
+          border-color: var(--accent-gold);
+        }
+      }
+
       .stat-icon-wrapper {
         width: 52px;
         height: 52px;
