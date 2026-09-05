@@ -21,6 +21,8 @@ export interface Book {
   submittedBy?: any;
   rejectionReason?: string;
   reviewedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -35,6 +37,10 @@ export class BookApiService {
     if (limit > 0) params = params.set('limit', limit);
     if (search.trim()) params = params.set('search', search.trim());
     return this.http.get<Book[]>(this.api, { params });
+  }
+
+  getAdminAll(): Observable<Book[]> {
+    return this.http.get<Book[]>(`${this.api}/admin/all`);
   }
 
   getById(id: string): Observable<Book> {
