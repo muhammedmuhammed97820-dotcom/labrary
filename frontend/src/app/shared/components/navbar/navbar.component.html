@@ -7,20 +7,26 @@
         <span class="brand-sub">DIGITAL LIBRARY</span>
       </div>
     </a>
+
     <div class="nav-links-desktop">
       <a class="nav-item-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a>
       <a class="nav-item-link" routerLink="/books" routerLinkActive="active">المكتبة</a>
       <a class="nav-item-link" routerLink="/categories" routerLinkActive="active">التصنيفات</a>
       <a class="nav-item-link" routerLink="/authors" routerLinkActive="active">المؤلفون</a>
-      @if (isLoggedIn) { 
-        <a class="nav-item-link" routerLink="/favorites" routerLinkActive="active">المفضلة</a> 
+
+      @if (isLoggedIn) {
+        <a class="nav-item-link" routerLink="/favorites" routerLinkActive="active">المفضلة</a>
+        <a class="nav-item-link" routerLink="/submit-book" routerLinkActive="active">إضافة كتاب</a>
+        <a class="nav-item-link" routerLink="/my-submissions" routerLinkActive="active">طلباتي</a>
       }
-      @if (isAdmin) { 
+
+      @if (isAdmin) {
         <a class="nav-item-link admin-link" routerLink="/admin" routerLinkActive="active">
           <i class="fa-solid fa-shield-halved"></i><span>الإدارة</span>
-        </a> 
+        </a>
       }
     </div>
+
     <div class="nav-actions">
       <button class="action-btn theme-toggle-btn" (click)="toggleTheme()" [title]="themeService.isDarkMode() ? 'الوضع النهاري' : 'الوضع الليلي'">
         @if (themeService.isDarkMode()) {
@@ -29,7 +35,8 @@
           <i class="fa-solid fa-moon icon-moon"></i>
         }
       </button>
-      @if (isLoggedIn) { 
+
+      @if (isLoggedIn) {
         <div class="user-pill-wrapper">
           <a class="user-profile-btn" routerLink="/profile" (click)="closeMenu()">
             @if (avatar) {
@@ -42,40 +49,56 @@
           <button class="logout-btn" (click)="logout()" title="تسجيل الخروج">
             <i class="fa-solid fa-right-from-bracket"></i>
           </button>
-        </div> 
-      } @else { 
+        </div>
+      } @else {
         <div class="auth-btns-group">
           <a class="btn-register btn-login" routerLink="/login" (click)="closeMenu()">تسجيل الدخول</a>
-        </div> 
+          <a class="btn-register" routerLink="/register" (click)="closeMenu()">إنشاء حساب</a>
+        </div>
       }
+
       <button class="mobile-toggle-btn" (click)="toggleMenu()" [class.is-open]="menuOpen" aria-label="القائمة">
         <span></span><span></span><span></span>
       </button>
     </div>
   </div>
+
   <div class="mobile-glass-drawer" [class.show]="menuOpen">
     <div class="drawer-header">
       <span>القائمة الرئيسية</span>
       <button class="drawer-close" (click)="closeMenu()">&times;</button>
     </div>
+
     <div class="drawer-links">
       <a class="drawer-link" routerLink="/" (click)="closeMenu()">الرئيسية</a>
       <a class="drawer-link" routerLink="/books" (click)="closeMenu()">المكتبة</a>
       <a class="drawer-link" routerLink="/categories" (click)="closeMenu()">التصنيفات</a>
       <a class="drawer-link" routerLink="/authors" (click)="closeMenu()">المؤلفون</a>
+
       @if (isLoggedIn) {
         <a class="drawer-link" routerLink="/favorites" (click)="closeMenu()">المفضلة</a>
+        <a class="drawer-link" routerLink="/submit-book" (click)="closeMenu()">إضافة كتاب</a>
+        <a class="drawer-link" routerLink="/my-submissions" (click)="closeMenu()">طلباتي</a>
+        <a class="drawer-link" routerLink="/profile" (click)="closeMenu()">الملف الشخصي</a>
       }
+
       @if (isAdmin) {
         <a class="drawer-link admin" routerLink="/admin" (click)="closeMenu()">لوحة الإدارة</a>
+        <a class="drawer-link admin" routerLink="/admin/books" (click)="closeMenu()">إدارة الكتب</a>
+        <a class="drawer-link admin" routerLink="/admin/book-submissions" (click)="closeMenu()">طلبات الكتب</a>
+        <a class="drawer-link admin" routerLink="/admin/authors" (click)="closeMenu()">إدارة المؤلفين</a>
+        <a class="drawer-link admin" routerLink="/admin/categories" (click)="closeMenu()">إدارة التصنيفات</a>
       }
     </div>
+
     @if (!isLoggedIn) {
       <div class="drawer-auth">
         <a class="btn-register w-100 text-center" routerLink="/login" (click)="closeMenu()">تسجيل الدخول</a>
+        <a class="btn-register w-100 text-center" routerLink="/register" (click)="closeMenu()">إنشاء حساب</a>
       </div>
     }
   </div>
+
   @if (menuOpen) {
     <div class="mobile-overlay" (click)="closeMenu()"></div>
   }
