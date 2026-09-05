@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { BookApiService } from '../../../core/services/book-api.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-book-submit',
@@ -17,6 +18,7 @@ export class BookSubmitComponent {
   private readonly api = inject(BookApiService);
   private readonly router = inject(Router);
   private readonly notify = inject(NotificationService);
+  public readonly themeService = inject(ThemeService);
 
   form = { title: '', author: '', category: '', description: '', publishedYear: '' };
   bookFile: File | null = null;
@@ -53,9 +55,9 @@ export class BookSubmitComponent {
     this.submitting = true;
 
     this.api.submitBook(data).subscribe({
-      next: response => {
+      next: (response: any) => {
         this.submitting = false;
-        this.notify.show(response.message || 'تم إرسال الكتاب للمراجعة.', 'success');
+        this.notify.show(response?.message || 'تم إرسال الكتاب للمراجعة.', 'success');
         this.router.navigate(['/my-submissions']);
       },
       error: (error: unknown) => {

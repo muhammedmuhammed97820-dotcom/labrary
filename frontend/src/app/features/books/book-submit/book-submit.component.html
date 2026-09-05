@@ -1,6 +1,10 @@
-<main class="submission-page" dir="rtl">
+<main class="submission-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="submission-card">
-    <header><span class="eyebrow">COMMUNITY LIBRARY</span><h1>إضافة كتاب للمكتبة</h1><p>أرسل كتابك وسيقوم فريق الإدارة بمراجعته قبل نشره.</p></header>
+    <header>
+      <span class="eyebrow">COMMUNITY LIBRARY</span>
+      <h1>إضافة كتاب للمكتبة</h1>
+      <p>أرسل كتابك وسيقوم فريق الإدارة بمراجعته قبل نشره.</p>
+    </header>
     <form (ngSubmit)="submit()">
       <div class="fields">
         <label>عنوان الكتاب *<input [(ngModel)]="form.title" name="title" required placeholder="عنوان الكتاب"></label>
@@ -9,9 +13,15 @@
         <label>سنة النشر<input [(ngModel)]="form.publishedYear" name="publishedYear" type="number"></label>
       </div>
       <label>الوصف<textarea [(ngModel)]="form.description" name="description" rows="5" placeholder="نبذة عن الكتاب"></textarea></label>
-      <div class="uploads"><label class="upload">📄 ملف PDF<input type="file" accept="application/pdf" (change)="onBookFile($event)" required><small>{{ bookFile?.name || 'اختر ملف الكتاب' }}</small></label><label class="upload">🖼️ غلاف الكتاب<input type="file" accept="image/*" (change)="onCover($event)" required><small>{{ coverImage?.name || 'اختر صورة الغلاف' }}</small></label></div>
+      <div class="uploads">
+        <label class="upload">📄 ملف PDF<input type="file" accept="application/pdf" (change)="onBookFile($event)" required><small>{{ bookFile?.name || 'اختر ملف الكتاب' }}</small></label>
+        <label class="upload">🖼️ غلاف الكتاب<input type="file" accept="image/*" (change)="onCover($event)" required><small>{{ coverImage?.name || 'اختر صورة الغلاف' }}</small></label>
+      </div>
       @if (coverPreviewUrl) { <img class="preview" [src]="coverPreviewUrl" alt="معاينة الغلاف"> }
-      <div class="actions"><a routerLink="/books">إلغاء</a><button type="submit" [disabled]="submitting">{{ submitting ? 'جارٍ الإرسال...' : 'إرسال للمراجعة' }}</button></div>
+      <div class="actions">
+        <a routerLink="/books">إلغاء</a>
+        <button type="submit" [disabled]="submitting">{{ submitting ? 'جارٍ الإرسال...' : 'إرسال للمراجعة' }}</button>
+      </div>
     </form>
   </div>
 </main>
