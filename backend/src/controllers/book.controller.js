@@ -25,7 +25,10 @@ async function getBooks(req, res) {
 
 async function getBook(req, res) {
   try {
-    const book = await Book.findById(req.params.id).populate("author").populate("category").populate("submittedBy", "name email");
+    const book = await Book.findById(req.params.id)
+      .populate("author")
+      .populate("category")
+      .populate("submittedBy", "name email");
     if (!book) return res.status(404).json({ message: "Book not found." });
     if (book.status !== "approved" && !canModerate(req) && String(book.submittedBy?._id) !== String(req.user?._id)) {
       return res.status(404).json({ message: "Book not found." });
@@ -41,25 +44,34 @@ async function createBook(req, res) {
   try {
     const { title, author, category, description, publishedYear, rating } = req.body;
     if (!title?.trim()) return res.status(400).json({ message: "Book title is required." });
-    if (!author) return res.status(400).json({ message: "Author is required." });
-    if (!category) return res.status(400).json({ message: "Category is required." });
+    if (!String(author || "").trim()) return res.status(400).json({ message: "Author is required." });
+    if (!String(category || "").trim()) return res.status(400).json({ message: "Category is required." });
     if (!req.files?.bookFile?.[0]) return res.status(400).json({ message: "Book file is required." });
     if (!req.files?.coverImage?.[0]) return res.status(400).json({ message: "Cover image is required." });
     if (!req.user) return res.status(401).json({ message: "Authentication required." });
 
-    const authorDocument = await findOrCreateAuthor(author);
-    const categoryDocument = await findOrCreateCategory(category);
     const bookFile = req.files.bookFile[0];
     const coverFile = req.files.coverImage[0];
     const isAdmin = canModerate(req);
 
+    let authorId = null;
+    let categoryId = null;
+
+    // Administrators can publish immediately. Normal users must go through
+    // moderation, so their author/category names stay as temporary book data.
+    if (isAdmin) {
+      authorId = (await findOrCreateAuthor(author.trim()))._id;
+      categoryId = (await findOrCreateCategory(category.trim()))._id;
+    }
+
     const book = await Book.create({
       title: title.trim(),
-      author: authorDocument._id,
-      category: categoryDocument._id,
+      author: authorId,
+      category: categoryId,
+      submittedAuthorName: isAdmin ? "" : author.trim(),
+      submittedCategoryName: isAdmin ? "" : category.trim(),
       description: description || "",
       publishedYear: publishedYear ? Number(publishedYear) : undefined,
-      // Rating is controlled by the admin/public system, not submitters.
       rating: isAdmin && rating ? Number(rating) : 0,
       filePath: `/uploads/books/${bookFile.filename}`,
       coverImage: `/uploads/covers/${coverFile.filename}`,
@@ -69,7 +81,11 @@ async function createBook(req, res) {
       reviewedAt: isAdmin ? new Date() : null
     });
 
-    const populatedBook = await Book.findById(book._id).populate("author").populate("category").populate("submittedBy", "name email");
+    const populatedBook = await Book.findById(book._id)
+      .populate("author")
+      .populate("category")
+      .populate("submittedBy", "name email");
+
     res.status(201).json({
       message: isAdmin ? "Book created and published successfully." : "Book submitted successfully and is awaiting admin review.",
       book: populatedBook
@@ -159,15 +175,36 @@ async function reviewBook(req, res) {
     if (!book) return res.status(404).json({ message: "Book not found." });
     if (book.status !== "pending") return res.status(400).json({ message: "Only pending books can be reviewed." });
 
+    if (status === "approved") {
+      if (book.author && book.category) {
+        // Compatibility with submissions created by the old workflow.
+      } else {
+        if (!book.submittedAuthorName?.trim() || !book.submittedCategoryName?.trim()) {
+          return res.status(400).json({ message: "The submitted author and category are missing." });
+        }
+        book.author = (await findOrCreateAuthor(book.submittedAuthorName.trim()))._id;
+        book.category = (await findOrCreateCategory(book.submittedCategoryName.trim()))._id;
+      }
+      book.submittedAuthorName = "";
+      book.submittedCategoryName = "";
+    }
+
     book.status = status;
     book.reviewedAt = new Date();
     book.rejectionReason = status === "rejected" ? String(rejectionReason).trim() : "";
     await book.save();
 
-    const populatedBook = await Book.findById(book._id).populate("author").populate("category").populate("submittedBy", "name email");
-    res.json({ message: status === "approved" ? "Book approved and published." : "Book rejected.", book: populatedBook });
+    const populatedBook = await Book.findById(book._id)
+      .populate("author")
+      .populate("category")
+      .populate("submittedBy", "name email");
+
+    res.json({
+      message: status === "approved" ? "Book approved and published." : "Book rejected.",
+      book: populatedBook
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Review book error:", error);
     res.status(500).json({ message: error.message || "Failed to review book." });
   }
 }
