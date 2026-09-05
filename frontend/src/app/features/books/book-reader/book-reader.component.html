@@ -1,0 +1,86 @@
+<main class="reader-shell" dir="rtl" (mousemove)="onPointerActivity()" (touchstart)="onPointerActivity()" [class.dark-reader]="themeService.isDarkMode()">
+  @if (loading) {
+    <section class="reader-loading"><div class="reader-spinner"></div><h2>جارٍ تجهيز الكتاب...</h2><p>يتم تحميل الصفحات بأعلى جودة ممكنة</p></section>
+  } @else if (error) {
+    <section class="reader-error"><div class="error-symbol">!</div><h2>تعذر فتح الكتاب</h2><p>{{ error }}</p><a routerLink="/books" class="back-link">العودة إلى المكتبة</a></section>
+  } @else {
+    <header class="reader-topbar" [class.hidden-toolbar]="!showToolbar">
+      <div class="reader-brand">
+        <a routerLink="/books" class="icon-button" title="العودة إلى المكتبة"><i class="fa-solid fa-arrow-right"></i></a>
+        <div class="book-mini-cover"><img [src]="book?.coverImage ? api.getFileUrl(book!.coverImage) : 'assets/images/default-cover.svg'" [alt]="book?.title || ''"></div>
+        <div class="book-heading"><strong>{{ book?.title || 'قارئ الكتب' }}</strong><span>{{ book?.author && typeof book?.author !== 'string' ? book?.author?.name : book?.author || 'المكتبة الإلكترونية' }}</span></div>
+      </div>
+
+      <div class="page-control" aria-label="التنقل بين الصفحات">
+        <button class="icon-button" (click)="previousPage()" [disabled]="page <= 1" title="الصفحة السابقة"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="page-input-wrap"><input [(ngModel)]="pageInput" (keyup.enter)="goToPage()" (blur)="goToPage()" aria-label="رقم الصفحة"><span>/ {{ totalPages }}</span></div>
+        <button class="icon-button" (click)="nextPage()" [disabled]="page >= totalPages" title="الصفحة التالية"><i class="fa-solid fa-chevron-left"></i></button>
+      </div>
+
+      <div class="reader-actions">
+        <button class="icon-button" (click)="searchOpen = !searchOpen" title="بحث داخل الكتاب"><i class="fa-solid fa-magnifying-glass"></i></button>
+        <button class="icon-button" [class.active]="isBookmarked()" (click)="toggleBookmark()" title="علامة مرجعية"><i class="fa-solid fa-bookmark"></i></button>
+        <button class="icon-button" (click)="sidebarOpen = !sidebarOpen" title="العلامات المرجعية"><i class="fa-solid fa-list"></i></button>
+        <button class="icon-button" (click)="settingsOpen = !settingsOpen" title="إعدادات العرض"><i class="fa-solid fa-sliders"></i></button>
+        <button class="icon-button" (click)="toggleFullscreen()" title="ملء الشاشة"><i class="fa-solid" [class.fa-expand]="!fullscreen" [class.fa-compress]="fullscreen"></i></button>
+      </div>
+    </header>
+
+    @if (searchOpen) {
+      <section class="search-panel">
+        <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input #searchInput [(ngModel)]="searchTerm" (keyup.enter)="search()" placeholder="ابحث داخل الكتاب..." autofocus><button (click)="search()">بحث</button></div>
+        <span class="search-count">{{ searchBusy ? 'جاري فهرسة الكتاب...' : searchResults.length ? searchResults.length + ' نتيجة' : 'اكتب كلمة للبحث' }}</span>
+        @if (searchResults.length) {
+          <div class="search-results">
+            @for (result of searchResults; track result.page) {
+              <button class="search-result" (click)="jumpToSearchResult(result)"><strong>صفحة {{ result.page }}</strong><span>{{ result.snippet }}</span></button>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <aside class="reader-sidebar" [class.open]="sidebarOpen">
+      <div class="sidebar-head"><strong>علاماتك المرجعية</strong><button class="icon-button" (click)="sidebarOpen = false"><i class="fa-solid fa-xmark"></i></button></div>
+      @if (bookmarks.length) {
+        @for (bookmark of bookmarks; track bookmark) {
+          <button class="bookmark-row" (click)="openBookmark(bookmark)"><i class="fa-solid fa-bookmark"></i><span>صفحة {{ bookmark }}</span><i class="fa-solid fa-chevron-left"></i></button>
+        }
+      } @else { <div class="empty-sidebar"><i class="fa-regular fa-bookmark"></i><p>لا توجد علامات مرجعية بعد.</p><small>اضغط B لحفظ الصفحة الحالية.</small></div> }
+    </aside>
+
+    @if (sidebarOpen) { <button class="sidebar-backdrop" aria-label="إغلاق القائمة" (click)="sidebarOpen = false"></button> }
+
+    <section class="reader-viewport" #readerViewport>
+      <div class="reading-stage" [class.stage-dark]="themeService.isDarkMode()">
+        <div class="page-frame" [class.is-rendering]="rendering">
+          <canvas #pageCanvas aria-label="صفحة الكتاب"></canvas>
+          @if (rendering) { <div class="page-loading"><div class="mini-spinner"></div></div> }
+        </div>
+      </div>
+    </section>
+
+    <footer class="reader-bottom-bar" [class.hidden-toolbar]="!showToolbar">
+      <div class="progress-area"><span>صفحة {{ page }}</span><div class="progress-track"><div class="progress-fill" [style.width.%]="totalPages ? (page / totalPages) * 100 : 0"></div></div><span>{{ totalPages ? ((page / totalPages) * 100 | number:'1.0-0') : 0 }}%</span></div>
+      <div class="bottom-tools">
+        <button class="tool-button" (click)="zoomOut()" title="تصغير"><i class="fa-solid fa-minus"></i></button>
+        <span class="zoom-label">{{ fitMode === 'width' ? 'ملاءمة العرض' : fitMode === 'page' ? 'ملاءمة الصفحة' : ((zoom * 100) | number:'1.0-0') + '%' }}</span>
+        <button class="tool-button" (click)="zoomIn()" title="تكبير"><i class="fa-solid fa-plus"></i></button>
+        <span class="tool-divider"></span>
+        <button class="tool-button" [class.selected]="fitMode === 'width'" (click)="setFit('width')" title="ملاءمة العرض"><i class="fa-solid fa-arrows-left-right"></i></button>
+        <button class="tool-button" [class.selected]="fitMode === 'page'" (click)="setFit('page')" title="ملاءمة الصفحة"><i class="fa-regular fa-square"></i></button>
+        <button class="tool-button" (click)="rotate()" title="تدوير"><i class="fa-solid fa-rotate-right"></i></button>
+      </div>
+    </footer>
+
+    @if (settingsOpen) {
+      <section class="settings-popover">
+        <div class="popover-title">إعدادات القارئ</div>
+        <button (click)="setFit('width'); settingsOpen = false"><i class="fa-solid fa-arrows-left-right"></i><span>ملاءمة عرض الصفحة</span><i class="fa-solid fa-check" *ngIf="fitMode === 'width'"></i></button>
+        <button (click)="setFit('page'); settingsOpen = false"><i class="fa-regular fa-square"></i><span>ملاءمة الصفحة كاملة</span><i class="fa-solid fa-check" *ngIf="fitMode === 'page'"></i></button>
+        <button (click)="rotate(); settingsOpen = false"><i class="fa-solid fa-rotate-right"></i><span>تدوير الصفحة</span></button>
+        <div class="shortcut-note"><strong>اختصارات لوحة المفاتيح</strong><span>← → للتنقل</span><span>+ − للتكبير</span><span>B علامة مرجعية · / بحث · F ملء الشاشة</span></div>
+      </section>
+    }
+  }
+</main>
