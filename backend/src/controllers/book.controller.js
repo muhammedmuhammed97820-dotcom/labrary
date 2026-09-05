@@ -23,6 +23,20 @@ async function getBooks(req, res) {
   }
 }
 
+async function getAdminBooks(req, res) {
+  try {
+    const books = await Book.find({})
+      .populate("author")
+      .populate("category")
+      .populate("submittedBy", "name email")
+      .sort({ createdAt: -1 });
+    res.json(books);
+  } catch (error) {
+    console.error("Admin books load error:", error);
+    res.status(500).json({ message: "Failed to load admin books." });
+  }
+}
+
 async function getBook(req, res) {
   try {
     const book = await Book.findById(req.params.id)
@@ -57,8 +71,6 @@ async function createBook(req, res) {
     let authorId = null;
     let categoryId = null;
 
-    // Administrators can publish immediately. Normal users must go through
-    // moderation, so their author/category names stay as temporary book data.
     if (isAdmin) {
       authorId = (await findOrCreateAuthor(author.trim()))._id;
       categoryId = (await findOrCreateCategory(category.trim()))._id;
@@ -237,6 +249,7 @@ async function incrementDownloads(req, res) {
 
 module.exports = {
   getBooks,
+  getAdminBooks,
   getBook,
   createBook,
   updateBook,
