@@ -12,17 +12,16 @@ const bookUpload = upload.fields([
 
 // Public catalog: controller only returns approved books.
 router.get("/", controller.getBooks);
+
+// User submission tracking and admin moderation queue must come before /:id.
+router.get("/my-submissions", authenticate, controller.getMySubmissions);
+router.get("/admin/pending", authenticate, requireAdmin, controller.getPendingBooks);
+router.patch("/admin/:id/review", authenticate, requireAdmin, controller.reviewBook);
+
 router.get("/:id", authenticate, controller.getBook);
 
 // Authenticated users may submit books. Admin submissions are published immediately.
 router.post("/", authenticate, bookUpload, controller.createBook);
-
-// User submission tracking.
-router.get("/my-submissions", authenticate, controller.getMySubmissions);
-
-// Admin moderation queue.
-router.get("/admin/pending", authenticate, requireAdmin, controller.getPendingBooks);
-router.patch("/admin/:id/review", authenticate, requireAdmin, controller.reviewBook);
 
 // Only admins can edit/delete catalog books.
 router.put("/:id", authenticate, requireAdmin, bookUpload, controller.updateBook);
