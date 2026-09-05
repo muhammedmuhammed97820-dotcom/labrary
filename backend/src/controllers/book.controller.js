@@ -1,5 +1,6 @@
 const Book = require("../models/Book");
 const BookView = require("../models/BookView");
+const BookDownload = require("../models/BookDownload");
 const { findOrCreateAuthor, findOrCreateCategory } = require("../services/book.service");
 
 function canModerate(req) {
@@ -138,7 +139,10 @@ async function deleteBook(req, res) {
     if (!canModerate(req)) return res.status(403).json({ message: "Only administrators can delete books." });
     const book = await Book.findByIdAndDelete(req.params.id);
     if (!book) return res.status(404).json({ message: "Book not found." });
-    await BookView.deleteMany({ book: book._id });
+    await Promise.all([
+      BookView.deleteMany({ book: book._id }),
+      BookDownload.deleteMany({ book: book._id })
+    ]);
     res.json({ message: "Book deleted successfully." });
   } catch (error) {
     console.error(error);
@@ -228,8 +232,12 @@ async function incrementViews(req, res) {
     const viewerId = String(req.get("X-Viewer-Id") || "").trim();
     if (!viewerId || viewerId.length > 128) return res.status(400).json({ message: "A valid viewer identifier is required." });
     let counted = false;
-    try { await BookView.create({ book: book._id, viewerId }); counted = true; }
-    catch (error) { if (error?.code !== 11000) throw error; }
+    try {
+      await BookView.create({ book: book._id, viewerId });
+      counted = true;
+    } catch (error) {
+      if (error?.code !== 11000) throw error;
+    }
     if (counted) await Book.findByIdAndUpdate(book._id, { $inc: { viewsCount: 1 } });
     const latest = await Book.findById(book._id).select("viewsCount").lean();
     res.json({ viewsCount: latest?.viewsCount || 0, counted });
@@ -241,10 +249,32 @@ async function incrementViews(req, res) {
 
 async function incrementDownloads(req, res) {
   try {
-    const book = await Book.findOneAndUpdate({ _id: req.params.id, status: "approved" }, { $inc: { downloads: 1 } }, { new: true });
+    const book = await Book.findOne({ _id: req.params.id, status: "approved" }).select("downloads");
     if (!book) return res.status(404).json({ message: "Book not found." });
-    res.json({ downloads: book.downloads });
-  } catch (error) { res.status(500).json({ message: "Failed to update downloads." }); }
+
+    const viewerId = String(req.get("X-Viewer-Id") || "").trim();
+    if (!viewerId || viewerId.length > 128) {
+      return res.status(400).json({ message: "A valid viewer identifier is required." });
+    }
+
+    let counted = false;
+    try {
+      await BookDownload.create({ book: book._id, viewerId });
+      counted = true;
+    } catch (error) {
+      if (error?.code !== 11000) throw error;
+    }
+
+    if (counted) {
+      await Book.findByIdAndUpdate(book._id, { $inc: { downloads: 1 } });
+    }
+
+    const latest = await Book.findById(book._id).select("downloads").lean();
+    res.json({ downloads: latest?.downloads || 0, counted });
+  } catch (error) {
+    console.error("Download count error:", error);
+    res.status(500).json({ message: "Failed to update downloads." });
+  }
 }
 
 module.exports = {
