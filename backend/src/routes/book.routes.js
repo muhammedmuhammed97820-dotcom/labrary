@@ -13,6 +13,9 @@ const bookUpload = upload.fields([
 // Public catalog: controller only returns approved books.
 router.get("/", controller.getBooks);
 
+// Admin dashboard: returns all books, including pending/rejected submissions.
+router.get("/admin/all", authenticate, requireAdmin, controller.getAdminBooks);
+
 // User submission tracking and admin moderation queue must come before /:id.
 router.get("/my-submissions", authenticate, controller.getMySubmissions);
 router.get("/admin/pending", authenticate, requireAdmin, controller.getPendingBooks);
