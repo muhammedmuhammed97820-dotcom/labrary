@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Book, BookApiService } from '../../../core/services/book-api.service';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -9,7 +10,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 @Component({
   selector: 'app-book-reader',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './book-reader.component.html',
   styleUrl: './book-reader.component.scss'
 })
@@ -19,7 +20,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
   private readonly route = inject(ActivatedRoute);
-  private readonly api = inject(BookApiService);
+  readonly api = inject(BookApiService);
   private readonly notify = inject(NotificationService);
   readonly themeService = inject(ThemeService);
 
@@ -46,10 +47,14 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   currentSearchIndex = 0;
   pageInput = '1';
   private hideTimer?: ReturnType<typeof setTimeout>;
-  private intersection?: IntersectionObserver;
   private destroyed = false;
 
   readonly zoomSteps = [0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
+
+  authorName(): string {
+    const author = this.book?.author;
+    return !author ? 'المكتبة الإلكترونية' : typeof author === 'string' ? author : author.name || 'مؤلف غير محدد';
+  }
 
   async ngOnInit(): Promise<void> {
     this.loadBookmarks();
@@ -76,7 +81,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyed = true;
-    this.intersection?.disconnect();
     if (this.hideTimer) clearTimeout(this.hideTimer);
     try { this.pdf?.destroy?.(); } catch { /* noop */ }
   }
@@ -173,7 +177,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
   async setFit(mode: 'width' | 'page' | 'manual'): Promise<void> {
     this.fitMode = mode;
-    if (mode === 'manual') return this.renderPage();
     await this.renderPage();
   }
 
@@ -259,11 +262,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleToolbar(): void {
-    this.showToolbar = !this.showToolbar;
-    if (this.showToolbar) this.keepToolbarVisible();
-  }
-
   @HostListener('document:fullscreenchange')
   onFullscreenChange(): void { this.fullscreen = !!document.fullscreenElement; }
 
@@ -274,46 +272,14 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       return;
     }
     switch (event.key) {
-      case 'ArrowLeft':
-      case 'PageDown':
-        event.preventDefault();
-        await this.nextPage();
-        break;
-      case 'ArrowRight':
-      case 'PageUp':
-        event.preventDefault();
-        await this.previousPage();
-        break;
-      case '+':
-      case '=':
-        event.preventDefault();
-        await this.zoomIn();
-        break;
-      case '-':
-        event.preventDefault();
-        await this.zoomOut();
-        break;
-      case 'f':
-      case 'F':
-        if (event.ctrlKey || event.metaKey) return;
-        event.preventDefault();
-        await this.toggleFullscreen();
-        break;
-      case 'b':
-      case 'B':
-        event.preventDefault();
-        this.toggleBookmark();
-        break;
-      case '/':
-        event.preventDefault();
-        this.searchOpen = true;
-        setTimeout(() => this.searchInput?.nativeElement.focus());
-        break;
-      case 'Escape':
-        this.searchOpen = false;
-        this.settingsOpen = false;
-        this.sidebarOpen = false;
-        break;
+      case 'ArrowLeft': case 'PageDown': event.preventDefault(); await this.nextPage(); break;
+      case 'ArrowRight': case 'PageUp': event.preventDefault(); await this.previousPage(); break;
+      case '+': case '=': event.preventDefault(); await this.zoomIn(); break;
+      case '-': event.preventDefault(); await this.zoomOut(); break;
+      case 'f': case 'F': if (!event.ctrlKey && !event.metaKey) { event.preventDefault(); await this.toggleFullscreen(); } break;
+      case 'b': case 'B': event.preventDefault(); this.toggleBookmark(); break;
+      case '/': event.preventDefault(); this.searchOpen = true; setTimeout(() => this.searchInput?.nativeElement.focus()); break;
+      case 'Escape': this.searchOpen = false; this.settingsOpen = false; this.sidebarOpen = false; break;
     }
     this.keepToolbarVisible();
   }
@@ -323,9 +289,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   private keepToolbarVisible(): void {
     this.showToolbar = true;
     if (this.hideTimer) clearTimeout(this.hideTimer);
-    if (this.fullscreen) {
-      this.hideTimer = setTimeout(() => this.showToolbar = false, 3200);
-    }
+    if (this.fullscreen) this.hideTimer = setTimeout(() => this.showToolbar = false, 3200);
   }
 
   private scrollReaderTop(): void {
@@ -334,17 +298,12 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
   private progressKey(): string { return `electronic_library_reader_progress_${this.book?._id || this.route.snapshot.paramMap.get('id')}`; }
   private bookmarkKey(): string { return `electronic_library_reader_bookmarks_${this.book?._id || this.route.snapshot.paramMap.get('id')}`; }
-
-  private saveProgress(): void {
-    localStorage.setItem(this.progressKey(), String(this.page));
-  }
+  private saveProgress(): void { localStorage.setItem(this.progressKey(), String(this.page)); }
 
   private loadBookmarks(): void {
     try {
       const value = JSON.parse(localStorage.getItem(this.bookmarkKey()) || '[]');
       this.bookmarks = Array.isArray(value) ? value.filter((page: unknown) => Number.isInteger(page)) : [];
-    } catch {
-      this.bookmarks = [];
-    }
+    } catch { this.bookmarks = []; }
   }
 }
