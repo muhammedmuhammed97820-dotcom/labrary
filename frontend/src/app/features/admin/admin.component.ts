@@ -29,7 +29,7 @@ export class AdminComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.error = '';
-    this.api.getAll().subscribe({
+    this.api.getAdminAll().subscribe({
       next: b => {
         this.books = b;
         this.loading = false;
@@ -62,5 +62,13 @@ export class AdminComponent implements OnInit {
   get downloads(): number { return this.books.reduce((n, b) => n + (Number(b.downloads) || 0), 0); }
   get authors(): number { return new Set(this.books.map(b => typeof b.author === 'string' ? b.author : b.author?.name).filter(Boolean)).size; }
   get categories(): number { return new Set(this.books.map(b => typeof b.category === 'string' ? b.category : b.category?.name).filter(Boolean)).size; }
-  get recent(): Book[] { return [...this.books].slice(-5).reverse(); }
+  get recent(): Book[] {
+    return [...this.books]
+      .sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, 5);
+  }
 }
