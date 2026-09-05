@@ -32,6 +32,7 @@ export class BookDetailsComponent implements OnInit {
   loading = true;
   error = '';
   favoriteBusy = false;
+  private viewRequestStarted = false;
 
   ngOnInit(): void {
     this.bookId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -49,24 +50,35 @@ export class BookDetailsComponent implements OnInit {
         this.book = book;
         this.loading = false;
         this.cdr.detectChanges();
-
-        // The backend identifies the browser with a persistent anonymous ID,
-        // so refreshing this page does not create another view for the same book.
-        this.api.addView(this.bookId).subscribe({
-          next: result => {
-            if (this.book && result.counted) {
-              this.book.viewsCount = result.viewsCount;
-              this.cdr.detectChanges();
-            }
-          },
-          error: (err: unknown) => console.warn('Failed to register view count:', err)
-        });
+        this.registerViewOnce();
       },
       error: (err: unknown) => {
         const httpError = err as { error?: { message?: string } };
         this.error = httpError.error?.message || 'تعذر تحميل تفاصيل الكتاب.';
         this.loading = false;
         this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private registerViewOnce(): void {
+    if (!this.bookId || this.viewRequestStarted || this.api.hasViewedBook(this.bookId)) return;
+
+    this.viewRequestStarted = true;
+    this.api.addView(this.bookId).subscribe({
+      next: result => {
+        // Mark locally even when the backend reports counted=false, because that
+        // means this browser has already viewed this book.
+        this.api.markBookAsViewed(this.bookId);
+        if (this.book) {
+          this.book.viewsCount = result.viewsCount;
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err: unknown) => {
+        // Do not mark failed requests as viewed so a temporary network/server
+        // failure can be retried on the next successful page load.
+        console.warn('Failed to register view count:', err);
       }
     });
   }
