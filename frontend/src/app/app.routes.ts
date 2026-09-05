@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
 import { BookDetailsComponent } from './features/books/book-details/book-details.component';
+import { BookReaderComponent } from './features/books/book-reader/book-reader.component';
 import { AuthComponent } from './features/auth/auth.component';
 import { AdminComponent } from './features/admin/admin.component';
 import { BookCreateComponent } from './features/admin/books/book-create/book-create.component';
@@ -20,6 +21,7 @@ import { BookSubmissionsComponent } from './features/admin/submissions/book-subm
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'books', loadComponent: () => import('./features/books/books.component').then(m => m.BooksComponent) },
+  { path: 'books/:id/read', component: BookReaderComponent },
   { path: 'books/:id', component: BookDetailsComponent },
   { path: 'categories', component: CategoriesComponent },
   { path: 'authors', component: AuthorsComponent },
