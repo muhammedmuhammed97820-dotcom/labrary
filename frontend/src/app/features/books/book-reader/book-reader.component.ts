@@ -70,13 +70,17 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     try {
       this.book = await this.api.getById(id).toPromise() as Book;
       if (!this.book?.filePath) throw new Error('ملف الكتاب غير متوفر.');
+
       const savedPage = Number(localStorage.getItem(this.progressKey())) || 1;
       this.page = Math.max(1, savedPage);
       this.pageInput = String(this.page);
-      await this.openPdf(this.api.getFileUrl(this.book.filePath));
+
+      // لا نقرأ الملف من /uploads مباشرة. الـBackend يقدمه كـPDF inline
+      // بعد التحقق من حالة الكتاب ومسار الملف الفعلي.
+      await this.openPdf(this.api.getReaderUrl(id));
     } catch (error) {
       console.error('Reader loading error:', error);
-      this.error = 'تعذر فتح الكتاب. تأكد أن ملف PDF متوفر ثم حاول مرة أخرى.';
+      this.error = this.getReaderError(error);
       this.loading = false;
     }
   }
@@ -87,25 +91,34 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     try { this.pdf?.destroy?.(); } catch { /* noop */ }
   }
 
+  private getReaderError(error: any): string {
+    const status = Number(error?.status || 0);
+    if (status === 404) return 'ملف الكتاب غير موجود على الخادم.';
+    if (status === 415) return 'هذا الكتاب ليس PDF. القارئ الحالي يدعم ملفات PDF فقط.';
+    if (status === 0) return 'تعذر الاتصال بخادم المكتبة. تأكد أن الـBackend يعمل على المنفذ 5000.';
+    return 'تعذر فتح الكتاب. تأكد أن ملف PDF متوفر ثم حاول مرة أخرى.';
+  }
+
   private async openPdf(url: string): Promise<void> {
     const loadingTask = pdfjsLib.getDocument({
       url,
-      cMapUrl: 'https://unpkg.com/pdfjs-dist@' + pdfjsLib.version + '/cmaps/',
+      cMapUrl: 'assets/pdfjs/cmaps/',
       cMapPacked: true,
+      standardFontDataUrl: 'assets/pdfjs/standard_fonts/',
+      useSystemFonts: true,
+      disableFontFace: false,
+      isEvalSupported: true,
     });
-    
+
     this.pdf = await loadingTask.promise;
     if (this.destroyed) return;
     this.totalPages = this.pdf.numPages;
     this.page = Math.min(this.page, this.totalPages);
     this.pageInput = String(this.page);
     this.loading = false;
-    
-    // الانتظار حتى يستقر الـ DOM ويتم رسم الصفحة الأولى بابعاد صحيحة
+
     setTimeout(async () => {
-      if (!this.destroyed) {
-        await this.renderPage();
-      }
+      if (!this.destroyed) await this.renderPage();
     }, 50);
   }
 
@@ -118,7 +131,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       const context = canvas.getContext('2d', { alpha: false });
       if (!context) return;
 
-      // التأكد من أن الـ Viewport لديه عرض حقيقي، وإلا ننتظر قليلاً ليقرأ الأبعاد الصحيحة من الشاشة
       let clientWidth = this.readerViewport?.nativeElement.clientWidth || 0;
       if (clientWidth < 100) {
         await new Promise(resolve => setTimeout(resolve, 60));
@@ -127,7 +139,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
       let scale = this.zoom;
       const viewportAtOne = pdfPage.getViewport({ scale: 1, rotation: this.rotation });
-      
+
       if (this.fitMode === 'width' && this.readerViewport) {
         const available = Math.max(320, clientWidth - 48);
         scale = Math.max(0.2, available / viewportAtOne.width);
@@ -145,7 +157,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      context.fillStyle = this.themeService.isDarkMode() ? '#151515' : '#ffffff';
+      context.fillStyle = '#ffffff';
       context.fillRect(0, 0, viewport.width, viewport.height);
       await pdfPage.render({ canvasContext: context, viewport }).promise;
       this.saveProgress();
@@ -227,31 +239,64 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     this.scrollReaderTop();
   }
 
+  private normalizeArabic(value: string): string {
+    return String(value || '')
+      .normalize('NFKC')
+      .replace(/[\u064B-\u065F\u0670]/g, '')
+      .replace(/[إأآٱ]/g, 'ا')
+      .replace(/ى/g, 'ي')
+      .replace(/ؤ/g, 'و')
+      .replace(/ئ/g, 'ي')
+      .replace(/ة/g, 'ه')
+      .replace(/[ـ]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLocaleLowerCase('ar');
+  }
+
+  private getTextForSearch(items: any[]): string {
+    // PDF.js already returns the visual text order for most PDFs. Keep spaces
+    // between text runs, but remove accidental line-break spacing and controls.
+    return items
+      .map(item => String(item?.str || '').replace(/[\r\n\t]+/g, ' ').trim())
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   async search(): Promise<void> {
-    const term = this.searchTerm.trim().toLocaleLowerCase();
+    const term = this.normalizeArabic(this.searchTerm);
     if (!term || !this.pdf) {
       this.searchResults = [];
       return;
     }
+
     this.searchBusy = true;
     try {
       if (!this.searchIndex.length) {
         for (let page = 1; page <= this.totalPages; page++) {
+          if (this.destroyed) return;
           const pdfPage = await this.pdf.getPage(page);
           const content = await pdfPage.getTextContent();
-          const text = content.items.map((item: any) => item.str || '').join(' ');
+          const text = this.getTextForSearch(content.items as any[]);
           this.searchIndex.push({ page, text });
         }
       }
+
       this.searchResults = this.searchIndex
-        .filter(item => item.text.toLocaleLowerCase().includes(term))
+        .map(item => ({ ...item, normalized: this.normalizeArabic(item.text) }))
+        .filter(item => item.normalized.includes(term))
         .slice(0, 80)
         .map(item => {
-          const index = item.text.toLocaleLowerCase().indexOf(term);
+          const normalized = item.normalized;
+          const index = normalized.indexOf(term);
+          const original = item.text;
           const start = Math.max(0, index - 55);
-          const end = Math.min(item.text.length, index + term.length + 95);
-          return { page: item.page, snippet: item.text.slice(start, end).trim() };
+          const end = Math.min(original.length, index + term.length + 95);
+          return { page: item.page, snippet: original.slice(start, end).trim() };
         });
+
       this.currentSearchIndex = 0;
     } finally {
       this.searchBusy = false;
