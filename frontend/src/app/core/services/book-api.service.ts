@@ -5,8 +5,10 @@ import { Observable } from 'rxjs';
 export interface Book {
   _id?: string;
   title: string;
-  author: { _id?: string; name: string } | string;
-  category: { _id?: string; name: string } | string;
+  author: { _id?: string; name: string } | string | null;
+  category: { _id?: string; name: string } | string | null;
+  submittedAuthorName?: string;
+  submittedCategoryName?: string;
   description?: string;
   publishedYear?: number;
   rating?: number;
