@@ -20,6 +20,8 @@ router.get("/admin/pending", authenticate, requireAdmin, controller.getPendingBo
 router.patch("/admin/:id/review", authenticate, requireAdmin, controller.reviewBook);
 
 // Serve an approved PDF as a real file download.
+// IMPORTANT: resolve the directory exactly like upload.middleware.js so the
+// result does not depend on the directory from which Node was started.
 router.get("/:id/download", async (req, res) => {
   try {
     const book = await Book.findOne({ _id: req.params.id, status: "approved" }).select("title filePath");
@@ -27,9 +29,15 @@ router.get("/:id/download", async (req, res) => {
     if (!book.filePath) return res.status(404).json({ message: "Book file not found on server." });
 
     const filename = path.basename(book.filePath);
-    const filePath = path.resolve(process.cwd(), "uploads", "books", filename);
+    const booksDir = path.resolve(process.env.UPLOAD_BOOKS_DIR || "uploads/books");
+    const filePath = path.join(booksDir, filename);
 
     if (!fs.existsSync(filePath)) {
+      console.error("Book file missing:", {
+        bookId: book._id.toString(),
+        filePath,
+        storedFilePath: book.filePath
+      });
       return res.status(404).json({ message: "Book file not found on server." });
     }
 
