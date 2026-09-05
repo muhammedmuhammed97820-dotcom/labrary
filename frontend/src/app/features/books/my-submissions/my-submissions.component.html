@@ -1,1 +1,39 @@
-<main class="my-submissions" dir="rtl"><div class="wrap"><header><a routerLink="/books">← المكتبة</a><h1>طلباتي</h1><p>تابع حالة الكتب التي أرسلتها للمكتبة.</p></header>@if(loading){<div class="empty">جارٍ التحميل...</div>}@else if(!books.length){<div class="empty">لا توجد طلبات كتب حتى الآن.</div>}@else{<div class="grid">@for(book of books;track book._id){<article><div class="cover">@if(book.coverImage){<img [src]="api.getFileUrl(book.coverImage)" [alt]="book.title">}@else{📚}</div><div class="info"><h2>{{book.title}}</h2><p>{{author(book)}}</p><span class="status" [class.approved]="book.status==='approved'" [class.rejected]="book.status==='rejected'">{{status(book)}}</span>@if(book.status==='rejected' && book.rejectionReason){<small>سبب الرفض: {{book.rejectionReason}}</small>}</div></article>}}</div>}</div></main>
+<main class="my-submissions" dir="rtl">
+  <div class="wrap">
+    <header>
+      <a routerLink="/books">← المكتبة</a>
+      <h1>طلباتي</h1>
+      <p>تابع حالة الكتب التي أرسلتها للمكتبة.</p>
+    </header>
+
+    @if (loading) {
+      <div class="empty">جارٍ التحميل...</div>
+    } @else if (!books.length) {
+      <div class="empty">لا توجد طلبات كتب حتى الآن.</div>
+    } @else {
+      <div class="grid">
+        @for (book of books; track book._id) {
+          <article>
+            <div class="cover">
+              @if (book.coverImage) {
+                <img [src]="api.getFileUrl(book.coverImage)" [alt]="book.title">
+              } @else {
+                <span>📚</span>
+              }
+            </div>
+            <div class="info">
+              <h2>{{ book.title }}</h2>
+              <p>{{ author(book) }}</p>
+              <span class="status" [class.approved]="book.status === 'approved'" [class.rejected]="book.status === 'rejected'">
+                {{ status(book) }}
+              </span>
+              @if (book.status === 'rejected' && book.rejectionReason) {
+                <small>سبب الرفض: {{ book.rejectionReason }}</small>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</main>
