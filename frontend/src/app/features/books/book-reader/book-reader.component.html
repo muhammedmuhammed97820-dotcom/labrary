@@ -8,7 +8,7 @@
       <div class="reader-brand">
         <a routerLink="/books" class="icon-button" title="العودة إلى المكتبة"><i class="fa-solid fa-arrow-right"></i></a>
         <div class="book-mini-cover"><img [src]="book?.coverImage ? api.getFileUrl(book!.coverImage) : 'assets/images/default-cover.svg'" [alt]="book?.title || ''"></div>
-        <div class="book-heading"><strong>{{ book?.title || 'قارئ الكتب' }}</strong><span>{{ book?.author && typeof book?.author !== 'string' ? book?.author?.name : book?.author || 'المكتبة الإلكترونية' }}</span></div>
+        <div class="book-heading"><strong>{{ book?.title || 'قارئ الكتب' }}</strong><span>{{ authorName() }}</span></div>
       </div>
 
       <div class="page-control" aria-label="التنقل بين الصفحات">
