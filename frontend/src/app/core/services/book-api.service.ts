@@ -30,6 +30,7 @@ export class BookApiService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:5000/api/books';
   private readonly viewerStorageKey = 'electronic_library_viewer_id';
+  private readonly viewedBooksStorageKey = 'electronic_library_viewed_books';
 
   getAll(page = 1, limit = 24, search = ''): Observable<Book[]> {
     let params = new HttpParams();
@@ -76,6 +77,30 @@ export class BookApiService {
 
   remove(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.api}/${id}`);
+  }
+
+  hasViewedBook(id: string): boolean {
+    try {
+      const raw = localStorage.getItem(this.viewedBooksStorageKey);
+      if (!raw) return false;
+      const viewed = JSON.parse(raw);
+      return Array.isArray(viewed) && viewed.includes(id);
+    } catch {
+      return false;
+    }
+  }
+
+  markBookAsViewed(id: string): void {
+    try {
+      const raw = localStorage.getItem(this.viewedBooksStorageKey);
+      const viewed: string[] = Array.isArray(JSON.parse(raw || '[]')) ? JSON.parse(raw || '[]') : [];
+      if (!viewed.includes(id)) {
+        viewed.push(id);
+        localStorage.setItem(this.viewedBooksStorageKey, JSON.stringify(viewed));
+      }
+    } catch {
+      // Backend remains the source of truth if localStorage is unavailable.
+    }
   }
 
   addView(id: string): Observable<{ viewsCount: number; counted: boolean }> {
