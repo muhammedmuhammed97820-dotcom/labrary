@@ -26,7 +26,7 @@ fs.mkdirSync(path.join(uploadsPath, "avatars"), { recursive: true });
 
 app.use(cors({
   origin: frontendUrl,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Viewer-Id"],
   credentials: true
 }));
