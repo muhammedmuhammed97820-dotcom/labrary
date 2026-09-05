@@ -88,14 +88,25 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   }
 
   private async openPdf(url: string): Promise<void> {
-    const loadingTask = pdfjsLib.getDocument({ url });
+    const loadingTask = pdfjsLib.getDocument({
+      url,
+      cMapUrl: 'https://unpkg.com/pdfjs-dist@' + pdfjsLib.version + '/cmaps/',
+      cMapPacked: true,
+    });
+    
     this.pdf = await loadingTask.promise;
     if (this.destroyed) return;
     this.totalPages = this.pdf.numPages;
     this.page = Math.min(this.page, this.totalPages);
     this.pageInput = String(this.page);
     this.loading = false;
-    await this.renderPage();
+    
+    // الانتظار حتى يستقر الـ DOM ويتم رسم الصفحة الأولى بابعاد صحيحة
+    setTimeout(async () => {
+      if (!this.destroyed) {
+        await this.renderPage();
+      }
+    }, 50);
   }
 
   async renderPage(): Promise<void> {
@@ -107,14 +118,22 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       const context = canvas.getContext('2d', { alpha: false });
       if (!context) return;
 
+      // التأكد من أن الـ Viewport لديه عرض حقيقي، وإلا ننتظر قليلاً ليقرأ الأبعاد الصحيحة من الشاشة
+      let clientWidth = this.readerViewport?.nativeElement.clientWidth || 0;
+      if (clientWidth < 100) {
+        await new Promise(resolve => setTimeout(resolve, 60));
+        clientWidth = this.readerViewport?.nativeElement.clientWidth || 800;
+      }
+
       let scale = this.zoom;
       const viewportAtOne = pdfPage.getViewport({ scale: 1, rotation: this.rotation });
+      
       if (this.fitMode === 'width' && this.readerViewport) {
-        const available = Math.max(320, this.readerViewport.nativeElement.clientWidth - 48);
-        scale = Math.max(0.5, available / viewportAtOne.width);
+        const available = Math.max(320, clientWidth - 48);
+        scale = Math.max(0.2, available / viewportAtOne.width);
       } else if (this.fitMode === 'page' && this.readerViewport) {
         const box = this.readerViewport.nativeElement;
-        const availableWidth = Math.max(320, box.clientWidth - 48);
+        const availableWidth = Math.max(320, clientWidth - 48);
         const availableHeight = Math.max(420, box.clientHeight - 48);
         scale = Math.min(availableWidth / viewportAtOne.width, availableHeight / viewportAtOne.height);
       }
