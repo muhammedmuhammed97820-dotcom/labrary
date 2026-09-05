@@ -31,6 +31,7 @@ export class BookApiService {
   private readonly api = 'http://localhost:5000/api/books';
   private readonly viewerStorageKey = 'electronic_library_viewer_id';
   private readonly viewedBooksStorageKey = 'electronic_library_viewed_books';
+  private readonly downloadedBooksStorageKey = 'electronic_library_downloaded_books';
 
   getAll(page = 1, limit = 24, search = ''): Observable<Book[]> {
     let params = new HttpParams();
@@ -40,74 +41,54 @@ export class BookApiService {
     return this.http.get<Book[]>(this.api, { params });
   }
 
-  getAdminAll(): Observable<Book[]> {
-    return this.http.get<Book[]>(`${this.api}/admin/all`);
-  }
-
-  getById(id: string): Observable<Book> {
-    return this.http.get<Book>(`${this.api}/${id}`);
-  }
-
-  create(data: FormData): Observable<{ message: string; book: Book }> {
-    return this.http.post<{ message: string; book: Book }>(this.api, data);
-  }
-
-  submitBook(data: FormData): Observable<{ message: string; book: Book }> {
-    return this.http.post<{ message: string; book: Book }>(this.api, data);
-  }
-
-  mySubmissions(): Observable<Book[]> {
-    return this.http.get<Book[]>(`${this.api}/my-submissions`);
-  }
-
-  adminSubmissions(): Observable<Book[]> {
-    return this.http.get<Book[]>(`${this.api}/admin/pending`);
-  }
-
+  getAdminAll(): Observable<Book[]> { return this.http.get<Book[]>(`${this.api}/admin/all`); }
+  getById(id: string): Observable<Book> { return this.http.get<Book>(`${this.api}/${id}`); }
+  create(data: FormData): Observable<{ message: string; book: Book }> { return this.http.post<{ message: string; book: Book }>(this.api, data); }
+  submitBook(data: FormData): Observable<{ message: string; book: Book }> { return this.http.post<{ message: string; book: Book }>(this.api, data); }
+  mySubmissions(): Observable<Book[]> { return this.http.get<Book[]>(`${this.api}/my-submissions`); }
+  adminSubmissions(): Observable<Book[]> { return this.http.get<Book[]>(`${this.api}/admin/pending`); }
   reviewSubmission(id: string, status: 'approved' | 'rejected', rejectionReason = ''): Observable<{ message: string; book: Book }> {
-    return this.http.patch<{ message: string; book: Book }>(`${this.api}/admin/${id}/review`, {
-      status,
-      rejectionReason
-    });
+    return this.http.patch<{ message: string; book: Book }>(`${this.api}/admin/${id}/review`, { status, rejectionReason });
+  }
+  update(id: string, data: FormData): Observable<{ message: string; book: Book }> { return this.http.put<{ message: string; book: Book }>(`${this.api}/${id}`, data); }
+  remove(id: string): Observable<{ message: string }> { return this.http.delete<{ message: string }>(`${this.api}/${id}`); }
+
+  hasViewedBook(id: string): boolean { return this.hasStoredBookId(this.viewedBooksStorageKey, id); }
+  markBookAsViewed(id: string): void { this.markStoredBookId(this.viewedBooksStorageKey, id); }
+  hasDownloadedBook(id: string): boolean { return this.hasStoredBookId(this.downloadedBooksStorageKey, id); }
+  markBookAsDownloaded(id: string): void { this.markStoredBookId(this.downloadedBooksStorageKey, id); }
+
+  addView(id: string): Observable<{ viewsCount: number; counted: boolean }> {
+    return this.http.post<{ viewsCount: number; counted: boolean }>(`${this.api}/${id}/views`, {}, { headers: this.viewerHeaders() });
   }
 
-  update(id: string, data: FormData): Observable<{ message: string; book: Book }> {
-    return this.http.put<{ message: string; book: Book }>(`${this.api}/${id}`, data);
+  addDownload(id: string): Observable<{ downloads: number; counted: boolean }> {
+    return this.http.post<{ downloads: number; counted: boolean }>(`${this.api}/${id}/downloads`, {}, { headers: this.viewerHeaders() });
   }
 
-  remove(id: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.api}/${id}`);
-  }
+  private viewerHeaders(): HttpHeaders { return new HttpHeaders({ 'X-Viewer-Id': this.getViewerId() }); }
 
-  hasViewedBook(id: string): boolean {
+  private hasStoredBookId(storageKey: string, id: string): boolean {
     try {
-      const raw = localStorage.getItem(this.viewedBooksStorageKey);
+      const raw = localStorage.getItem(storageKey);
       if (!raw) return false;
-      const viewed: unknown = JSON.parse(raw);
-      return Array.isArray(viewed) && viewed.includes(id);
-    } catch {
-      return false;
-    }
+      const parsed: unknown = JSON.parse(raw);
+      return Array.isArray(parsed) && parsed.includes(id);
+    } catch { return false; }
   }
 
-  markBookAsViewed(id: string): void {
+  private markStoredBookId(storageKey: string, id: string): void {
     try {
-      const raw = localStorage.getItem(this.viewedBooksStorageKey);
+      const raw = localStorage.getItem(storageKey);
       const parsed: unknown = raw ? JSON.parse(raw) : [];
-      const viewed: string[] = Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
-      if (!viewed.includes(id)) {
-        viewed.push(id);
-        localStorage.setItem(this.viewedBooksStorageKey, JSON.stringify(viewed));
+      const stored: string[] = Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
+      if (!stored.includes(id)) {
+        stored.push(id);
+        localStorage.setItem(storageKey, JSON.stringify(stored));
       }
     } catch {
       // Backend remains the source of truth if localStorage is unavailable.
     }
-  }
-
-  addView(id: string): Observable<{ viewsCount: number; counted: boolean }> {
-    const viewerId = this.getViewerId();
-    const headers = new HttpHeaders({ 'X-Viewer-Id': viewerId });
-    return this.http.post<{ viewsCount: number; counted: boolean }>(`${this.api}/${id}/views`, {}, { headers });
   }
 
   private getViewerId(): string {
@@ -119,21 +100,13 @@ export class BookApiService {
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       localStorage.setItem(this.viewerStorageKey, generated);
       return generated;
-    } catch {
-      return `temporary-${Date.now()}`;
-    }
+    } catch { return `temporary-${Date.now()}`; }
   }
 
   getFileUrl(filePath: string): string {
     if (/^https?:\/\//i.test(filePath)) return filePath;
     return `http://localhost:5000${filePath.startsWith('/') ? filePath : `/${filePath}`}`;
   }
-
-  getReaderUrl(id: string): string {
-    return `${this.api}/${id}/read`;
-  }
-
-  getDownloadUrl(id: string): string {
-    return `${this.api}/${id}/download`;
-  }
+  getReaderUrl(id: string): string { return `${this.api}/${id}/read`; }
+  getDownloadUrl(id: string): string { return `${this.api}/${id}/download`; }
 }
