@@ -83,7 +83,7 @@ export class BookApiService {
     try {
       const raw = localStorage.getItem(this.viewedBooksStorageKey);
       if (!raw) return false;
-      const viewed = JSON.parse(raw);
+      const viewed: unknown = JSON.parse(raw);
       return Array.isArray(viewed) && viewed.includes(id);
     } catch {
       return false;
@@ -93,7 +93,8 @@ export class BookApiService {
   markBookAsViewed(id: string): void {
     try {
       const raw = localStorage.getItem(this.viewedBooksStorageKey);
-      const viewed: string[] = Array.isArray(JSON.parse(raw || '[]')) ? JSON.parse(raw || '[]') : [];
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      const viewed: string[] = Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
       if (!viewed.includes(id)) {
         viewed.push(id);
         localStorage.setItem(this.viewedBooksStorageKey, JSON.stringify(viewed));
