@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { environment } from '../../../../environments/environment'; // أو المسار الصحيح حسب بيئتك
@@ -10,7 +9,7 @@ import { environment } from '../../../../environments/environment'; // أو ال
 @Component({
   selector: 'app-authors-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   encapsulation: ViewEncapsulation.None,
   templateUrl: './authors-management.component.html',
   styleUrl: './authors-management.component.scss'
