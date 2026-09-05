@@ -1,1 +1,49 @@
-<main class="requests" dir="rtl"><div class="wrap"><header><a routerLink="/admin">← لوحة التحكم</a><span>ADMIN REVIEW</span><h1>طلبات إضافة الكتب</h1><p>راجع الكتب المرسلة من المستخدمين قبل نشرها في المكتبة.</p></header>@if(loading){<div class="empty">جارٍ تحميل الطلبات...</div>}@else if(!books.length){<div class="empty">🎉 لا توجد طلبات معلقة حاليًا.</div>}@else{<section class="grid">@for(book of books;track book._id){<article><div class="cover">@if(book.coverImage){<img [src]="api.getFileUrl(book.coverImage)" [alt]="book.title">}@else{📚}</div><div class="body"><h2>{{book.title}}</h2><p>المؤلف: {{typeof book.author==='string'?book.author:book.author?.name}}</p><p>التصنيف: {{typeof book.category==='string'?book.category:book.category?.name}}</p><p class="desc">{{book.description||'لا يوجد وصف.'}}</p><div class="actions"><button class="approve" (click)="approve(book)">✓ موافقة ونشر</button><button class="reject" (click)="rejecting=book._id||''">✕ رفض</button></div>@if(rejecting===book._id){<div class="reject-box"><textarea [(ngModel)]="reason" placeholder="سبب رفض الكتاب..."></textarea><button (click)="reject(book)">تأكيد الرفض</button></div>}</div></article>}}</section>}</div></main>
+<main class="requests" dir="rtl">
+  <div class="wrap">
+    <header>
+      <a routerLink="/admin">← لوحة التحكم</a>
+      <span>ADMIN REVIEW</span>
+      <h1>طلبات إضافة الكتب</h1>
+      <p>راجع الكتب المرسلة من المستخدمين قبل نشرها في المكتبة.</p>
+    </header>
+
+    @if (loading) {
+      <div class="empty">جارٍ تحميل الطلبات...</div>
+    } @else if (!books.length) {
+      <div class="empty">🎉 لا توجد طلبات معلقة حاليًا.</div>
+    } @else {
+      <section class="grid">
+        @for (book of books; track book._id) {
+          <article>
+            <div class="cover">
+              @if (book.coverImage) {
+                <img [src]="api.getFileUrl(book.coverImage)" [alt]="book.title">
+              } @else {
+                <span>📚</span>
+              }
+            </div>
+
+            <div class="body">
+              <h2>{{ book.title }}</h2>
+              <p>المؤلف: {{ author(book) }}</p>
+              <p>التصنيف: {{ category(book) }}</p>
+              <p class="desc">{{ book.description || 'لا يوجد وصف.' }}</p>
+
+              <div class="actions">
+                <button class="approve" type="button" (click)="approve(book)">✓ موافقة ونشر</button>
+                <button class="reject" type="button" (click)="rejecting = book._id || ''">✕ رفض</button>
+              </div>
+
+              @if (rejecting === book._id) {
+                <div class="reject-box">
+                  <textarea [(ngModel)]="reason" placeholder="سبب رفض الكتاب..."></textarea>
+                  <button type="button" (click)="reject(book)">تأكيد الرفض</button>
+                </div>
+              }
+            </div>
+          </article>
+        }
+      </section>
+    }
+  </div>
+</main>
