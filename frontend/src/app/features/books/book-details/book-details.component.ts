@@ -32,6 +32,7 @@ export class BookDetailsComponent implements OnInit {
   loading = true;
   error = '';
   favoriteBusy = false;
+  downloadBusy = false;
   private viewRequestStarted = false;
 
   ngOnInit(): void {
@@ -63,23 +64,16 @@ export class BookDetailsComponent implements OnInit {
 
   private registerViewOnce(): void {
     if (!this.bookId || this.viewRequestStarted || this.api.hasViewedBook(this.bookId)) return;
-
     this.viewRequestStarted = true;
     this.api.addView(this.bookId).subscribe({
       next: result => {
-        // Mark locally even when the backend reports counted=false, because that
-        // means this browser has already viewed this book.
         this.api.markBookAsViewed(this.bookId);
         if (this.book) {
           this.book.viewsCount = result.viewsCount;
           this.cdr.detectChanges();
         }
       },
-      error: (err: unknown) => {
-        // Do not mark failed requests as viewed so a temporary network/server
-        // failure can be retried on the next successful page load.
-        console.warn('Failed to register view count:', err);
-      }
+      error: (err: unknown) => console.warn('Failed to register view count:', err)
     });
   }
 
@@ -88,26 +82,24 @@ export class BookDetailsComponent implements OnInit {
   cover(): string { return this.book?.coverImage ? this.api.getFileUrl(this.book.coverImage) : 'assets/images/default-cover.svg'; }
   fileUrl(): string { return this.book?.filePath ? this.api.getFileUrl(this.book.filePath) : ''; }
 
-  isFavorite(): boolean { const id = String(this.book?._id || ''); return !!id && (this.auth.currentUser?.favorites || []).some(f => String(f) === id); }
+  isFavorite(): boolean {
+    const id = String(this.book?._id || '');
+    return !!id && (this.auth.currentUser?.favorites || []).some(f => String(f) === id);
+  }
 
   toggleFavorite(): void {
     const id = String(this.book?._id || '');
     if (!id || this.favoriteBusy) return;
-
     if (!this.auth.isLoggedIn) {
       this.notify.show('سجّل الدخول أولًا لإضافة الكتب إلى المفضلة.', 'error');
       return;
     }
-
     this.favoriteBusy = true;
     this.http.post<FavoriteResponse>(`${environment.apiUrl}/auth/favorites/${id}/toggle`, {}).subscribe({
       next: response => {
         const user = this.auth.currentUser;
         if (user) this.auth.updateUser({ ...user, favorites: (response.favorites || []).map(String) });
-
-        const msg = response.favorite ? 'تمت إضافة الكتاب إلى المفضلة ✓' : 'تمت إزالة الكتاب من المفضلة ✓';
-        this.notify.show(msg, 'success');
-
+        this.notify.show(response.favorite ? 'تمت إضافة الكتاب إلى المفضلة ✓' : 'تمت إزالة الكتاب من المفضلة ✓', 'success');
         this.favoriteBusy = false;
         this.cdr.detectChanges();
       },
@@ -121,6 +113,33 @@ export class BookDetailsComponent implements OnInit {
   }
 
   download(): void {
-    if (this.bookId) window.open(this.api.getDownloadUrl(this.bookId), '_blank', 'noopener,noreferrer');
+    if (!this.bookId || this.downloadBusy) return;
+
+    // The browser-side check prevents duplicate requests, while the backend's
+    // unique index remains the final source of truth against repeated calls.
+    if (this.api.hasDownloadedBook(this.bookId)) {
+      window.open(this.api.getDownloadUrl(this.bookId), '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    this.downloadBusy = true;
+    this.api.addDownload(this.bookId).subscribe({
+      next: result => {
+        this.api.markBookAsDownloaded(this.bookId);
+        if (this.book) {
+          this.book.downloads = result.downloads;
+          this.cdr.detectChanges();
+        }
+        window.open(this.api.getDownloadUrl(this.bookId), '_blank', 'noopener,noreferrer');
+        this.downloadBusy = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: unknown) => {
+        console.error('Download count error:', err);
+        this.notify.show('تعذر بدء التحميل. حاول مرة أخرى.', 'error');
+        this.downloadBusy = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
