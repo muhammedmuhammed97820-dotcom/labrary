@@ -29,7 +29,7 @@ $font-cairo: 'Cairo', sans-serif;
   color: var(--text-primary);
   font-family: $font-cairo;
   padding: 50px 20px 100px;
-  margin-top: 65px;
+  margin-top: 0;
   transition: background-color 0.4s ease, color 0.4s ease;
 
   .admin-container {
@@ -274,10 +274,10 @@ $font-cairo: 'Cairo', sans-serif;
           }
 
           .b-footer { 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            font-size: 0.72rem; 
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
             color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
