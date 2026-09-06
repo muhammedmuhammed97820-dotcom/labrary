@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const User = require('../models/user.model');
 const Book = require('../models/Book');
+const { uploadBuffer, getFile, openDownloadStream, deleteFile } = require('../services/gridfs.service');
 
 function tokenFor(user) {
   const secret = process.env.JWT_SECRET;
@@ -17,12 +18,12 @@ function publicUser(user) {
     name: user.name,
     email: user.email,
     role: user.role,
-    avatar: user.avatar || null,
+    avatar: user.avatarFileId ? `/api/auth/avatar/${user.avatarFileId}` : user.avatar || null,
     favorites: (user.favorites || []).map(String)
   };
 }
 
-function removeStoredAvatar(avatar) {
+function removeLegacyAvatar(avatar) {
   if (!avatar || typeof avatar !== 'string') return;
   const prefix = '/uploads/avatars/';
   if (!avatar.startsWith(prefix)) return;
@@ -62,6 +63,17 @@ async function me(req, res) {
   res.json({ user: publicUser(req.user) });
 }
 
+async function getAvatar(req, res, next) {
+  try {
+    const file = await getFile(req.params.id, 'libraryAvatars');
+    if (!file) return res.status(404).json({ message: 'Avatar not found.' });
+    res.setHeader('Content-Type', file.contentType || 'application/octet-stream');
+    res.setHeader('Content-Length', file.length);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    return openDownloadStream(req.params.id, 'libraryAvatars').pipe(res);
+  } catch (error) { next(error); }
+}
+
 async function updateProfile(req, res, next) {
   try {
     const { name, removeAvatar } = req.body;
@@ -71,16 +83,35 @@ async function updateProfile(req, res, next) {
       req.user.name = cleanName;
     }
 
+    let newAvatarId = null;
+    const oldAvatarId = req.user.avatarFileId;
+    const oldLegacyAvatar = req.user.avatar;
+
     if (req.file) {
-      const oldAvatar = req.user.avatar;
-      req.user.avatar = `/uploads/avatars/${req.file.filename}`;
-      removeStoredAvatar(oldAvatar);
+      newAvatarId = await uploadBuffer(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        { type: 'profile-avatar', userId: req.user._id.toString() },
+        'libraryAvatars'
+      );
+      req.user.avatarFileId = newAvatarId;
+      req.user.avatar = null;
     } else if (String(removeAvatar).toLowerCase() === 'true') {
-      removeStoredAvatar(req.user.avatar);
+      req.user.avatarFileId = null;
       req.user.avatar = null;
     }
 
-    await req.user.save();
+    try {
+      await req.user.save();
+    } catch (error) {
+      if (newAvatarId) await deleteFile(newAvatarId, 'libraryAvatars').catch(() => {});
+      throw error;
+    }
+
+    if (newAvatarId && oldAvatarId) await deleteFile(oldAvatarId, 'libraryAvatars').catch(() => {});
+    if (newAvatarId || String(removeAvatar).toLowerCase() === 'true') removeLegacyAvatar(oldLegacyAvatar);
+
     res.json({ message: 'Profile updated successfully.', user: publicUser(req.user) });
   } catch (error) { next(error); }
 }
@@ -102,4 +133,4 @@ async function toggleFavorite(req, res, next) {
   } catch (error) { next(error); }
 }
 
-module.exports = { register, login, me, updateProfile, toggleFavorite };
+module.exports = { register, login, me, getAvatar, updateProfile, toggleFavorite };
