@@ -1,16 +1,23 @@
 <main class="requests" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="wrap">
     <header>
-      <a routerLink="/admin">← لوحة التحكم</a>
-      <span>ADMIN REVIEW</span>
+      <a routerLink="/admin">
+        <i class="fa-solid fa-arrow-right"></i> لوحة التحكم
+      </a>
+      <span>ADMIN REVIEW DASHBOARD</span>
       <h1>طلبات إضافة الكتب</h1>
-      <p>راجع الكتب المرسلة من المستخدمين قبل نشرها في المكتبة.</p>
+      <p>راجع الكتب المرسلة من المستخدمين قبل اعتمادها ونشرها في المكتبة.</p>
     </header>
 
     @if (loading) {
-      <div class="empty">جارٍ تحميل الطلبات...</div>
+      <div class="empty">
+        <i class="fa-solid fa-spinner spin fa-2x mb-3" style="color: var(--accent-gold);"></i>
+        <p class="mb-0">جارٍ تحميل الطلبات...</p>
+      </div>
     } @else if (!books.length) {
-      <div class="empty">🎉 لا توجد طلبات معلقة حاليًا.</div>
+      <div class="empty">
+        <p class="mb-0">لا توجد طلبات معلقة حاليًا.</p>
+      </div>
     } @else {
       <section class="grid">
         @for (book of books; track book._id) {
@@ -19,25 +26,39 @@
               @if (book.coverImage) {
                 <img [src]="api.getFileUrl(book.coverImage)" [alt]="book.title">
               } @else {
-                <span>📚</span>
+                <span>غلاف</span>
               }
             </div>
 
             <div class="body">
               <h2>{{ book.title }}</h2>
-              <p>المؤلف: {{ author(book) }}</p>
-              <p>التصنيف: {{ category(book) }}</p>
-              <p class="desc">{{ book.description || 'لا يوجد وصف.' }}</p>
+              <p><strong>المؤلف:</strong> {{ author(book) }}</p>
+              <p><strong>التصنيف:</strong> {{ category(book) }}</p>
+              <p class="desc">{{ book.description || 'لا يوجد وصف متاح.' }}</p>
 
               <div class="actions">
-                <button class="approve" type="button" (click)="approve(book)">✓ موافقة ونشر</button>
-                <button class="reject" type="button" (click)="rejecting = book._id || ''">✕ رفض</button>
+                <button class="approve" type="button" (click)="approve(book)" [disabled]="processing === book._id">
+                  @if (processing === book._id) {
+                    <i class="fa-solid fa-spinner spin me-1"></i> معالجة...
+                  } @else {
+                    <i class="fa-solid fa-check me-1"></i> موافقة ونشر
+                  }
+                </button>
+                <button class="reject" type="button" (click)="rejecting = rejecting === book._id ? '' : (book._id || '')">
+                  <i class="fa-solid fa-xmark me-1"></i> رفض
+                </button>
               </div>
 
               @if (rejecting === book._id) {
                 <div class="reject-box">
-                  <textarea [(ngModel)]="reason" placeholder="سبب رفض الكتاب..."></textarea>
-                  <button type="button" (click)="reject(book)">تأكيد الرفض</button>
+                  <textarea [(ngModel)]="reason" placeholder="اكتب سبب رفض الكتاب ليرسل للمستخدم..."></textarea>
+                  <button type="button" (click)="reject(book)" [disabled]="processing === book._id">
+                    @if (processing === book._id) {
+                      <i class="fa-solid fa-spinner spin"></i>
+                    } @else {
+                      تأكيد الرفض
+                    }
+                  </button>
                 </div>
               }
             </div>

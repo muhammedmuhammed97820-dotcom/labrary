@@ -2,59 +2,88 @@ $font-cairo: 'Cairo', sans-serif;
 $font-amiri: 'Amiri', serif;
 
 .auth-wrapper {
-  --admin-bg: #f1f5f9;
+  --admin-bg: #f8fafc;
   --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+  --text-primary: #090d16;
+  --text-secondary: #64748b;
   --accent-gold: #d97706;
   --accent-gold-hover: #b45309;
-  --card-inner-bg: rgba(255, 255, 255, 0.9);
+  --card-inner-bg: rgba(255, 255, 255, 0.6);
+  --glow-color: rgba(217, 119, 6, 0.15);
 
   &.dark-theme {
-    --admin-bg: #0b0f17;
-    --glass-bg: rgba(18, 24, 38, 0.85);
+    --admin-bg: #07090e;
+    --glass-bg: rgba(13, 18, 28, 0.7);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
-    --accent-gold: #f59e0b;
-    --accent-gold-hover: #fbbf24;
-    --card-inner-bg: rgba(30, 41, 59, 0.8);
+    --accent-gold: #fbbf24;
+    --accent-gold-hover: #f59e0b;
+    --card-inner-bg: rgba(18, 25, 40, 0.5);
+    --glow-color: rgba(251, 191, 36, 0.12);
   }
 
   min-height: 100vh;
   background-color: var(--admin-bg);
   color: var(--text-primary);
   font-family: $font-cairo;
-  transition: all 0.3s ease;
+  position: relative;
+  overflow-x: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* إضاءة خلفية جمالية متوهجة متوافقة مع الهوية */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    right: 20%;
+    width: 400px;
+    height: 400px;
+    background: var(--glow-color);
+    filter: blur(100px);
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+  }
 
   .admin-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(245, 158, 11, 0.15);
+    background: var(--glow-color);
+    border: 1px solid rgba(245, 158, 11, 0.2);
     color: var(--accent-gold);
     font-size: 0.82rem;
     font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 20px;
+    padding: 6px 16px;
+    border-radius: 30px;
     letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   }
 
   .auth-hero-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    border-radius: 24px;
+    border-radius: 28px;
     overflow: hidden;
+    transition: transform 0.3s ease;
 
     h1 {
       font-family: $font-amiri;
-      line-height: 1.2;
+      line-height: 1.25;
       color: var(--text-primary);
+      letter-spacing: -0.5px;
 
       .text-highlight {
         color: var(--accent-gold);
@@ -64,75 +93,83 @@ $font-amiri: 'Amiri', serif;
     .quote-box {
       background: var(--card-inner-bg);
       border: 1px solid var(--glass-border);
-      padding: 20px;
-      border-radius: 16px;
+      padding: 24px;
+      border-radius: 20px;
       color: var(--text-secondary);
       font-family: $font-amiri;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.02);
 
       .quote-icon {
         color: var(--accent-gold);
-        opacity: 0.3;
-        font-size: 2rem;
+        opacity: 0.25;
+        font-size: 2.2rem;
         position: absolute;
-        left: 15px;
-        bottom: 10px;
+        left: 20px;
+        bottom: 12px;
       }
     }
   }
 
   .auth-form-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    border-radius: 24px;
+    border-radius: 28px;
+    transition: transform 0.3s ease;
 
     .logo-brand {
       color: var(--text-primary) !important;
-      font-size: 1.25rem;
+      font-size: 1.3rem;
 
       .logo-badge {
-        background: var(--accent-gold);
+        background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-hover));
         color: #fff;
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: $font-amiri;
         font-weight: bold;
+        box-shadow: 0 6px 15px var(--glow-color);
       }
     }
 
     h2 {
       font-family: $font-amiri;
       color: var(--text-primary);
+      letter-spacing: -0.5px;
     }
 
     .alert-custom {
-      padding: 12px 16px;
-      border-radius: 12px;
+      padding: 14px 18px;
+      border-radius: 16px;
       font-weight: 600;
       font-size: 0.95rem;
+      backdrop-filter: blur(12px);
 
       &.error {
         background: rgba(239, 68, 68, 0.12);
         color: #ef4444;
-        border: 1px solid rgba(239, 68, 68, 0.25);
+        border: 1px solid rgba(239, 68, 68, 0.3);
       }
 
       &.success {
         background: rgba(34, 197, 94, 0.12);
         color: #22c55e;
-        border: 1px solid rgba(34, 197, 94, 0.25);
+        border: 1px solid rgba(34, 197, 94, 0.3);
       }
     }
 
     .form-label {
       color: var(--text-primary);
+      font-size: 0.92rem;
+      font-weight: 700;
     }
 
     .input-with-icon {
@@ -140,69 +177,74 @@ $font-amiri: 'Amiri', serif;
 
       .input-icon {
         position: absolute;
-        right: 16px;
+        right: 18px;
         top: 50%;
         transform: translateY(-50%);
         color: var(--text-secondary);
+        font-size: 1.05rem;
       }
 
       .glass-control {
         width: 100%;
-        padding: 12px 45px 12px 45px;
-        border-radius: 14px;
+        padding: 14px 48px 14px 48px;
+        border-radius: 16px;
         border: 1px solid var(--glass-border);
         background: var(--card-inner-bg);
         color: var(--text-primary);
         font-family: $font-cairo;
         font-size: 1rem;
         outline: none;
-        transition: border-color 0.25s;
+        transition: all 0.25s ease;
 
         &:focus {
           border-color: var(--accent-gold);
+          box-shadow: 0 0 0 4px var(--glow-color);
+          background: var(--glass-bg);
         }
       }
 
       .password-toggle-btn {
         position: absolute;
-        left: 14px;
+        left: 16px;
         top: 50%;
         transform: translateY(-50%);
         background: none;
         border: none;
         color: var(--text-secondary);
         cursor: pointer;
-        font-size: 1rem;
+        font-size: 1.05rem;
+        transition: color 0.2s;
 
         &:hover { color: var(--accent-gold); }
       }
     }
 
     .submit-btn {
-      background: var(--accent-gold);
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-hover));
       color: #fff;
       border: none;
       padding: 14px;
-      border-radius: 14px;
+      border-radius: 16px;
       font-weight: 700;
       font-size: 1.05rem;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-      transition: all 0.25s ease;
+      box-shadow: 0 8px 25px var(--glow-color);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
       &:hover:not(:disabled) {
-        background: var(--accent-gold-hover);
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(245, 158, 11, 0.35);
       }
 
       &:disabled {
         opacity: 0.7;
-        cursor: not-allowed;
+        cursor: wait;
       }
     }
 
     .separator {
       border-color: var(--glass-border);
+      opacity: 0.8;
     }
 
     .switch-mode-btn {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewEncapsulation, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewEncapsulation, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -19,6 +19,7 @@ export class ProfileComponent {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
   private readonly notify = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef); // <--- أضفنا كاشف التغييرات
   public readonly themeService = inject(ThemeService);
   
   private readonly api = 'http://localhost:5000/api';
@@ -40,7 +41,6 @@ export class ProfileComponent {
     return this.user?.favorites?.length || 0;
   }
 
-  // تم تحديث الدالة لضمان معالجة مسارات الصور النسبية والمطلقة بدقة تامة
   get avatarUrl(): string | null {
     if (!this.avatar) return null;
     if (/^data:|^blob:|^https?:\/\//i.test(this.avatar)) {
@@ -63,6 +63,7 @@ export class ProfileComponent {
       this.error = 'اختر صورة بصيغة JPG أو PNG أو WEBP.';
       this.notify.show(this.error, 'error');
       input.value = '';
+      this.cdr.detectChanges(); // <--- تحديث الواجهة عند الخطأ
       return;
     }
 
@@ -70,6 +71,7 @@ export class ProfileComponent {
       this.error = 'حجم الصورة يجب ألا يتجاوز 5 ميجابايت.';
       this.notify.show(this.error, 'error');
       input.value = '';
+      this.cdr.detectChanges(); // <--- تحديث الواجهة عند الخطأ
       return;
     }
 
@@ -78,7 +80,10 @@ export class ProfileComponent {
     this.error = '';
 
     const reader = new FileReader();
-    reader.onload = () => (this.avatar = String(reader.result));
+    reader.onload = () => {
+      this.avatar = String(reader.result);
+      this.cdr.detectChanges(); // <--- تحديث واجهة المعاينة فور تحميل قراءة الملف
+    };
     reader.readAsDataURL(file);
   }
 
@@ -87,6 +92,7 @@ export class ProfileComponent {
     this.avatarFile = null;
     this.avatarRemoved = true;
     this.error = '';
+    this.cdr.detectChanges(); // <--- تحديث الواجهة عند الحذف
   }
 
   save(): void {
@@ -95,11 +101,13 @@ export class ProfileComponent {
     if (!cleanName) {
       this.error = 'حقل الاسم الكامل مطلوب.';
       this.notify.show(this.error, 'error');
+      this.cdr.detectChanges();
       return;
     }
 
     this.saving = true;
     this.error = '';
+    this.cdr.detectChanges(); // <--- تفعيل حالة التحميل للزر فور الضغط
 
     const hasFileChange = !!this.avatarFile || this.avatarRemoved;
     const requestBody: FormData | { name: string } = hasFileChange
@@ -117,11 +125,13 @@ export class ProfileComponent {
         
         this.notify.show('تم حفظ التغييرات بنجاح ✓', 'success');
         this.saving = false;
+        this.cdr.detectChanges(); // <--- إيقاف التحميل وتحديث واجهة المستخدم بنجاح
       },
       error: err => {
         this.error = err?.error?.message || 'تعذر حفظ التغييرات. تأكد من تشغيل الخادم ثم حاول مرة أخرى.';
         this.notify.show(this.error, 'error');
         this.saving = false;
+        this.cdr.detectChanges(); // <--- إيقاف التحميل وإظهار رسالة الخطأ فوراً
       }
     });
   }

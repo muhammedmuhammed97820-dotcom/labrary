@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewEncapsulation, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewEncapsulation, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { BookApiService } from '../../../core/services/book-api.service';
@@ -18,6 +18,7 @@ export class BookSubmitComponent {
   private readonly api = inject(BookApiService);
   private readonly router = inject(Router);
   private readonly notify = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef); // <--- أضفنا حقن كاشف التغييرات
   public readonly themeService = inject(ThemeService);
 
   form = { title: '', author: '', category: '', description: '', publishedYear: '' };
@@ -28,6 +29,7 @@ export class BookSubmitComponent {
 
   onBookFile(event: Event): void {
     this.bookFile = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.cdr.detectChanges();
   }
 
   onCover(event: Event): void {
@@ -35,10 +37,14 @@ export class BookSubmitComponent {
     this.coverImage = file;
     if (!file) {
       this.coverPreviewUrl = null;
+      this.cdr.detectChanges();
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => this.coverPreviewUrl = reader.result as string;
+    reader.onload = () => {
+      this.coverPreviewUrl = reader.result as string;
+      this.cdr.detectChanges(); // <--- تحديث المعاينة فور تحميل الصورة
+    };
     reader.readAsDataURL(file);
   }
 
@@ -53,11 +59,13 @@ export class BookSubmitComponent {
     data.append('bookFile', this.bookFile);
     data.append('coverImage', this.coverImage);
     this.submitting = true;
+    this.cdr.detectChanges(); // <--- تحديث حالة الزر ليظهر علامة التحميل
 
     this.api.submitBook(data).subscribe({
       next: (response: any) => {
         this.submitting = false;
         this.notify.show(response?.message || 'تم إرسال الكتاب للمراجعة.', 'success');
+        this.cdr.detectChanges(); // <--- إعادة الزر لحالته الطبيعية
         this.router.navigate(['/my-submissions']);
       },
       error: (error: unknown) => {
@@ -66,6 +74,7 @@ export class BookSubmitComponent {
           ? ((error as { error?: { message?: string } }).error?.message || 'تعذر إرسال الكتاب.')
           : 'تعذر إرسال الكتاب.';
         this.notify.show(message, 'error');
+        this.cdr.detectChanges(); // <--- إيقاف التحميل وإظهار الخطأ
       }
     });
   }

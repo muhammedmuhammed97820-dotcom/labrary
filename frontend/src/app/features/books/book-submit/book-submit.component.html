@@ -1,27 +1,100 @@
-<main class="submission-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
-  <div class="submission-card">
-    <header>
-      <span class="eyebrow">COMMUNITY LIBRARY</span>
-      <h1>إضافة كتاب للمكتبة</h1>
-      <p>أرسل كتابك وسيقوم فريق الإدارة بمراجعته قبل نشره.</p>
-    </header>
-    <form (ngSubmit)="submit()">
-      <div class="fields">
-        <label>عنوان الكتاب *<input [(ngModel)]="form.title" name="title" required placeholder="عنوان الكتاب"></label>
-        <label>المؤلف *<input [(ngModel)]="form.author" name="author" required placeholder="اسم المؤلف"></label>
-        <label>التصنيف *<input [(ngModel)]="form.category" name="category" required placeholder="التصنيف"></label>
-        <label>سنة النشر<input [(ngModel)]="form.publishedYear" name="publishedYear" type="number"></label>
+<main class="admin-dashboard-wrapper book-details-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
+    
+    <!-- شريط التنقل العلوي -->
+    <div class="details-top-bar">
+      <a routerLink="/books" class="back-nav-btn">
+        <i class="fa-solid fa-arrow-right"></i>
+        <span>العودة إلى المكتبة</span>
+      </a>
+      <span class="book-id-badge">
+        <i class="fa-solid fa-cloud-arrow-up"></i> COMMUNITY LIBRARY SUBMISSION
+      </span>
+    </div>
+
+    <!-- بطاقة النموذج الرئيسية بنسق الـ Glassmorphism -->
+    <div class="panel-glass-card">
+      <div class="panel-header mb-4">
+        <span class="panel-tag">NEW BOOK SUBMISSION</span>
+        <h1 class="panel-title display-title">إضافة كتاب جديد للمكتبة</h1>
+        <p class="details-desc mt-2">أرسل كتابك وسيقوم فريق الإدارة بمراجعته ونشره في أسرع وقت ليكون متاحاً لزوار المنصة.</p>
       </div>
-      <label>الوصف<textarea [(ngModel)]="form.description" name="description" rows="5" placeholder="نبذة عن الكتاب"></textarea></label>
-      <div class="uploads">
-        <label class="upload">📄 ملف PDF<input type="file" accept="application/pdf" (change)="onBookFile($event)" required><small>{{ bookFile?.name || 'اختر ملف الكتاب' }}</small></label>
-        <label class="upload">🖼️ غلاف الكتاب<input type="file" accept="image/*" (change)="onCover($event)" required><small>{{ coverImage?.name || 'اختر صورة الغلاف' }}</small></label>
-      </div>
-      @if (coverPreviewUrl) { <img class="preview" [src]="coverPreviewUrl" alt="معاينة الغلاف"> }
-      <div class="actions">
-        <a routerLink="/books">إلغاء</a>
-        <button type="submit" [disabled]="submitting">{{ submitting ? 'جارٍ الإرسال...' : 'إرسال للمراجعة' }}</button>
-      </div>
-    </form>
+
+      <form (ngSubmit)="submit()" class="submission-form">
+        
+        <!-- قسم المعلومات الأساسية -->
+        <h3 class="section-subtitle mb-3"><i class="fa-solid fa-circle-info me-2 text-warning"></i> بيانات الكتاب الأساسية</h3>
+        
+        <div class="fields-grid-custom mb-4">
+          <label class="custom-input-group">
+            <span class="input-label">عنوان الكتاب <span class="text-danger">*</span></span>
+            <input [(ngModel)]="form.title" name="title" required placeholder="عنوان الكتاب">
+          </label>
+
+          <label class="custom-input-group">
+            <span class="input-label">المؤلف <span class="text-danger">*</span></span>
+            <input [(ngModel)]="form.author" name="author" required placeholder="اسم المؤلف">
+          </label>
+
+          <label class="custom-input-group">
+            <span class="input-label">التصنيف <span class="text-danger">*</span></span>
+            <input [(ngModel)]="form.category" name="category" required placeholder="التصنيف">
+          </label>
+
+          <label class="custom-input-group">
+            <span class="input-label">سنة النشر</span>
+            <input [(ngModel)]="form.publishedYear" name="publishedYear" type="number" placeholder="مثال: 2026">
+          </label>
+        </div>
+
+        <label class="custom-input-group mb-4">
+          <span class="input-label">الوصف والنبذة</span>
+          <textarea [(ngModel)]="form.description" name="description" rows="4" placeholder="نبذة مختصرة عن الكتاب ومحتواه..."></textarea>
+        </label>
+
+        <!-- قسم المرفقات (ملف الكتاب والغلاف) -->
+        <h3 class="section-subtitle mb-3"><i class="fa-solid fa-folder-open me-2 text-warning"></i> ملفات المرفقات</h3>
+        
+        <div class="uploads-grid-custom mb-4">
+          <label class="upload-glass-box" [class.has-file]="bookFile">
+            <div class="upload-icon-wrap"><i class="fa-solid fa-file-pdf"></i></div>
+            <div class="upload-text-info">
+              <span class="upload-title">ملف الكتاب (PDF) <span class="text-danger">*</span></span>
+              <small>{{ bookFile?.name || 'اختر ملف الكتاب بصيغة PDF' }}</small>
+            </div>
+            <input type="file" accept="application/pdf" (change)="onBookFile($event)" required>
+          </label>
+
+          <label class="upload-glass-box" [class.has-file]="coverImage">
+            <div class="upload-icon-wrap"><i class="fa-solid fa-image"></i></div>
+            <div class="upload-text-info">
+              <span class="upload-title">غلاف الكتاب <span class="text-danger">*</span></span>
+              <small>{{ coverImage?.name || 'اختر صورة الغلاف المناسبة' }}</small>
+            </div>
+            <input type="file" accept="image/*" (change)="onCover($event)" required>
+          </label>
+        </div>
+
+        @if (coverPreviewUrl) {
+          <div class="preview-container mb-4">
+            <span class="input-label mb-2">معاينة الغلاف:</span>
+            <div class="cover-image-preview-wrapper">
+              <img class="preview-cover-img" [src]="coverPreviewUrl" alt="معاينة الغلاف">
+            </div>
+          </div>
+        }
+
+        <!-- أزرار الإجراءات -->
+        <div class="actions-button-group mt-4 pt-3 border-top-custom">
+          <a routerLink="/books" class="retry-btn-outline text-decoration-none">إلغاء</a>
+          <button type="submit" class="add-book-btn border-0" [disabled]="submitting">
+            <i class="fa-solid" [class.fa-spinner]="submitting" [class.fa-spin]="submitting" [class.fa-paper-plane]="!submitting"></i>
+            <span>{{ submitting ? 'جارٍ الإرسال...' : 'إرسال للمراجعة' }}</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
   </div>
 </main>

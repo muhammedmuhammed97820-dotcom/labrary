@@ -12,7 +12,7 @@
                 DIGITAL LIBRARY · 2026
               </span>
               <h1 class="display-4 fw-bold">عالم كامل من<br><span class="text-highlight">المعرفة</span> بانتظارك.</h1>
-              <p class="lead mt-3 text-secondary">اكتشف الكتب، احفظ ما تحب، وواصل القراءة من المكان الذي توقفت عنده بكل سهولة.</p>
+              <p class="lead mt-3 text-secondary">اكتشف الكتب، احفظ ما تحب، وواصل القراءة من المكان الذي توقفت عنده بكل سلاسة وفخامة.</p>
             </div>
             
             <div class="quote-box">
@@ -57,7 +57,7 @@
             <form (ngSubmit)="submit()">
               @if (mode === 'register') {
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">الاسم الكامل</label>
+                  <label class="form-label">الاسم الكامل</label>
                   <div class="input-with-icon">
                     <i class="fa-solid fa-user input-icon"></i>
                     <input class="glass-control" name="name" [(ngModel)]="name" placeholder="اسمك الكريم">
@@ -66,7 +66,7 @@
               }
 
               <div class="mb-3">
-                <label class="form-label fw-semibold">البريد الإلكتروني</label>
+                <label class="form-label">البريد الإلكتروني</label>
                 <div class="input-with-icon">
                   <i class="fa-solid fa-envelope input-icon"></i>
                   <input class="glass-control" name="email" [(ngModel)]="email" type="email" placeholder="name@example.com" required>
@@ -74,7 +74,7 @@
               </div>
 
               <div class="mb-4">
-                <label class="form-label fw-semibold">كلمة المرور</label>
+                <label class="form-label">كلمة المرور</label>
                 <div class="input-with-icon">
                   <i class="fa-solid fa-lock input-icon"></i>
                   <input class="glass-control" name="password" [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" placeholder="••••••••" required>

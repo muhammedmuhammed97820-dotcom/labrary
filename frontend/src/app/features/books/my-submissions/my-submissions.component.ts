@@ -1,42 +1,86 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { BookApiService, Book } from '../../../core/services/book-api.service';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { ThemeService } from '../../../core/services/theme.service';
+
+interface SubmissionBook {
+  _id?: string;
+  id?: string | number;
+  title?: string;
+  description?: string;
+  coverImage?: string;
+  author?: { name?: string; _id?: string } | string;
+  status?: string;
+  rejectionReason?: string;
+}
 
 @Component({
   selector: 'app-my-submissions',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
+  encapsulation: ViewEncapsulation.None,
   templateUrl: './my-submissions.component.html',
   styleUrl: './my-submissions.component.scss'
 })
 export class MySubmissionsComponent implements OnInit {
-  readonly api = inject(BookApiService);
+  private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
+  private readonly notify = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
   public readonly themeService = inject(ThemeService);
-  books: Book[] = [];
-  loading = true;
+  
+  private readonly serverOrigin = 'http://localhost:5000';
 
-  ngOnInit(): void {
-    this.api.mySubmissions().subscribe({
-      next: (res: any) => {
-        console.log('API Response:', res); // سيظهر لك شكل البيانات في المتصفح F12
-        // التعامل مع مختلف أشكال الاستجابة (مصفوفة مباشرة أو مغلفة في كائن)
-        this.books = Array.isArray(res) ? res : (res?.data || res?.books || []);
+  books: SubmissionBook[] = [];
+  loading = true;
+  error = '';
+
+  ngOnInit() {
+    this.load();
+  }
+
+  load() {
+    this.loading = true;
+    this.error = '';
+
+    const url = `${this.serverOrigin}/api/books/my-submissions`;
+
+    this.http.get<any>(url).subscribe({
+      next: (res) => {
+        this.books = Array.isArray(res) ? res : (res.books ?? res.data ?? []);
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('API Error:', err); // سيوضح أي خطأ صامت من الخادم
+        console.error('Fetch submissions error:', err);
+        this.error = err?.error?.message || 'تعذر جلب طلبات الكتب، يرجى المحاولة لاحقاً.';
         this.loading = false;
+        this.notify.show(this.error, 'error');
+        this.cdr.detectChanges();
       }
     });
   }
 
-  author(book: Book): string {
-    return typeof book.author === 'string' ? book.author : book.author?.name || '—';
+  getFileUrl(cover: string): string {
+    if (!cover) return '';
+    if (/^data:|^blob:|^https?:\/\//i.test(cover)) return cover;
+    return `${this.serverOrigin}${cover.startsWith('/') ? cover : `/${cover}`}`;
   }
 
-  status(book: Book): string {
-    return book.status === 'approved' ? 'تمت الموافقة' : book.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة';
+  author(book: SubmissionBook): string {
+    if (!book.author) return 'مؤلف غير محدد';
+    return typeof book.author === 'string' ? book.author : (book.author.name || 'مؤلف غير محدد');
+  }
+
+  status(book: SubmissionBook): string {
+    switch (book.status) {
+      case 'approved': return 'تم القبول';
+      case 'rejected': return 'مرفوض';
+      default: return 'قيد المراجعة';
+    }
   }
 }

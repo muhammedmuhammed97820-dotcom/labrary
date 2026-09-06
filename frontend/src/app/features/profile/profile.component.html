@@ -6,10 +6,10 @@
       <div class="header-info">
         <span class="admin-badge">
           <i class="fa-solid fa-user-gear"></i>
-          MY LIBRARY · ACCOUNT
+          NEXT-GEN · ACCOUNT DASHBOARD
         </span>
-        <h1 class="header-title">ملفي الشخصي</h1>
-        <p class="header-subtitle">تحكم ببياناتك الشخصية، صورتك، وإحصائيات مكتبتك من مكان واحد.</p>
+        <h1 class="header-title">الملف الشخصي</h1>
+        <p class="header-subtitle">تحكم ببياناتك الشخصية، صورتك الشخصية، وإحصائيات مكتبتك بكل سلاسة.</p>
       </div>
       <a routerLink="/books" class="back-btn">
         <i class="fa-solid fa-arrow-right"></i>
@@ -42,7 +42,7 @@
             </div>
 
             <label class="btn-outline-custom mb-3">
-              <i class="fa-solid fa-camera me-1"></i> تغيير الصورة
+              <i class="fa-solid fa-camera me-1"></i> تغيير الصورة الشخصية
               <input class="d-none" type="file" accept="image/png,image/jpeg,image/webp" (click)="resetAvatarInput($event)" (change)="chooseAvatar($event)">
             </label>
 
@@ -69,14 +69,14 @@
       <div class="col-lg-8">
         <article class="glass-card">
           <div class="card-header-box">
-            <span class="card-tag">SETTINGS</span>
+            <span class="card-tag">SECURITY & IDENTITY</span>
             <h2 class="card-title">معلومات الحساب</h2>
           </div>
           
           <div class="card-body-box text-start">
             <div class="form-group-box">
               <label class="form-label-text">الاسم الكامل</label>
-              <input class="glass-control" [(ngModel)]="name" maxlength="100" placeholder="اسمك الكامل">
+              <input class="glass-control" [(ngModel)]="name" maxlength="100" placeholder="أدخل اسمك الكامل">
             </div>
 
             <div class="form-group-box">
@@ -87,7 +87,7 @@
             <button class="btn-gold" type="button" (click)="save()" [disabled]="saving">
               @if (saving) {
                 <i class="fa-solid fa-spinner spin"></i>
-                <span>جارٍ الحفظ...</span>
+                <span>جارٍ حفظ التغييرات...</span>
               } @else {
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>حفظ التغييرات</span>
@@ -101,13 +101,13 @@
       <div class="col-12">
         <article class="stats-banner-card">
           <div class="banner-info">
-            <span class="banner-tag">مكتبتك الشخصية</span>
+            <span class="banner-tag">المفضلة والمكتبة الشخصية</span>
             <div class="banner-number">{{ favoriteCount }}</div>
-            <span class="banner-sub">كتاب محفوظ في قائمة المفضلة لديك</span>
+            <span class="banner-sub">كتاب محفوظ في قائمة المفضلة الخاصة بك</span>
           </div>
           <a routerLink="/favorites" class="banner-action-btn">
             <i class="fa-solid fa-heart"></i>
-            <span>عرض المفضلة</span>
+            <span>استعراض المفضلة</span>
           </a>
         </article>
       </div>

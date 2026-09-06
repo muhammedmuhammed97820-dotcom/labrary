@@ -107,7 +107,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       standardFontDataUrl: 'assets/pdfjs/standard_fonts/',
       useSystemFonts: true,
       disableFontFace: false,
-      isEvalSupported: true,
+    //  isEvalSupported: true,
     });
 
     this.pdf = await loadingTask.promise;

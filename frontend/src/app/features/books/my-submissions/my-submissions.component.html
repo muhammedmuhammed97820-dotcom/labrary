@@ -1,39 +1,102 @@
-<main class="my-submissions" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
-  <div class="wrap">
-    <header>
-      <a routerLink="/books">← المكتبة</a>
-      <h1>طلباتي</h1>
-      <p>تابع حالة الكتب التي أرسلتها للمكتبة.</p>
+<main class="admin-books-wrapper my-submissions-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
+
+    <!-- HEADER SECTION -->
+    <header class="admin-header">
+      <div class="header-info">
+        <span class="admin-badge">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          TRACKING DASHBOARD · SUBMISSIONS
+        </span>
+        <h1 class="header-title">طلباتي والمقترحات</h1>
+        <p class="header-subtitle">تابع حالة الكتب التي أرسلتها للمكتبة وتعرف على ملاحظات الإدارة عليها.</p>
+      </div>
     </header>
 
+    <!-- LOADING STATE -->
     @if (loading) {
-      <div class="empty">جارٍ التحميل...</div>
-    } @else if (!books.length) {
-      <div class="empty">لا توجد طلبات كتب حتى الآن.</div>
-    } @else {
-      <div class="grid">
+      <div class="admin-state-box loading-box">
+        <div class="glass-spinner"></div>
+        <p>جارٍ تحميل طلباتك...</p>
+      </div>
+    }
+
+    <!-- ERROR STATE -->
+    @else if (error) {
+      <div class="admin-state-box error-box">
+        <div class="error-content">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>{{ error }}</span>
+        </div>
+        <button class="retry-btn" type="button" (click)="load()">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة المحاولة</span>
+        </button>
+      </div>
+    }
+
+    <!-- EMPTY STATE -->
+    @else if (!books.length) {
+      <div class="admin-state-box empty-box">
+        <i class="fa-solid fa-folder-open empty-icon"></i>
+        <h2>لا توجد طلبات كتب حتى الآن</h2>
+        <p>لم تقم بإرسال أي كتب للمراجعة بعد. يمكنك البدء بإضافة كتاب جديد.</p>
+        <a routerLink="/books/submit" class="retry-btn text-decoration-none mt-3 d-inline-block">
+          <i class="fa-solid fa-plus"></i> إضافة كتاب جديد
+        </a>
+      </div>
+    }
+
+    <!-- SUBMISSIONS GRID -->
+    @else {
+      <div class="books-grid-container">
         @for (book of books; track book._id) {
-          <article>
-            <div class="cover">
-              @if (book.coverImage) {
-                <img [src]="api.getFileUrl(book.coverImage)" [alt]="book.title">
-              } @else {
-                <span>📚</span>
-              }
-            </div>
-            <div class="info">
-              <h2>{{ book.title }}</h2>
-              <p>{{ author(book) }}</p>
-              <span class="status" [class.approved]="book.status === 'approved'" [class.rejected]="book.status === 'rejected'">
+          <div class="glass-book-card submission-card">
+            
+            <!-- صورة الغلاف وحالة الطلب -->
+            <div class="card-media-header">
+              <div class="book-cover-wrapper">
+                @if (book.coverImage) {
+                  <img [src]="getFileUrl(book.coverImage)" [alt]="book.title" class="book-cover-img">
+                } @else {
+                  <span class="cover-fallback">{{ book.title ? book.title.slice(0, 1) : 'ك' }}</span>
+                }
+              </div>
+
+              <!-- شارة الحالة العلوية العائمة -->
+              <span class="category-floating-badge status-badge" 
+                    [class.approved]="book.status === 'approved'" 
+                    [class.rejected]="book.status === 'rejected'"
+                    [class.pending]="book.status !== 'approved' && book.status !== 'rejected'">
+                <i class="fa-solid" 
+                   [class.fa-circle-check]="book.status === 'approved'" 
+                   [class.fa-circle-xmark]="book.status === 'rejected'"
+                   [class.fa-clock]="book.status !== 'approved' && book.status !== 'rejected'"></i>
                 {{ status(book) }}
               </span>
+            </div>
+
+            <!-- تفاصيل الكتاب -->
+            <div class="card-body-content">
+              <h3 class="book-title-text" [title]="book.title">{{ book.title || 'بدون عنوان' }}</h3>
+              
+              <div class="author-row">
+                <i class="fa-solid fa-pen-nib"></i>
+                <span>{{ author(book) }}</span>
+              </div>
+
               @if (book.status === 'rejected' && book.rejectionReason) {
-                <small>سبب الرفض: {{ book.rejectionReason }}</small>
+                <div class="rejection-box mt-2">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  <span>سبب الرفض: {{ book.rejectionReason }}</span>
+                </div>
               }
             </div>
-          </article>
+
+          </div>
         }
       </div>
     }
+
   </div>
 </main>
