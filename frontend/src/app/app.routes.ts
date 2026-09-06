@@ -8,6 +8,7 @@ import { BookCreateComponent } from './features/admin/books/book-create/book-cre
 import { AdminBooksComponent } from './features/admin/books/admin-books.component';
 import { BookEditComponent } from './features/admin/books/book-edit/book-edit.component';
 import { ProfileComponent } from './features/profile/profile.component';
+import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { CategoriesComponent } from './features/categories/categories.component';
 import { AuthorsComponent } from './features/authors/authors.component';
@@ -28,10 +29,10 @@ export const routes: Routes = [
   { path: 'authors/:id', component: AuthorDetailsComponent },
   { path: 'login', component: AuthComponent },
   { path: 'register', component: AuthComponent },
-  { path: 'profile', component: ProfileComponent },
-  { path: 'favorites', loadComponent: () => import('./features/favorites/favorites.component').then(m => m.FavoritesComponent) },
-  { path: 'submit-book', component: BookSubmitComponent },
-  { path: 'my-submissions', component: MySubmissionsComponent },
+  { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  { path: 'favorites', loadComponent: () => import('./features/favorites/favorites.component').then(m => m.FavoritesComponent), canActivate: [authGuard] },
+  { path: 'submit-book', component: BookSubmitComponent, canActivate: [authGuard] },
+  { path: 'my-submissions', component: MySubmissionsComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
   { path: 'admin/books', component: AdminBooksComponent, canActivate: [adminGuard] },
   { path: 'admin/books/create', component: BookCreateComponent, canActivate: [adminGuard] },
