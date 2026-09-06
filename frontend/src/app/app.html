@@ -1,6 +1,7 @@
-<app-navbar></app-navbar>
 
-<div class="app-main-container" [class.dark-mode]="themeService.isDarkMode()" aria-live="polite">
+<div class="app-main-container" [class.dark-mode]="themeService.isDarkMode()" >
+  <app-navbar></app-navbar>
+
   <router-outlet></router-outlet>
   <app-notification-toast></app-notification-toast>
 </div>

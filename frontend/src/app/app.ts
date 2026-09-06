@@ -11,6 +11,8 @@ import { DOCUMENT } from '@angular/common';
   standalone: true,
   imports: [CommonModule, RouterOutlet, NavbarComponent, NotificationToastComponent],
   templateUrl: './app.html',
+   
+
 })
 export class App {
   public readonly themeService = inject(ThemeService);
