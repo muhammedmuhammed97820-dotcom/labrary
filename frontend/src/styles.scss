@@ -76,6 +76,15 @@ main > *:first-child {
   padding-top: 0 !important;
 }
 
+/* توحيد المنطقة المحيطة بالنافبار مع خلفية الصفحة ومنع ظهور الشريط الأبيض */
+app-navbar,
+.navbar-glass-wrapper {
+  display: block;
+  width: 100%;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
 img {
   max-width: 100%;
 }
