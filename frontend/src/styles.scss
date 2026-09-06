@@ -2,8 +2,6 @@
 
 :root {
   --bg-primary: #f8f9fa;
-  --bg-page-start: #ffffff;
-  --bg-page-end: #f1f5f9;
   --text-primary: #1e293b;
   --text-muted: #64748b;
   --card-bg: #ffffff;
@@ -15,8 +13,6 @@
 html.dark-mode,
 body.dark-mode {
   --bg-primary: #0f172a;
-  --bg-page-start: #111827;
-  --bg-page-end: #0b1120;
   --text-primary: #f8fafc;
   --text-muted: #94a3b8;
   --card-bg: #1e293b;
@@ -29,15 +25,13 @@ html,
 body {
   font-family: 'Cairo', sans-serif;
   background-color: var(--bg-primary) !important;
-  background-image: linear-gradient(180deg, var(--bg-page-start) 0%, var(--bg-page-end) 100%) !important;
-  background-attachment: fixed;
   color: var(--text-primary) !important;
   margin: 0 !important;
   padding: 0 !important;
   min-height: 100vh;
   width: 100%;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease, background-image 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body.light-mode,
@@ -54,7 +48,7 @@ app-root {
   display: block;
   min-height: 100vh;
   width: 100%;
-  background: transparent !important;
+  background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -62,14 +56,14 @@ app-root {
 
 .app-main-container {
   min-height: 100vh;
-  background: transparent !important;
+  background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
 main {
-  background: transparent !important;
+  background-color: transparent !important;
   margin: 0 !important;
   padding: 0 !important;
 }
