@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "migrate:legacy-books": "node scripts/migrate-legacy-books.js"
+    "migrate:legacy-books": "node scripts/migrate-legacy-books.js",
+    "migrate:avatars": "node src/scripts/migrate-avatars-to-gridfs.js"
   },
   "keywords": [
     "electronic-library",
