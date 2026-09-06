@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   avatar: { type: String, default: null },
+  avatarFileId: { type: mongoose.Schema.Types.ObjectId, default: null },
   favorites: { type: [String], default: [] }
 }, { timestamps: true });
 
