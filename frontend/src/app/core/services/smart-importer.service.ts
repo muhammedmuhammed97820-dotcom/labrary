@@ -2,6 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface ImportExtraction {
+  score: number;
+  confidence: number;
+  signals: string[];
+}
+
 export interface ImportCandidate {
   title: string;
   author: string;
@@ -17,6 +23,7 @@ export interface ImportCandidate {
   source: string;
   sourceId: string;
   rights: string;
+  extraction?: ImportExtraction;
   authorBio?: string;
   authorImage?: string;
   duplicate?: boolean;
