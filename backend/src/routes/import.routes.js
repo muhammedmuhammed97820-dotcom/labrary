@@ -1,6 +1,6 @@
 const express = require("express");
 const { authenticate, requireAdmin } = require("../middleware/auth.middleware");
-const { scanAndImport } = require("../services/smart-library-agent.service");
+const { scanAndImport } = require("../services/smart-library-agent-v4.service");
 
 const router = express.Router();
 
