@@ -44,6 +44,7 @@ export class AdminComponent implements OnInit {
   acoImportRunning = false;
   acoImportMessage = '';
   acoImportOutput: string[] = [];
+  acoPdfQuality: 'low' | 'high' = 'low';
   acoProgress: AcoImportStatus = this.emptyAcoProgress();
 
   ngOnInit(): void {
@@ -90,19 +91,21 @@ export class AdminComponent implements OnInit {
   startAcoFullImport(): void {
     if (this.acoImportRunning) return;
 
+    const qualityLabel = this.acoPdfQuality === 'high' ? 'عالية' : 'منخفضة';
     const confirmed = window.confirm(
-      'سيبدأ هذا تنزيل ملفات PDF منخفضة الدقة والأغلفة لكل كتب ACO المتاحة وإيداعها داخل MongoDB/GridFS. قد تحتاج العملية مساحة تخزين كبيرة ووقتاً طويلاً. هل تريد المتابعة؟'
+      `سيبدأ هذا تنزيل ملفات PDF بدقة ${qualityLabel} والأغلفة لكل كتب ACO المتاحة وإيداعها داخل MongoDB/GridFS. ` +
+      'الدقة العالية قد تحتاج مساحة تخزين كبيرة جداً ووقتاً أطول. هل تريد المتابعة؟'
     );
     if (!confirmed) return;
 
     this.acoImportRunning = true;
-    this.acoImportMessage = 'جارِ بدء الاستيراد الجماعي...';
+    this.acoImportMessage = `جارِ بدء الاستيراد بدقة ${qualityLabel}...`;
     this.http.post<any>(`${this.serverOrigin}/api/import/aco/full`, {
-      pdf: 'low',
+      pdf: this.acoPdfQuality,
       concurrency: 1
     }).subscribe({
       next: response => {
-        this.acoImportMessage = response?.message || 'بدأ الاستيراد الجماعي.';
+        this.acoImportMessage = response?.message || `بدأ الاستيراد بدقة ${qualityLabel}.`;
         this.notify.show(this.acoImportMessage, 'success');
         this.refreshAcoImportStatus();
       },
