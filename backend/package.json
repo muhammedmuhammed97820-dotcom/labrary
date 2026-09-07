@@ -10,7 +10,7 @@
     "migrate:avatars": "node src/scripts/migrate-avatars-to-gridfs.js",
     "migrate:media": "node src/scripts/migrate-media-to-gridfs.js"
   },
-  "keywords": ["electronic-library", "books", "ai-import", "smart-library"],
+  "keywords": ["electronic-library", "books", "library-management"],
   "author": "Electronic Library",
   "license": "MIT",
   "dependencies": {
