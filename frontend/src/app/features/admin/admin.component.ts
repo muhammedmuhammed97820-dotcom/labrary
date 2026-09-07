@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Book, BookApiService } from '../../core/services/book-api.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-admin',
@@ -14,6 +16,8 @@ import { ThemeService } from '../../core/services/theme.service';
 })
 export class AdminComponent implements OnInit {
   private readonly api = inject(BookApiService);
+  private readonly http = inject(HttpClient);
+  private readonly notify = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
   public readonly themeService = inject(ThemeService);
   private readonly serverOrigin = 'http://localhost:5000';
@@ -21,9 +25,13 @@ export class AdminComponent implements OnInit {
   books: Book[] = [];
   loading = true;
   error = '';
+  acoImportRunning = false;
+  acoImportMessage = '';
+  acoImportOutput: string[] = [];
 
   ngOnInit(): void {
     this.load();
+    this.refreshAcoImportStatus();
   }
 
   load(): void {
@@ -39,6 +47,53 @@ export class AdminComponent implements OnInit {
         console.error('Admin books load error:', e);
         this.error = e?.error?.message || 'تعذر تحميل إحصائيات المكتبة.';
         this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  startAcoFullImport(): void {
+    if (this.acoImportRunning) return;
+
+    const confirmed = window.confirm(
+      'سيبدأ هذا تنزيل ملفات PDF منخفضة الدقة والأغلفة لكل كتب ACO المتاحة وإيداعها داخل MongoDB/GridFS. قد تحتاج العملية مساحة تخزين كبيرة ووقتاً طويلاً. هل تريد المتابعة؟'
+    );
+    if (!confirmed) return;
+
+    this.acoImportRunning = true;
+    this.acoImportMessage = 'جارِ بدء الاستيراد الجماعي...';
+    this.http.post<any>(`${this.serverOrigin}/api/import/aco/full`, {
+      pdf: 'low',
+      concurrency: 1
+    }).subscribe({
+      next: response => {
+        this.acoImportMessage = response?.message || 'بدأ الاستيراد الجماعي.';
+        this.notify.show(this.acoImportMessage, 'success');
+        this.refreshAcoImportStatus();
+      },
+      error: error => {
+        this.acoImportRunning = false;
+        this.acoImportMessage = error?.error?.message || 'تعذر بدء الاستيراد الجماعي.';
+        this.notify.show(this.acoImportMessage, 'error');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  refreshAcoImportStatus(): void {
+    this.http.get<any>(`${this.serverOrigin}/api/import/aco/status`).subscribe({
+      next: status => {
+        this.acoImportRunning = Boolean(status?.running);
+        this.acoImportOutput = Array.isArray(status?.output) ? status.output : [];
+        if (!this.acoImportRunning && status?.finishedAt && status?.exitCode === 0) {
+          this.acoImportMessage = 'اكتمل تنزيل ملفات ACO.';
+        }
+        this.cdr.detectChanges();
+        if (this.acoImportRunning) {
+          window.setTimeout(() => this.refreshAcoImportStatus(), 5000);
+        }
+      },
+      error: () => {
         this.cdr.detectChanges();
       }
     });
