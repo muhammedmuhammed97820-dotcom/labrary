@@ -13,7 +13,8 @@ interface SubmissionBook {
   title?: string;
   description?: string;
   coverImage?: string;
-  author?: { name?: string; _id?: string } | string;
+  author?: { name?: string; _id?: string } | string | null;
+  submittedAuthorName?: string;
   status?: string;
   rejectionReason?: string;
 }
@@ -72,8 +73,10 @@ export class MySubmissionsComponent implements OnInit {
   }
 
   author(book: SubmissionBook): string {
-    if (!book.author) return 'مؤلف غير محدد';
-    return typeof book.author === 'string' ? book.author : (book.author.name || 'مؤلف غير محدد');
+    if (typeof book.author === 'string' && book.author.trim()) return book.author.trim();
+    if (book.author && typeof book.author === 'object' && book.author.name?.trim()) return book.author.name.trim();
+    if (book.submittedAuthorName?.trim()) return book.submittedAuthorName.trim();
+    return 'مؤلف غير محدد';
   }
 
   status(book: SubmissionBook): string {
