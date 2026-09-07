@@ -140,25 +140,14 @@
                   </td>
                   <td>
                     <div class="table-actions-box">
-                      @if (deletingId !== user.id) {
-                        <button class="action-btn edit-btn" type="button" (click)="openEdit(user)" title="تعديل حساب المستخدم">
-                          <i class="fa-solid fa-pen-nib"></i>
-                          <span>تعديل</span>
-                        </button>
-                        <button class="action-btn delete-btn" type="button" (click)="promptDelete(user)" title="حذف المستخدم نهائياً">
-                          <i class="fa-solid fa-trash-can"></i>
-                          <span>حذف</span>
-                        </button>
-                      } @else {
-                        <button class="action-btn delete-btn" type="button" (click)="promptDelete(user)" title="تأكيد حذف المستخدم">
-                          <i class="fa-solid fa-triangle-exclamation"></i>
-                          <span>تأكيد الحذف؟</span>
-                        </button>
-                        <button class="action-btn edit-btn" type="button" (click)="cancelDelete()" title="إلغاء حذف المستخدم">
-                          <i class="fa-solid fa-xmark"></i>
-                          <span>إلغاء</span>
-                        </button>
-                      }
+                      <button class="action-btn edit-btn" type="button" (click)="openEdit(user)" title="تعديل حساب المستخدم">
+                        <i class="fa-solid fa-pen-nib"></i>
+                        <span>تعديل</span>
+                      </button>
+                      <button class="action-btn delete-btn" type="button" (click)="deleteUser(user)" title="حذف المستخدم نهائياً">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>حذف</span>
+                      </button>
                     </div>
                   </td>
                 </tr>
