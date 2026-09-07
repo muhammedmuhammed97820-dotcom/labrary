@@ -33,12 +33,13 @@ export class MySubmissionsComponent implements OnInit {
   private readonly notify = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
   public readonly themeService = inject(ThemeService);
-  
+
   private readonly serverOrigin = 'http://localhost:5000';
 
   books: SubmissionBook[] = [];
   loading = true;
   error = '';
+  deletingId = '';
 
   ngOnInit() {
     this.load();
@@ -85,5 +86,32 @@ export class MySubmissionsComponent implements OnInit {
       case 'rejected': return 'مرفوض';
       default: return 'قيد المراجعة';
     }
+  }
+
+  deleteRejected(book: SubmissionBook): void {
+    if (book.status !== 'rejected' || !book._id || this.deletingId) return;
+
+    const confirmed = window.confirm(
+      `هل أنت متأكد من حذف الطلب المرفوض "${book.title || 'بدون عنوان'}"؟\n\nسيتم حذف الطلب وملف الكتاب وصورة الغلاف نهائياً.`
+    );
+    if (!confirmed) return;
+
+    const id = book._id;
+    this.deletingId = id;
+
+    this.http.delete(`${this.serverOrigin}/api/books/${id}/my-rejected-submission`).subscribe({
+      next: (res: any) => {
+        this.books = this.books.filter(item => item._id !== id);
+        this.deletingId = '';
+        this.notify.show(res?.message || 'تم حذف الطلب المرفوض بنجاح.', 'success');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Delete rejected submission error:', err);
+        this.deletingId = '';
+        this.notify.show(err?.error?.message || 'تعذر حذف الطلب المرفوض.', 'error');
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
