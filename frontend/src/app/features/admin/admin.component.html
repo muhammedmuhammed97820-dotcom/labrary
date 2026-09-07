@@ -2,58 +2,96 @@
   <div class="admin-container">
     <header class="admin-header">
       <div class="header-info">
-        <span class="admin-badge"><i class="fa-solid fa-shield-halved"></i> DIGITAL LIBRARY · ADMIN</span>
+        <span class="admin-badge"><i class="fa-solid fa-shield-halved"></i> إدارة المكتبة الرقمية</span>
         <h1 class="header-title">لوحة التحكم الإدارية</h1>
         <p class="header-subtitle">مراقبة الإحصائيات الشاملة وإدارة الكتب والمحتوى الرقمي</p>
       </div>
-      <div class="header-actions"><a routerLink="/admin/books/create" class="add-book-btn"><i class="fa-solid fa-plus"></i><span>إضافة كتاب جديد</span></a></div>
+      <div class="header-actions">
+        <a routerLink="/admin/books/create" class="add-book-btn">
+          <i class="fa-solid fa-plus"></i>
+          <span>إضافة كتاب جديد</span>
+        </a>
+      </div>
     </header>
 
     @if (loading) {
-      <div class="admin-state-box loading-box"><div class="glass-spinner"></div><p>جارِ تحميل إحصائيات وبيانات المكتبة...</p></div>
+      <div class="admin-state-box loading-box">
+        <div class="glass-spinner"></div>
+        <p>جارِ تحميل إحصائيات وبيانات المكتبة...</p>
+      </div>
     } @else if (error) {
-      <div class="admin-state-box error-box"><div class="error-content"><i class="fa-solid fa-circle-exclamation error-icon"></i><span>{{ error }}</span></div><button class="retry-btn" type="button" (click)="load()"><i class="fa-solid fa-rotate-right"></i><span>إعادة المحاولة</span></button></div>
+      <div class="admin-state-box error-box">
+        <div class="error-content">
+          <i class="fa-solid fa-circle-exclamation error-icon"></i>
+          <span>{{ error }}</span>
+        </div>
+        <button class="retry-btn" type="button" (click)="load()">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة المحاولة</span>
+        </button>
+      </div>
     } @else {
       <section class="stats-grid">
-        <article class="stat-glass-card"><div class="stat-icon-wrapper blue"><i class="fa-solid fa-book"></i></div><div class="stat-details"><span class="stat-label">إجمالي الكتب</span><strong class="stat-value">{{ total }}</strong></div></article>
-        <article class="stat-glass-card"><div class="stat-icon-wrapper green"><i class="fa-solid fa-circle-check"></i></div><div class="stat-details"><span class="stat-label">الكتب المتاحة</span><strong class="stat-value">{{ available }}</strong></div></article>
-        <article class="stat-glass-card"><div class="stat-icon-wrapper purple"><i class="fa-solid fa-eye"></i></div><div class="stat-details"><span class="stat-label">إجمالي المشاهدات</span><strong class="stat-value">{{ views }}</strong></div></article>
-        <article class="stat-glass-card"><div class="stat-icon-wrapper orange"><i class="fa-solid fa-download"></i></div><div class="stat-details"><span class="stat-label">إجمالي التحميلات</span><strong class="stat-value">{{ downloads }}</strong></div></article>
-        <a routerLink="/admin/authors" class="stat-glass-card stat-link-card"><div class="stat-icon-wrapper teal"><i class="fa-solid fa-user-pen"></i></div><div class="stat-details"><span class="stat-label">المؤلفون</span><strong class="stat-value">{{ authors }}</strong></div></a>
-        <a routerLink="/admin/categories" class="stat-glass-card stat-link-card"><div class="stat-icon-wrapper gold"><i class="fa-solid fa-layer-group"></i></div><div class="stat-details"><span class="stat-label">التصنيفات</span><strong class="stat-value">{{ categories }}</strong></div></a>
+        <article class="stat-glass-card">
+          <div class="stat-icon-wrapper blue"><i class="fa-solid fa-book"></i></div>
+          <div class="stat-details"><span class="stat-label">إجمالي الكتب</span><strong class="stat-value">{{ total }}</strong></div>
+        </article>
+        <article class="stat-glass-card">
+          <div class="stat-icon-wrapper green"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-details"><span class="stat-label">الكتب المتاحة</span><strong class="stat-value">{{ available }}</strong></div>
+        </article>
+        <article class="stat-glass-card">
+          <div class="stat-icon-wrapper purple"><i class="fa-solid fa-eye"></i></div>
+          <div class="stat-details"><span class="stat-label">إجمالي المشاهدات</span><strong class="stat-value">{{ views }}</strong></div>
+        </article>
+        <article class="stat-glass-card">
+          <div class="stat-icon-wrapper orange"><i class="fa-solid fa-download"></i></div>
+          <div class="stat-details"><span class="stat-label">إجمالي التحميلات</span><strong class="stat-value">{{ downloads }}</strong></div>
+        </article>
+        <a routerLink="/admin/authors" class="stat-glass-card stat-link-card">
+          <div class="stat-icon-wrapper teal"><i class="fa-solid fa-user-pen"></i></div>
+          <div class="stat-details"><span class="stat-label">المؤلفون</span><strong class="stat-value">{{ authors }}</strong></div>
+        </a>
+        <a routerLink="/admin/categories" class="stat-glass-card stat-link-card">
+          <div class="stat-icon-wrapper gold"><i class="fa-solid fa-layer-group"></i></div>
+          <div class="stat-details"><span class="stat-label">التصنيفات</span><strong class="stat-value">{{ categories }}</strong></div>
+        </a>
       </section>
 
-      <div class="panels-grid">
-        <article class="panel-glass-card">
-          <div class="panel-header"><span class="panel-tag">SMART IMPORT</span><h2 class="panel-title">استيراد مكتبة بواسطة الذكاء الاصطناعي</h2></div>
-          <section class="aco-import-box">
-            <div class="aco-import-title"><div class="quick-icon-box gold"><i class="fa-solid fa-robot"></i></div><div><strong>وكيل المكتبة الذكي</strong><small>أعطه رابط أي مكتبة وسيتعرف على الكتب وحقولها تلقائياً</small></div></div>
-            <div class="aco-quality-row"><label for="smartLibraryUrl"><i class="fa-solid fa-link"></i> رابط المكتبة</label><input id="smartLibraryUrl" type="url" [(ngModel)]="smartLibraryUrl" [disabled]="smartImportRunning" placeholder="https://example-library.org" /></div>
-            <div class="aco-quality-row"><label for="smartMaxPages"><i class="fa-solid fa-layer-group"></i> عدد الصفحات القصوى</label><input id="smartMaxPages" type="number" min="1" max="200" [(ngModel)]="smartMaxPages" [disabled]="smartImportRunning" /></div>
-            <div class="aco-quality-row"><label><input type="checkbox" [(ngModel)]="smartImportNow" [disabled]="smartImportRunning" /> استيراد الكتب بعد التحليل</label></div>
-            <div class="aco-quality-row"><label><input type="checkbox" [(ngModel)]="smartDownloadFiles" [disabled]="smartImportRunning" /> تنزيل PDF والأغلفة إذا كانت الإتاحة القانونية واضحة</label></div>
-            <div class="aco-quality-row"><label><input type="checkbox" [(ngModel)]="smartUpdateExisting" [disabled]="smartImportRunning" /> تحديث الكتب المستوردة سابقاً</label></div>
-            <button type="button" class="quick-action-card highlight aco-start-btn" (click)="startSmartImport()" [disabled]="smartImportRunning"><div class="quick-icon-box gold"><i class="fa-solid" [class.fa-robot]="!smartImportRunning" [class.fa-spinner]="smartImportRunning" [class.fa-spin]="smartImportRunning"></i></div><div class="quick-info"><span class="quick-title">{{ smartImportRunning ? 'جاري التحليل والاستيراد...' : 'بدء الاستيراد الذكي' }}</span><small class="quick-sub">لا يتم تغيير حقول Book الموجودة في مشروعك</small></div></button>
-          </section>
-
-          @if (smartImportMessage || smartImportRunning) {
-            <div class="aco-progress-panel" [class.is-running]="smartImportRunning" [class.is-error]="!smartImportRunning && smartProgress.error">
-              <div class="aco-progress-header"><div><strong>{{ smartImportMessage }}</strong><small class="aco-current">المصدر: {{ smartProgress.url || smartLibraryUrl }}</small></div></div>
-              <div class="aco-progress-numbers"><span><b>{{ smartProgress.pages | number }}</b> صفحات</span><span><b>{{ smartProgress.discovered | number }}</b> سجلات مكتشفة</span><span><b>{{ smartProgress.normalized | number }}</b> سجلات موحدة</span><span><b>{{ smartProgress.imported | number }}</b> كتب مستوردة</span></div>
-              @if (!smartImportRunning && smartProgress.error) { <div class="aco-finished aco-failed"><i class="fa-solid fa-circle-exclamation"></i> {{ smartProgress.error }}</div> }
-              @if (!smartImportRunning && smartProgress.finishedAt && !smartProgress.error) { <div class="aco-finished"><i class="fa-solid fa-circle-check"></i> اكتملت عملية الاستيراد الذكي.</div> }
+      <section class="panel-glass-card recent-panel">
+        <div class="panel-header">
+          <span class="panel-tag">النشاط الأخير</span>
+          <h2 class="panel-title">آخر الكتب المضافة</h2>
+        </div>
+        <div class="recent-books-list">
+          @if (!recent.length) {
+            <div class="empty-list-state">
+              <i class="fa-solid fa-box-open"></i>
+              <span>لا توجد كتب مضافة حتى الآن في النظام.</span>
             </div>
+          } @else {
+            @for (book of recent; track book._id) {
+              <div class="recent-book-item">
+                <div class="book-avatar">
+                  @if (getBookCover(book)) {
+                    <img [src]="getBookCover(book)" [alt]="book.title" class="book-cover-img">
+                  } @else {
+                    <span>{{ book.title.slice(0, 1) }}</span>
+                  }
+                </div>
+                <div class="book-details">
+                  <strong class="book-title">{{ book.title }}</strong>
+                  <small class="book-author"><i class="fa-solid fa-pen-nib me-1"></i>{{ getAuthorName(book.author) }}</small>
+                </div>
+                <a [routerLink]="['/admin/books', book._id, 'edit']" class="edit-btn">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  <span>تعديل</span>
+                </a>
+              </div>
+            }
           }
-        </article>
-
-        <article class="panel-glass-card">
-          <div class="panel-header"><span class="panel-tag">RECENT ACTIVITY</span><h2 class="panel-title">آخر الكتب المضافة</h2></div>
-          <div class="recent-books-list">
-            @if (!recent.length) { <div class="empty-list-state"><i class="fa-solid fa-box-open"></i><span>لا توجد كتب مضافة حتى الآن في النظام.</span></div> }
-            @else { @for (book of recent; track book._id) { <div class="recent-book-item"><div class="book-avatar">@if (getBookCover(book)) { <img [src]="getBookCover(book)" [alt]="book.title" class="book-cover-img"> } @else { <span>{{ book.title.slice(0, 1) }}</span> }</div><div class="book-details"><strong class="book-title">{{ book.title }}</strong><small class="book-author"><i class="fa-solid fa-pen-nib me-1"></i>{{ getAuthorName(book.author) }}</small></div><a [routerLink]="['/admin/books', book._id, 'edit']" class="edit-btn"><i class="fa-solid fa-pen-to-square"></i><span>تعديل</span></a></div> } }
-          </div>
-        </article>
-      </div>
+        </div>
+      </section>
     }
   </div>
 </main>
