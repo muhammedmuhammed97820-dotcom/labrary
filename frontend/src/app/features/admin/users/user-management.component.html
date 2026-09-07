@@ -1,0 +1,76 @@
+<main class="users-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="users-container">
+    <header class="users-header">
+      <div>
+        <span class="eyebrow">إدارة النظام</span>
+        <h1>إدارة المستخدمين</h1>
+        <p>إنشاء الحسابات وإدارة الصلاحيات وتحديث بيانات المستخدمين من مكان واحد.</p>
+      </div>
+      <button class="primary-btn" type="button" (click)="openCreate()"><span>＋</span> إضافة مستخدم</button>
+    </header>
+
+    @if (success) { <div class="alert success">{{ success }}</div> }
+    @if (error && !modalOpen) { <div class="alert error">{{ error }}</div> }
+
+    <section class="stats">
+      <article><span class="stat-icon">👥</span><div><small>كل المستخدمين</small><strong>{{ stats.totalUsers }}</strong></div></article>
+      <article><span class="stat-icon">🛡️</span><div><small>المديرون</small><strong>{{ stats.totalAdmins }}</strong></div></article>
+      <article><span class="stat-icon">👤</span><div><small>المستخدمون العاديون</small><strong>{{ stats.regularUsers }}</strong></div></article>
+    </section>
+
+    <section class="toolbar">
+      <div class="search-box"><span>⌕</span><input [(ngModel)]="search" (keyup.enter)="searchUsers()" placeholder="ابحث بالاسم أو البريد الإلكتروني..." /></div>
+      <select [(ngModel)]="roleFilter" (change)="searchUsers()">
+        <option value="">كل الصلاحيات</option><option value="user">مستخدم</option><option value="admin">مدير</option>
+      </select>
+      <button class="secondary-btn" type="button" (click)="searchUsers()">بحث</button>
+      <button class="ghost-btn" type="button" (click)="resetFilters()">إعادة ضبط</button>
+    </section>
+
+    @if (loading) {
+      <div class="state"><div class="spinner"></div><p>جارِ تحميل المستخدمين...</p></div>
+    } @else if (!users.length) {
+      <div class="state"><div class="empty-icon">👥</div><h3>لا يوجد مستخدمون</h3><p>جرّب تغيير البحث أو أضف مستخدماً جديداً.</p></div>
+    } @else {
+      <section class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>المستخدم</th><th>البريد الإلكتروني</th><th>الصلاحية</th><th>المفضلة</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead>
+            <tbody>
+              @for (user of users; track user.id) {
+                <tr>
+                  <td><div class="user-cell">@if (avatar(user)) { <img [src]="avatar(user)" [alt]="user.name"> } @else { <span class="avatar-fallback">{{ initials(user.name) }}</span> }<strong>{{ user.name }}</strong></div></td>
+                  <td class="email">{{ user.email }}</td>
+                  <td><span class="role" [class.admin]="user.role === 'admin'">{{ user.role === 'admin' ? 'مدير' : 'مستخدم' }}</span></td>
+                  <td>{{ user.favoritesCount }}</td>
+                  <td>{{ user.createdAt ? (user.createdAt | date:'yyyy/MM/dd') : '—' }}</td>
+                  <td><div class="actions"><button class="edit" type="button" (click)="openEdit(user)">تعديل</button><button class="delete" type="button" (click)="deleteUser(user)">حذف</button></div></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <footer class="pagination">
+          <span>إجمالي النتائج: <b>{{ total }}</b></span>
+          <div><button type="button" [disabled]="page <= 1" (click)="load(page - 1)">السابق</button><strong>صفحة {{ page }} من {{ totalPages }}</strong><button type="button" [disabled]="page >= totalPages" (click)="load(page + 1)">التالي</button></div>
+        </footer>
+      </section>
+    }
+  </div>
+
+  @if (modalOpen) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header><div><span class="eyebrow">{{ editing ? 'تعديل الحساب' : 'حساب جديد' }}</span><h2>{{ editing ? 'تعديل المستخدم' : 'إضافة مستخدم' }}</h2></div><button type="button" class="close" (click)="closeModal()">×</button></header>
+        @if (error) { <div class="alert error">{{ error }}</div> }
+        <div class="form-grid">
+          <label>الاسم<input [(ngModel)]="form.name" placeholder="اسم المستخدم"></label>
+          <label>البريد الإلكتروني<input [(ngModel)]="form.email" type="email" placeholder="user@example.com"></label>
+          <label>الصلاحية<select [(ngModel)]="form.role"><option value="user">مستخدم</option><option value="admin">مدير</option></select></label>
+          <label>كلمة المرور{{ editing ? ' (اختياري)' : '' }}<input [(ngModel)]="form.password" type="password" [placeholder]="editing ? 'اتركها فارغة للإبقاء عليها' : '6 أحرف على الأقل'"></label>
+        </div>
+        <footer><button class="ghost-btn" type="button" (click)="closeModal()">إلغاء</button><button class="primary-btn" type="button" [disabled]="saving" (click)="save()">{{ saving ? 'جارِ الحفظ...' : (editing ? 'حفظ التعديلات' : 'إنشاء المستخدم') }}</button></footer>
+      </section>
+    </div>
+  }
+</main>
