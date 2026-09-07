@@ -19,7 +19,6 @@ export class AdminBooksComponent implements OnInit {
   private readonly notify = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
   public readonly themeService = inject(ThemeService);
-  private readonly serverOrigin = 'http://localhost:5000';
 
   books: Book[] = [];
   query = '';
@@ -51,9 +50,7 @@ export class AdminBooksComponent implements OnInit {
       next: books => {
         this.books = books || [];
         this.loading = false;
-        if (showNotify) {
-          this.notify.show('تم تحديث قائمة الكتب بنجاح.', 'info');
-        }
+        if (showNotify) this.notify.show('تم تحديث قائمة الكتب بنجاح.', 'info');
         this.cdr.detectChanges();
       },
       error: err => {
@@ -80,14 +77,12 @@ export class AdminBooksComponent implements OnInit {
 
   executeDelete(): void {
     if (!this.bookToDelete) return;
-
     const book = this.bookToDelete;
     const bookId = this.getBookId(book);
     if (!bookId) return;
 
     this.deletingId = bookId;
     this.cdr.detectChanges();
-
     this.booksApi.remove(bookId).subscribe({
       next: () => {
         this.books = this.books.filter(item => this.getBookId(item) !== bookId);
@@ -111,11 +106,9 @@ export class AdminBooksComponent implements OnInit {
     return book?._id || book?.id || '';
   }
 
-  getBookCover(book: any): string | null {
-    const cover = book?.coverImage || book?.coverUrl || book?.cover;
-    if (!cover) return null;
-    if (/^data:|^blob:|^https?:\/\//i.test(cover)) return cover;
-    return `${this.serverOrigin}${cover.startsWith('/') ? cover : `/${cover}`}`;
+  getBookCover(book: Book): string {
+    const cover = book?.coverImage;
+    return cover ? this.booksApi.getBookCoverUrl(book) : '';
   }
 
   authorName(book: Book): string {
