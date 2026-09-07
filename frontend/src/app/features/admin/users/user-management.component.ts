@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../../environments/environment';
 import { UserManagementService, ManagedUser } from '../../../core/services/user-management.service';
 import { ThemeService } from '../../../core/services/theme.service';
 
@@ -75,18 +76,9 @@ export class UserManagementComponent implements OnInit {
   closeModal(): void { if (!this.saving) this.modalOpen = false; }
 
   save(): void {
-    if (!this.form.name.trim() || !this.form.email.trim()) {
-      this.error = 'الاسم والبريد الإلكتروني مطلوبان.';
-      return;
-    }
-    if (!this.editing && this.form.password.length < 6) {
-      this.error = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
-      return;
-    }
-    if (this.editing && this.form.password && this.form.password.length < 6) {
-      this.error = 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.';
-      return;
-    }
+    if (!this.form.name.trim() || !this.form.email.trim()) { this.error = 'الاسم والبريد الإلكتروني مطلوبان.'; return; }
+    if (!this.editing && this.form.password.length < 6) { this.error = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.'; return; }
+    if (this.editing && this.form.password && this.form.password.length < 6) { this.error = 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.'; return; }
 
     this.saving = true;
     this.error = '';
@@ -95,16 +87,8 @@ export class UserManagementComponent implements OnInit {
       : this.service.create(this.form);
 
     request.subscribe({
-      next: response => {
-        this.saving = false;
-        this.modalOpen = false;
-        this.success = response.message;
-        this.load(this.page);
-      },
-      error: err => {
-        this.saving = false;
-        this.error = err?.error?.message || 'تعذر حفظ المستخدم.';
-      }
+      next: response => { this.saving = false; this.modalOpen = false; this.success = response.message; this.load(this.page); },
+      error: err => { this.saving = false; this.error = err?.error?.message || 'تعذر حفظ المستخدم.'; }
     });
   }
 
@@ -112,11 +96,7 @@ export class UserManagementComponent implements OnInit {
     if (!confirm(`هل أنت متأكد من حذف المستخدم "${user.name}"؟ لا يمكن التراجع عن هذه العملية.`)) return;
     this.error = '';
     this.service.remove(user.id).subscribe({
-      next: response => {
-        this.success = response.message;
-        if (this.users.length === 1 && this.page > 1) this.page--;
-        this.load(this.page);
-      },
+      next: response => { this.success = response.message; if (this.users.length === 1 && this.page > 1) this.page--; this.load(this.page); },
       error: err => this.error = err?.error?.message || 'تعذر حذف المستخدم.'
     });
   }
@@ -124,12 +104,8 @@ export class UserManagementComponent implements OnInit {
   avatar(user: ManagedUser): string | null {
     if (!user.avatar) return null;
     if (/^https?:\/\//i.test(user.avatar)) return user.avatar;
-    return `${environmentOrigin()}${user.avatar.startsWith('/') ? user.avatar : '/' + user.avatar}`;
+    return `${environment.apiOrigin}${user.avatar.startsWith('/') ? user.avatar : '/' + user.avatar}`;
   }
 
   initials(name: string): string { return name.trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase(); }
-}
-
-function environmentOrigin(): string {
-  return 'http://localhost:5000';
 }
