@@ -30,10 +30,11 @@ function rightsText(metadata) {
 }
 
 function isOpenRights(metadata) {
-  const values = [metadata.rights, metadata.licenseurl, metadata.license, metadata.publicdate]
+  const values = [metadata.rights, metadata.licenseurl, metadata.license]
     .flatMap((value) => Array.isArray(value) ? value : [value])
     .filter(Boolean)
     .map((value) => String(value).toLowerCase());
+
   return values.some((value) =>
     value.includes("public domain") ||
     value.includes("creativecommons") ||
@@ -100,12 +101,9 @@ async function preview(req, res) {
 
     const url = new URL(IA_SEARCH_URL);
     url.searchParams.set("q", q);
-    url.searchParams.set("fl[]", "identifier");
-    url.searchParams.set("fl[]", "title");
-    url.searchParams.set("fl[]", "creator");
-    url.searchParams.set("fl[]", "language");
-    url.searchParams.set("fl[]", "date");
-    url.searchParams.set("fl[]", "rights");
+    ["identifier", "title", "creator", "language", "date", "rights", "licenseurl", "description", "subject"].forEach((field) => {
+      url.searchParams.append("fl[]", field);
+    });
     url.searchParams.set("rows", String(rows));
     url.searchParams.set("page", String(page));
     url.searchParams.set("output", "json");
