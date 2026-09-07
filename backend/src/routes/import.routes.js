@@ -5,6 +5,7 @@ const { authenticate, requireAdmin } = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
+let heartbeatTimer = null;
 let job = {
   running: false,
   startedAt: null,
@@ -18,8 +19,16 @@ let job = {
   pdfDownloaded: 0,
   coversDownloaded: 0,
   current: "",
-  etaSeconds: null
+  etaSeconds: null,
+  stage: "idle"
 };
+
+function addOutput(message) {
+  const text = String(message || "").trim();
+  if (!text) return;
+  job.output.push(text);
+  if (job.output.length > 200) job.output = job.output.slice(-200);
+}
 
 function updateProgressFromLine(line) {
   const text = String(line).trim();
@@ -29,6 +38,7 @@ function updateProgressFromLine(line) {
     const total = Number(totalMatch[2]) || 0;
     job.total = Math.max(job.total, total);
     job.remaining = Math.max(job.total - job.processed, 0);
+    job.stage = total > 0 ? "importing" : "empty";
     if (job.total === 0) job.percent = 100;
     return;
   }
@@ -47,6 +57,7 @@ function updateProgressFromLine(line) {
   job.remaining = Math.max(job.total - job.processed, 0);
   job.percent = job.total ? Math.min(100, Math.round((job.processed / job.total) * 1000) / 10) : 0;
   job.current = current;
+  job.stage = "importing";
   if (pdfState === "محلي") job.pdfDownloaded += 1;
   if (coverState === "محلي") job.coversDownloaded += 1;
 
@@ -66,7 +77,8 @@ router.post("/aco/full", authenticate, requireAdmin, (req, res) => {
     return res.status(409).json({ message: "استيراد ACO يعمل حالياً.", job: { ...job, output: job.output.slice(-40) } });
   }
 
-  const pdf = String(req.body?.pdf || "low").toLowerCase() === "high" ? "high" : "low";
+  const requestedPdf = String(req.body?.pdf || "low").toLowerCase();
+  const pdf = ["none", "low", "high"].includes(requestedPdf) ? requestedPdf : "low";
   const limit = Number.parseInt(req.body?.limit, 10) || 0;
   const offset = Math.max(Number.parseInt(req.body?.offset, 10) || 0, 0);
   const concurrency = Math.min(Math.max(Number.parseInt(req.body?.concurrency, 10) || 1, 1), 3);
@@ -86,9 +98,13 @@ router.post("/aco/full", authenticate, requireAdmin, (req, res) => {
     percent: 0,
     pdfDownloaded: 0,
     coversDownloaded: 0,
-    current: "تهيئة الاستيراد...",
-    etaSeconds: null
+    current: "بدء تشغيل المستورد...",
+    etaSeconds: null,
+    stage: "starting"
   };
+
+  addOutput(`بدأ مستورد ACO. وضع PDF: ${pdf === "none" ? "بدون تنزيل PDF" : pdf === "low" ? "منخفض" : "عالي"}.`);
+  addOutput("جاري الاتصال بقاعدة البيانات وتجهيز فهرس ACO...");
 
   const child = spawn(process.execPath, args, {
     cwd: path.resolve(__dirname, "../.."),
@@ -100,22 +116,38 @@ router.post("/aco/full", authenticate, requireAdmin, (req, res) => {
   const append = (chunk) => {
     const lines = String(chunk).split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
     for (const line of lines) {
-      job.output.push(line);
+      addOutput(line);
       updateProgressFromLine(line);
     }
-    if (job.output.length > 200) job.output = job.output.slice(-200);
   };
 
   child.stdout.on("data", append);
   child.stderr.on("data", append);
-  child.on("error", (error) => append(`خطأ في تشغيل المستورد: ${error.message}`));
+  child.on("error", (error) => {
+    job.stage = "error";
+    append(`خطأ في تشغيل المستورد: ${error.message}`);
+  });
   child.on("close", (code) => {
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+    }
     job.running = false;
     job.finishedAt = new Date().toISOString();
     job.exitCode = code;
     job.remaining = Math.max(job.total - job.processed, 0);
+    job.stage = code === 0 ? "completed" : "failed";
     if (code === 0) job.percent = 100;
+    addOutput(code === 0 ? "اكتمل الاستيراد بنجاح." : `انتهى المستورد بفشل. رمز الخروج: ${code}.`);
   });
+
+  heartbeatTimer = setInterval(() => {
+    if (!job.running) return;
+    const elapsed = Math.round((Date.now() - new Date(job.startedAt).getTime()) / 1000);
+    if (job.processed === 0 && elapsed > 0 && elapsed % 5 === 0) {
+      addOutput(`ما زال المستورد يعمل... المرحلة: ${job.stage}. الزمن المنقضي: ${elapsed} ثانية.`);
+    }
+  }, 1000);
 
   return res.status(202).json({
     message: "بدأ تنزيل كتب ACO وملفات PDF والأغلفة إلى قاعدة البيانات.",
