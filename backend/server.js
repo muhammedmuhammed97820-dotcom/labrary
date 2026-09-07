@@ -13,6 +13,7 @@ const bookRoutes = require("./src/routes/book.routes");
 const authorRoutes = require("./src/routes/author.routes");
 const categoryRoutes = require("./src/routes/category.routes");
 const authRoutes = require("./src/routes/auth.routes");
+const importRoutes = require("./src/routes/import.routes");
 const errorHandler = require("./src/middleware/error.middleware");
 
 const app = express();
@@ -58,6 +59,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/authors", authorRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/import", importRoutes);
 
 app.use((req, res) => res.status(404).json({ message: "API endpoint not found." }));
 app.use(errorHandler);
