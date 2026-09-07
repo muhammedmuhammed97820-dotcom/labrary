@@ -119,7 +119,11 @@
                 <span class="book-index-badge">{{ (i + 1).toString().padStart(2, '0') }}</span>
                 <div class="book-cover-wrapper">
                   @if (b.coverImage) {
-                    <img [src]="imageUrl(b.coverImage)" [alt]="b.title">
+                    <img
+                      [src]="bookCoverUrl(b)"
+                      [alt]="b.title"
+                      (error)="$any($event.target).src = 'assets/images/default-cover.svg'"
+                    >
                   } @else {
                     <div class="cover-placeholder">
                       <i class="fa-solid fa-book"></i>
