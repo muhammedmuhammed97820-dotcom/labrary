@@ -7,10 +7,9 @@ import { Book, BookApiService } from '../../core/services/book-api.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
 
-interface AcoImportStatus {
-  running: boolean; startedAt: string | null; finishedAt: string | null; exitCode: number | null;
-  output: string[]; total: number; processed: number; remaining: number; percent: number;
-  pdfDownloaded: number; coversDownloaded: number; current: string; etaSeconds: number | null;
+interface SmartImportStatus {
+  running: boolean; startedAt: string | null; finishedAt: string | null; error: string; url: string; stage: string;
+  pages: number; discovered: number; normalized: number; imported: number; result: any;
 }
 
 @Component({
@@ -26,14 +25,18 @@ export class AdminComponent implements OnInit {
   private readonly serverOrigin = 'http://localhost:5000';
 
   books: Book[] = []; loading = true; error = '';
-  acoImportRunning = false; acoImportMessage = ''; acoImportOutput: string[] = [];
-  acoPdfQuality: 'low' | 'high' = 'low';
-  acoProgress: AcoImportStatus = this.emptyAcoProgress();
+  smartImportRunning = false; smartImportMessage = ''; smartImportOutput: string[] = [];
+  smartLibraryUrl = '';
+  smartMaxPages = 30;
+  smartImportNow = true;
+  smartDownloadFiles = false;
+  smartUpdateExisting = false;
+  smartProgress: SmartImportStatus = this.emptySmartProgress();
 
-  ngOnInit(): void { this.load(); this.refreshAcoImportStatus(); }
+  ngOnInit(): void { this.load(); this.refreshSmartImportStatus(); }
 
-  private emptyAcoProgress(): AcoImportStatus {
-    return { running: false, startedAt: null, finishedAt: null, exitCode: null, output: [], total: 0, processed: 0, remaining: 0, percent: 0, pdfDownloaded: 0, coversDownloaded: 0, current: '', etaSeconds: null };
+  private emptySmartProgress(): SmartImportStatus {
+    return { running: false, startedAt: null, finishedAt: null, error: '', url: '', stage: 'idle', pages: 0, discovered: 0, normalized: 0, imported: 0, result: null };
   }
 
   load(): void {
@@ -44,37 +47,38 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  startAcoFullImport(): void {
-    if (this.acoImportRunning) return;
-    const qualityLabel = this.acoPdfQuality === 'high' ? 'عالية' : 'منخفضة';
-    const confirmed = window.confirm(`سيبدأ هذا تنزيل ملفات PDF بدقة ${qualityLabel} والأغلفة لكل كتب ACO المتاحة وإيداعها داخل MongoDB/GridFS. الدقة العالية قد تحتاج مساحة تخزين كبيرة جداً ووقتاً أطول. هل تريد المتابعة؟`);
+  startSmartImport(): void {
+    const url = this.smartLibraryUrl.trim();
+    if (this.smartImportRunning || !/^https?:\/\//i.test(url)) {
+      this.notify.show('أدخل رابط مكتبة صحيحاً يبدأ بـ http أو https.', 'error');
+      return;
+    }
+    const confirmed = window.confirm('سيقوم الوكيل الذكي بفحص الموقع وتحويل البيانات إلى حقول مكتبتك الحالية دون تغيير مخطط قاعدة البيانات. هل تريد البدء؟');
     if (!confirmed) return;
-    this.acoImportRunning = true;
-    this.acoImportMessage = `جارِ بدء الاستيراد بدقة ${qualityLabel}...`;
-    this.http.post<any>(`${this.serverOrigin}/api/import/aco/full`, { pdf: this.acoPdfQuality, concurrency: 1 }).subscribe({
-      next: response => { this.acoImportMessage = response?.message || `بدأ الاستيراد بدقة ${qualityLabel}.`; this.notify.show(this.acoImportMessage, 'success'); this.refreshAcoImportStatus(); },
-      error: error => { this.acoImportRunning = false; this.acoImportMessage = error?.error?.message || 'تعذر بدء الاستيراد الجماعي.'; this.notify.show(this.acoImportMessage, 'error'); this.cdr.detectChanges(); }
+    this.smartImportRunning = true;
+    this.smartImportMessage = 'جارِ فحص المكتبة وتحليل الكتب...';
+    this.http.post<any>(`${this.serverOrigin}/api/import/smart/scan`, {
+      url, maxPages: this.smartMaxPages, importNow: this.smartImportNow,
+      downloadFiles: this.smartDownloadFiles, updateExisting: this.smartUpdateExisting
+    }).subscribe({
+      next: response => { this.smartImportMessage = response?.message || 'بدأ الاستيراد الذكي.'; this.notify.show(this.smartImportMessage, 'success'); this.refreshSmartImportStatus(); },
+      error: error => { this.smartImportRunning = false; this.smartImportMessage = error?.error?.message || 'تعذر بدء الاستيراد الذكي.'; this.notify.show(this.smartImportMessage, 'error'); this.cdr.detectChanges(); }
     });
   }
 
-  refreshAcoImportStatus(): void {
-    this.http.get<any>(`${this.serverOrigin}/api/import/aco/status`).subscribe({
+  refreshSmartImportStatus(): void {
+    this.http.get<any>(`${this.serverOrigin}/api/import/smart/status`).subscribe({
       next: status => {
-        this.acoProgress = { ...this.emptyAcoProgress(), ...status, output: Array.isArray(status?.output) ? status.output : [] };
-        this.acoImportRunning = Boolean(status?.running); this.acoImportOutput = this.acoProgress.output;
-        if (this.acoProgress.running) this.acoImportMessage = 'جارِ تنزيل الكتب والملفات إلى قاعدة البيانات...';
-        else if (this.acoProgress.finishedAt && this.acoProgress.exitCode === 0) this.acoImportMessage = 'اكتمل تنزيل ملفات ACO.';
+        this.smartProgress = { ...this.emptySmartProgress(), ...status };
+        this.smartImportRunning = Boolean(status?.running);
+        if (this.smartProgress.running) this.smartImportMessage = 'الوكيل الذكي يعمل ويحلل بيانات المكتبة...';
+        else if (this.smartProgress.error) this.smartImportMessage = this.smartProgress.error;
+        else if (this.smartProgress.finishedAt) this.smartImportMessage = `اكتملت العملية: ${this.smartProgress.imported} كتاب.`;
         this.cdr.detectChanges();
-        if (this.acoImportRunning) window.setTimeout(() => this.refreshAcoImportStatus(), 2000);
+        if (this.smartImportRunning) window.setTimeout(() => this.refreshSmartImportStatus(), 2000);
       },
-      error: () => { this.cdr.detectChanges(); if (this.acoImportRunning) window.setTimeout(() => this.refreshAcoImportStatus(), 5000); }
+      error: () => { this.cdr.detectChanges(); if (this.smartImportRunning) window.setTimeout(() => this.refreshSmartImportStatus(), 5000); }
     });
-  }
-
-  formatEta(seconds: number | null): string {
-    if (seconds === null || !Number.isFinite(seconds)) return 'جارٍ الحساب...';
-    const value = Math.max(0, Math.round(seconds)), hours = Math.floor(value / 3600), minutes = Math.floor((value % 3600) / 60), secs = value % 60;
-    if (hours) return `${hours}س ${minutes}د`; if (minutes) return `${minutes}د ${secs}ث`; return `${secs}ث`;
   }
 
   getBookCover(book: any): string | null { const cover = book?.coverImage || book?.coverUrl || book?.cover; if (!cover) return null; if (/^data:|^blob:|^https?:\/\//i.test(cover)) return cover; return `${this.serverOrigin}${cover.startsWith('/') ? cover : `/${cover}`}`; }
