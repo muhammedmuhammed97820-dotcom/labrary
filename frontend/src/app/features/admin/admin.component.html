@@ -54,10 +54,35 @@
           </div>
 
           @if (acoImportMessage || acoImportRunning) {
-            <div class="admin-state-box loading-box" style="margin-top: 18px;">
-              <p><strong>{{ acoImportMessage || 'جارِ تنزيل كتب ACO...' }}</strong></p>
-              @if (acoImportOutput.length) {
-                <small>{{ acoImportOutput[acoImportOutput.length - 1] }}</small>
+            <div class="aco-progress-panel" [class.is-running]="acoImportRunning">
+              <div class="aco-progress-header">
+                <div>
+                  <strong>{{ acoImportMessage || 'جارِ تنزيل كتب ACO...' }}</strong>
+                  @if (acoProgress.current) {
+                    <small class="aco-current">الكتاب الحالي: {{ acoProgress.current }}</small>
+                  }
+                </div>
+                <strong class="aco-percent">{{ acoProgress.percent | number:'1.0-1' }}%</strong>
+              </div>
+
+              <div class="aco-progress-track" role="progressbar" [attr.aria-valuenow]="acoProgress.percent" aria-valuemin="0" aria-valuemax="100">
+                <div class="aco-progress-fill" [style.width.%]="acoProgress.percent"></div>
+              </div>
+
+              <div class="aco-progress-numbers">
+                <span><b>{{ acoProgress.processed | number }}</b> تمّت معالجتها</span>
+                <span><b>{{ acoProgress.remaining | number }}</b> متبقية</span>
+                <span><b>{{ acoProgress.total | number }}</b> إجمالي</span>
+              </div>
+
+              <div class="aco-progress-details">
+                <div><i class="fa-solid fa-file-pdf"></i><span>PDF محفوظ: <b>{{ acoProgress.pdfDownloaded | number }}</b></span></div>
+                <div><i class="fa-solid fa-image"></i><span>أغلفة محفوظة: <b>{{ acoProgress.coversDownloaded | number }}</b></span></div>
+                <div><i class="fa-solid fa-hourglass-half"></i><span>المتبقي تقريباً: <b>{{ formatEta(acoProgress.etaSeconds) }}</b></span></div>
+              </div>
+
+              @if (!acoImportRunning && acoProgress.finishedAt) {
+                <div class="aco-finished"><i class="fa-solid fa-circle-check"></i> انتهت عملية الاستيراد.</div>
               }
             </div>
           }
