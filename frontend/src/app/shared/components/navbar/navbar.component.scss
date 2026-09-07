@@ -3,13 +3,6 @@
 $font-amiri: 'Amiri', serif;
 $font-cairo: 'Cairo', sans-serif;
 
-:host {
-  display: block;
-  width: 100%;
-  background: var(--bg-primary, #f8f9fa);
-  color: var(--text-primary, #1e293b);
-}
-
 .navbar-glass-wrapper {
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(255, 255, 255, 0.5);
@@ -20,7 +13,6 @@ $font-cairo: 'Cairo', sans-serif;
   --accent-hover: #b45309;
   --accent-light: rgba(217, 119, 6, 0.12);
   --card-bg: rgba(255, 255, 255, 0.88);
-  --page-bg: #f8f9fa;
 
   &.dark-theme {
     --glass-bg: rgba(15, 23, 42, 0.8);
@@ -32,7 +24,6 @@ $font-cairo: 'Cairo', sans-serif;
     --accent-hover: #fbbf24;
     --accent-light: rgba(245, 158, 11, 0.18);
     --card-bg: rgba(30, 41, 59, 0.9);
-    --page-bg: #0f172a;
   }
 
   position: sticky;
@@ -43,8 +34,7 @@ $font-cairo: 'Cairo', sans-serif;
   width: 100%;
   box-sizing: border-box;
   font-family: $font-cairo;
-  background: var(--page-bg);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.3s ease;
 
   .navbar-glass-container {
     max-width: 1280px;
