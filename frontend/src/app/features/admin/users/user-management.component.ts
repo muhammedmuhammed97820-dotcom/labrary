@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { UserManagementService, ManagedUser } from '../../../core/services/user-management.service';
@@ -17,6 +17,7 @@ export class UserManagementComponent implements OnInit {
   private readonly service = inject(UserManagementService);
   readonly themeService = inject(ThemeService);
   private readonly notify = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   users: ManagedUser[] = [];
   loading = true;
@@ -45,11 +46,13 @@ export class UserManagementComponent implements OnInit {
         this.totalPages = Math.max(response.pagination.totalPages, 1);
         this.stats = response.stats;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: err => {
         const errorMsg = err?.error?.message || 'تعذر تحميل المستخدمين.';
         this.showNotificationMessage('error', errorMsg);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -72,17 +75,17 @@ export class UserManagementComponent implements OnInit {
   closeModal(): void { if (!this.saving) this.modalOpen = false; }
 
   save(): void {
-    if (!this.form.name.trim() || !this.form.email.trim()) { 
-      this.showNotificationMessage('warning', 'الاسم والبريد الإلكتروني مطلوبان.'); 
-      return; 
+    if (!this.form.name.trim() || !this.form.email.trim()) {
+      this.showNotificationMessage('warning', 'الاسم والبريد الإلكتروني مطلوبان.');
+      return;
     }
-    if (!this.editing && this.form.password.length < 6) { 
-      this.showNotificationMessage('warning', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.'); 
-      return; 
+    if (!this.editing && this.form.password.length < 6) {
+      this.showNotificationMessage('warning', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.');
+      return;
     }
-    if (this.editing && this.form.password && this.form.password.length < 6) { 
-      this.showNotificationMessage('warning', 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.'); 
-      return; 
+    if (this.editing && this.form.password && this.form.password.length < 6) {
+      this.showNotificationMessage('warning', 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.');
+      return;
     }
 
     this.saving = true;
@@ -91,14 +94,14 @@ export class UserManagementComponent implements OnInit {
       : this.service.create(this.form);
 
     request.subscribe({
-      next: response => { 
-        this.saving = false; 
-        this.modalOpen = false; 
+      next: response => {
+        this.saving = false;
+        this.modalOpen = false;
         this.showNotificationMessage('success', response.message || 'تم حفظ المستخدم بنجاح');
-        this.load(this.page); 
+        this.load(this.page);
       },
-      error: err => { 
-        this.saving = false; 
+      error: err => {
+        this.saving = false;
         const errorMsg = err?.error?.message || 'تعذر حفظ المستخدم.';
         this.showNotificationMessage('error', errorMsg);
       }
@@ -107,12 +110,12 @@ export class UserManagementComponent implements OnInit {
 
   deleteUser(user: ManagedUser): void {
     if (!confirm(`هل أنت متأكد من حذف المستخدم "${user.name}"؟ لا يمكن التراجع عن هذه العملية.`)) return;
-    
+
     this.service.remove(user.id).subscribe({
-      next: response => { 
+      next: response => {
         this.showNotificationMessage('success', response.message || 'تم حذف المستخدم بنجاح');
-        if (this.users.length === 1 && this.page > 1) this.page--; 
-        this.load(this.page); 
+        if (this.users.length === 1 && this.page > 1) this.page--;
+        this.load(this.page);
       },
       error: err => {
         const errorMsg = err?.error?.message || 'تعذر حذف المستخدم.';
@@ -129,7 +132,6 @@ export class UserManagementComponent implements OnInit {
 
   initials(name: string): string { return name.trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase(); }
 
-  // دالة مساعدة ذكية تتكيف تلقائياً مع أسماء الدوال المتاحة في NotificationService
   private showNotificationMessage(type: 'success' | 'error' | 'warning', message: string): void {
     const notifyAny = this.notify as any;
     if (type === 'success' && typeof notifyAny.success === 'function') {
@@ -141,7 +143,7 @@ export class UserManagementComponent implements OnInit {
     } else if (type === 'warning') {
       if (typeof notifyAny.warning === 'function') notifyAny.warning(message);
       else if (typeof notifyAny.show === 'function') notifyAny.show(message, 'warning');
-      else notifyAny.success(message); // كاحتياطي أخير
+      else notifyAny.success(message);
     }
   }
 }
