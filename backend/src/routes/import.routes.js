@@ -1,6 +1,6 @@
 const express = require("express");
 const { authenticate, requireAdmin } = require("../middleware/auth.middleware");
-const { scanAndImport } = require("../services/smart-import.service");
+const { scanAndImport } = require("../services/smart-library-agent.service");
 
 const router = express.Router();
 
@@ -18,24 +18,18 @@ let job = {
   result: null
 };
 
-router.get("/smart/status", authenticate, requireAdmin, (req, res) => {
-  res.json(job);
-});
+router.get("/smart/status", authenticate, requireAdmin, (req, res) => res.json(job));
 
 router.post("/smart/scan", authenticate, requireAdmin, async (req, res) => {
   if (job.running) return res.status(409).json({ message: "يوجد استيراد ذكي يعمل حالياً.", job });
-
   const url = String(req.body?.url || "").trim();
   if (!/^https?:\/\//i.test(url)) return res.status(400).json({ message: "أدخل رابط مكتبة صحيحاً يبدأ بـ http أو https." });
-
-  const maxPages = Math.min(Math.max(Number.parseInt(req.body?.maxPages, 10) || 30, 1), 200);
+  const maxPages = Math.min(Math.max(Number.parseInt(req.body?.maxPages, 10) || 50, 1), 200);
   const importNow = req.body?.importNow !== false;
   const downloadFiles = req.body?.downloadFiles === true;
   const updateExisting = req.body?.updateExisting === true;
-
   job = { running: true, startedAt: new Date().toISOString(), finishedAt: null, error: "", url, stage: "crawling", pages: 0, discovered: 0, normalized: 0, imported: 0, result: null };
-  res.status(202).json({ message: "بدأ الوكيل الذكي بفحص المكتبة وتحويل بياناتها إلى مخطط مكتبتك الحالي.", job });
-
+  res.status(202).json({ message: "بدأ الوكيل الذكي بتحليل الكتب والمؤلفين والتصنيفات.", job });
   try {
     const result = await scanAndImport(url, { maxPages, import: importNow, downloadFiles, updateExisting });
     job.running = false;
