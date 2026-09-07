@@ -18,6 +18,7 @@ import { CategoriesManagementComponent } from './features/admin/categories/categ
 import { BookSubmitComponent } from './features/books/book-submit/book-submit.component';
 import { MySubmissionsComponent } from './features/books/my-submissions/my-submissions.component';
 import { BookSubmissionsComponent } from './features/admin/submissions/book-submissions.component';
+import { SmartImporterComponent } from './features/admin/importer/smart-importer.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -40,5 +41,6 @@ export const routes: Routes = [
   { path: 'admin/authors', component: AuthorsManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/categories', component: CategoriesManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/book-submissions', component: BookSubmissionsComponent, canActivate: [adminGuard] },
+  { path: 'admin/smart-importer', component: SmartImporterComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: '' }
 ];
