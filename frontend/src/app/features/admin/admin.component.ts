@@ -6,6 +6,22 @@ import { Book, BookApiService } from '../../core/services/book-api.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
 
+interface AcoImportStatus {
+  running: boolean;
+  startedAt: string | null;
+  finishedAt: string | null;
+  exitCode: number | null;
+  output: string[];
+  total: number;
+  processed: number;
+  remaining: number;
+  percent: number;
+  pdfDownloaded: number;
+  coversDownloaded: number;
+  current: string;
+  etaSeconds: number | null;
+}
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -28,10 +44,29 @@ export class AdminComponent implements OnInit {
   acoImportRunning = false;
   acoImportMessage = '';
   acoImportOutput: string[] = [];
+  acoProgress: AcoImportStatus = this.emptyAcoProgress();
 
   ngOnInit(): void {
     this.load();
     this.refreshAcoImportStatus();
+  }
+
+  private emptyAcoProgress(): AcoImportStatus {
+    return {
+      running: false,
+      startedAt: null,
+      finishedAt: null,
+      exitCode: null,
+      output: [],
+      total: 0,
+      processed: 0,
+      remaining: 0,
+      percent: 0,
+      pdfDownloaded: 0,
+      coversDownloaded: 0,
+      current: '',
+      etaSeconds: null
+    };
   }
 
   load(): void {
@@ -83,20 +118,43 @@ export class AdminComponent implements OnInit {
   refreshAcoImportStatus(): void {
     this.http.get<any>(`${this.serverOrigin}/api/import/aco/status`).subscribe({
       next: status => {
+        this.acoProgress = {
+          ...this.emptyAcoProgress(),
+          ...status,
+          output: Array.isArray(status?.output) ? status.output : []
+        };
         this.acoImportRunning = Boolean(status?.running);
-        this.acoImportOutput = Array.isArray(status?.output) ? status.output : [];
-        if (!this.acoImportRunning && status?.finishedAt && status?.exitCode === 0) {
+        this.acoImportOutput = this.acoProgress.output;
+
+        if (this.acoProgress.running) {
+          this.acoImportMessage = 'جارِ تنزيل الكتب والملفات إلى قاعدة البيانات...';
+        } else if (this.acoProgress.finishedAt && this.acoProgress.exitCode === 0) {
           this.acoImportMessage = 'اكتمل تنزيل ملفات ACO.';
         }
+
         this.cdr.detectChanges();
         if (this.acoImportRunning) {
-          window.setTimeout(() => this.refreshAcoImportStatus(), 5000);
+          window.setTimeout(() => this.refreshAcoImportStatus(), 2000);
         }
       },
       error: () => {
         this.cdr.detectChanges();
+        if (this.acoImportRunning) {
+          window.setTimeout(() => this.refreshAcoImportStatus(), 5000);
+        }
       }
     });
+  }
+
+  formatEta(seconds: number | null): string {
+    if (seconds === null || !Number.isFinite(seconds)) return 'جارٍ الحساب...';
+    const value = Math.max(0, Math.round(seconds));
+    const hours = Math.floor(value / 3600);
+    const minutes = Math.floor((value % 3600) / 60);
+    const secs = value % 60;
+    if (hours) return `${hours}س ${minutes}د`;
+    if (minutes) return `${minutes}د ${secs}ث`;
+    return `${secs}ث`;
   }
 
   getBookCover(book: any): string | null {
