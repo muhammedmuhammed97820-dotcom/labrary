@@ -22,7 +22,18 @@ let job = {
 };
 
 function updateProgressFromLine(line) {
-  const match = String(line).match(/^\[(\d+)\/(\d+)\]\s+(.+?)\s+\|\s+PDF:\s+(.+?)\s+\|\s+الغلاف:\s+(.+)$/);
+  const text = String(line).trim();
+
+  const totalMatch = text.match(/تم العثور على\s+(\d+)\s+سجل XML؛\s*ستتم معالجة\s+(\d+)/);
+  if (totalMatch) {
+    const total = Number(totalMatch[2]) || 0;
+    job.total = Math.max(job.total, total);
+    job.remaining = Math.max(job.total - job.processed, 0);
+    if (job.total === 0) job.percent = 100;
+    return;
+  }
+
+  const match = text.match(/^\[(\d+)\/(\d+)\]\s+(.+?)\s+\|\s+PDF:\s+(.+?)\s+\|\s+الغلاف:\s+(.+)$/);
   if (!match) return;
 
   const processed = Number(match[1]) || 0;
@@ -103,7 +114,7 @@ router.post("/aco/full", authenticate, requireAdmin, (req, res) => {
     job.finishedAt = new Date().toISOString();
     job.exitCode = code;
     job.remaining = Math.max(job.total - job.processed, 0);
-    if (code === 0 && job.total) job.percent = 100;
+    if (code === 0) job.percent = 100;
   });
 
   return res.status(202).json({
