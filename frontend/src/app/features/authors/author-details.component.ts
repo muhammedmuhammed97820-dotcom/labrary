@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ViewEncapsulation,
+  inject
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ThemeService } from '../../core/services/theme.service';
@@ -19,7 +25,8 @@ export class AuthorDetailsComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly notify = inject(NotificationService);
-  private readonly media = inject(BookApiService);
+  private readonly api = inject(BookApiService);
+
   readonly themeService = inject(ThemeService);
 
   authorId = '';
@@ -29,35 +36,57 @@ export class AuthorDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.authorId = this.route.snapshot.paramMap.get('id') ?? '';
+
     if (!this.authorId) {
       this.error = 'معرّف المؤلف غير موجود.';
       this.loading = false;
       return;
     }
+
     this.loadAuthorDetails();
   }
 
   private loadAuthorDetails(): void {
-    this.http.get<any>(`${this.media.getFileUrl('/api')}/authors/${this.authorId}`).subscribe({
-      next: data => {
-        this.author = data;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: (err: unknown) => {
-        const httpError = err as { error?: { message?: string } };
-        this.error = httpError.error?.message || 'تعذر تحميل تفاصيل المؤلف.';
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
-    });
+    this.http
+      .get<any>(
+        `${this.api.getFileUrl('/api')}/authors/${this.authorId}`
+      )
+      .subscribe({
+        next: data => {
+          this.author = data;
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+
+        error: (err: unknown) => {
+          const httpError = err as {
+            error?: {
+              message?: string;
+            };
+          };
+
+          this.error =
+            httpError.error?.message ||
+            'تعذر تحميل تفاصيل المؤلف.';
+
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
-  imageUrl(v?: string | null): string {
-    return this.media.getFileUrl(v);
+  /**
+   * رابط صورة المؤلف الشخصية
+   */
+  imageUrl(value?: string | null): string {
+    return this.api.getFileUrl(value);
   }
 
+  /**
+   * رابط غلاف الكتاب (يطابق تماماً الطريقة الصحيحة في BookDetailsComponent)
+   */
   bookCoverUrl(book: any): string {
-    return this.media.getBookCoverUrl(book) || 'assets/images/default-cover.svg';
+    const coverPath = book?.coverImage || book?.coverUrl || book?.cover;
+    return coverPath ? this.api.getFileUrl(coverPath) : 'assets/images/default-cover.svg';
   }
 }
