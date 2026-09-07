@@ -1,6 +1,6 @@
 const express = require("express");
 const { authenticate, requireAdmin } = require("../middleware/auth.middleware");
-const { scanAndImport } = require("../services/smart-library-agent-v4.service");
+const { scanAndImport } = require("../services/smart-library-agent-v5.service");
 
 const router = express.Router();
 
@@ -29,7 +29,7 @@ router.post("/smart/scan", authenticate, requireAdmin, async (req, res) => {
   const downloadFiles = req.body?.downloadFiles === true;
   const updateExisting = req.body?.updateExisting === true;
   job = { running: true, startedAt: new Date().toISOString(), finishedAt: null, error: "", url, stage: "crawling", pages: 0, discovered: 0, normalized: 0, imported: 0, result: null };
-  res.status(202).json({ message: "بدأ الوكيل الذكي بتحليل الكتب والمؤلفين والتصنيفات.", job });
+  res.status(202).json({ message: "بدأ الوكيل الذكي بتحليل الكتب والمؤلفين والتصنيفات والصور الخارجية.", job });
   try {
     const result = await scanAndImport(url, { maxPages, import: importNow, downloadFiles, updateExisting });
     job.running = false;
