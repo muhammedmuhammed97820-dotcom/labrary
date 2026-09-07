@@ -9,7 +9,7 @@ const { execFileSync } = require("child_process");
 const connectDatabase = require("../config/database");
 const Book = require("../models/Book");
 const { findOrCreateAuthor, findOrCreateCategory } = require("../services/book.service");
-const { uploadBuffer, deleteFile } = require("../services/gridfs.service");
+const { uploadBuffer } = require("../services/gridfs.service");
 
 const ACO_REPO = "https://github.com/NYULibraries/aco-karms.git";
 const ACO_SITE = "https://aco.dlib.nyu.edu";
@@ -91,7 +91,6 @@ function parseMarcXml(xml, map) {
   const category = firstField(xml, ["650", "651", "655"], ["a", "x"]);
   const description = firstField(xml, ["520", "500"], ["a"]);
   const publisher = firstField(xml, ["264", "260"], ["b"]);
-  const place = firstField(xml, ["264", "260"], ["a"]);
   const date = firstField(xml, ["264", "260"], ["c"]);
   const isbn = firstField(xml, ["020"], ["a"]);
   const subjects = allFields(xml, ["650", "651", "655"], ["a", "x", "y", "z"]);
@@ -106,12 +105,10 @@ function parseMarcXml(xml, map) {
     category: clean(category),
     description: clean(description),
     publisher: clean(publisher),
-    place: clean(place),
     publishedYear: extractYear(date),
     isbn: clean(isbn).split(/\s+/)[0] || "",
     subjects,
-    sourceUrl: clean(sourceUrl),
-    rawDate: clean(date)
+    sourceUrl: clean(sourceUrl)
   };
 }
 
@@ -186,12 +183,13 @@ async function importOne(record, index, total) {
 
   const existing = await Book.findOne({ source: "ACO", sourceId: record.sourceId }).select("_id fileId coverImageId").lean();
   let fileId = existing?.fileId || null;
-  let coverImageId = existing?.coverImageId || null;
+  const lowPdfUrl = pdfUrl(record.sourceId, false);
+  const highPdfUrl = pdfUrl(record.sourceId, true);
 
   if (!existing || !fileId) {
     const shouldDownloadPdf = pdfMode === "low" || pdfMode === "high";
     if (shouldDownloadPdf) {
-      const url = pdfUrl(record.sourceId, pdfMode === "high");
+      const url = pdfMode === "high" ? highPdfUrl : lowPdfUrl;
       if (url) {
         try {
           const cacheName = `${record.sourceId}_${pdfMode}.pdf`;
@@ -212,9 +210,7 @@ async function importOne(record, index, total) {
 
   const authorDoc = await findOrCreateAuthor(record.author);
   const categoryDoc = await findOrCreateCategory(record.category);
-  const source = "ACO";
   const sourceUrl = record.sourceUrl || `${ACO_SITE}/`;
-  const filePath = fileId ? "" : sourceUrl;
 
   const payload = {
     title: record.title,
@@ -225,32 +221,30 @@ async function importOne(record, index, total) {
     description: record.description,
     publishedYear: record.publishedYear,
     rating: 0,
-    isAvailable: Boolean(fileId),
+    isAvailable: Boolean(fileId || lowPdfUrl),
     fileId,
-    coverImageId,
-    filePath,
+    coverImageId: existing?.coverImageId || null,
+    filePath: fileId ? "" : lowPdfUrl,
     coverImage: "",
     status: "approved",
     submittedBy: null,
     reviewedAt: new Date(),
     rejectionReason: "",
-    source,
+    source: "ACO",
     sourceId: record.sourceId,
     sourceUrl,
+    sourceFileUrl: lowPdfUrl,
     sourceProvider: record.publisher || "",
     rights: "Public Domain",
     isbn: record.isbn,
     subjects: record.subjects
   };
 
-  if (existing) {
-    await Book.updateOne({ _id: existing._id }, { $set: payload });
-  } else {
-    await Book.create(payload);
-  }
+  if (existing) await Book.updateOne({ _id: existing._id }, { $set: payload });
+  else await Book.create(payload);
 
   if (index % DEFAULT_BATCH === 0 || index === total) {
-    console.log(`[${index}/${total}] ${record.title} | PDF: ${fileId ? "نعم" : "لا"}`);
+    console.log(`[${index}/${total}] ${record.title} | PDF محلي: ${fileId ? "نعم" : "رابط مباشر"}`);
   }
   return { status: "imported", fileId: Boolean(fileId) };
 }
@@ -272,7 +266,7 @@ async function main() {
   console.log(`الحد: ${limit || "كل السجلات"} | البداية: ${offset}`);
 
   if (pdfMode !== "none" && !confirm) {
-    console.error("\nلتحميل ملفات PDF يجب تشغيل الأمر مع --confirm لأن العملية قد تحتاج مساحة تخزين كبيرة جداً.");
+    console.error("\nلتحميل ملفات PDF إلى MongoDB يجب تشغيل الأمر مع --confirm لأن العملية قد تحتاج مساحة تخزين ضخمة.");
     console.error("مثال: npm run import:aco -- --pdf=low --confirm");
     process.exitCode = 2;
     return;
@@ -298,8 +292,7 @@ async function main() {
       try {
         const xml = await fsp.readFile(file, "utf8");
         const record = parseMarcXml(xml, map);
-        const result = await importOne(record, offset + i + batchIndex + 1, files.length);
-        return result;
+        return await importOne(record, offset + i + batchIndex + 1, files.length);
       } catch (error) {
         console.error(`فشل: ${file}: ${error.message}`);
         return { status: "failed" };
@@ -318,9 +311,10 @@ async function main() {
   console.log("\n=== اكتمل الاستيراد ===");
   console.log(`تمت الإضافة/التحديث: ${imported}`);
   console.log(`مع PDF داخل GridFS: ${withPdf}`);
+  console.log(`مع رابط PDF خارجي: ${Math.max(imported - withPdf, 0)}`);
   console.log(`تم التجاوز: ${skipped}`);
   console.log(`فشل: ${failed}`);
-  console.log("ملاحظة: غلاف ACO المنفصل غير متوفر كملف مستقل في هذا المستورد، لذلك لا يتم اختلاق غلاف للكتاب.");
+  console.log("ملاحظة: لا يتم اختلاق غلاف للكتاب؛ بيانات ACO وملف PDF القانوني يتم ربطهما من المصدر.");
 
   await require("mongoose").connection.close();
 }
