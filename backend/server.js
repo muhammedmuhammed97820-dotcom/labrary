@@ -13,7 +13,6 @@ const bookRoutes = require("./src/routes/book.routes");
 const authorRoutes = require("./src/routes/author.routes");
 const categoryRoutes = require("./src/routes/category.routes");
 const authRoutes = require("./src/routes/auth.routes");
-const smartImporterRoutes = require("./src/routes/smart-importer.routes");
 const errorHandler = require("./src/middleware/error.middleware");
 
 const app = express();
@@ -52,14 +51,13 @@ app.use("/uploads", (req, res, next) => {
   }
 } }));
 
-app.get("/", (req, res) => res.json({ name: "Electronic Library API", version: "1.0.0", status: "online", smartImporter: true }));
+app.get("/", (req, res) => res.json({ name: "Electronic Library API", version: "1.0.0", status: "online" }));
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "Electronic Library Backend", timestamp: new Date().toISOString() }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/authors", authorRoutes);
 app.use("/api/categories", categoryRoutes);
-app.use("/api/admin/smart-importer", smartImporterRoutes);
 
 app.use((req, res) => res.status(404).json({ message: "API endpoint not found." }));
 app.use(errorHandler);
@@ -71,7 +69,6 @@ async function startServer() {
     console.log(" ELECTRONIC LIBRARY BACKEND");
     console.log(` Server: http://localhost:${PORT}`);
     console.log(` API: http://localhost:${PORT}/api`);
-    console.log(" Smart Importer: /api/admin/smart-importer");
     console.log("==================================================");
   });
 }
