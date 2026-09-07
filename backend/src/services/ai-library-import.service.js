@@ -4,6 +4,7 @@ const Category = require("../models/Category");
 const { uploadBuffer } = require("./gridfs.service");
 const { findBookCover, findAuthorImage } = require("./external-image.service");
 const { analyzePage, fetchHtml } = require("./openai-library.service");
+const { researchBook } = require("./openai-research.service");
 
 const MAX_PAGES = 100;
 const UA = "ElectronicLibrary OpenAI Importer/1.0";
@@ -86,7 +87,7 @@ async function saveBook(item, context, options) {
   const sourceUrl = absolute(context.pageUrl, item.bookUrl || context.pageUrl);
   if (!sourceUrl) return { skipped: true, reason: "missing-source-url" };
 
-  const author = await saveAuthor({ name: item.authorName, url: item.authorUrl }, options);
+  const author = await saveAuthor({ name: item.authorName, url: item.authorUrl, bio: item.authorBio }, options);
   const category = await saveCategory({ name: item.categoryName });
 
   let book = await Book.findOne({ source: "OPENAI", sourceUrl });
@@ -146,7 +147,9 @@ async function saveBook(item, context, options) {
     author: author?.name || "",
     category: category?.name || "",
     externalCover: coverSaved || Boolean(book.coverImageId),
-    pdfImported: pdfSaved
+    pdfImported: pdfSaved,
+    researched: Boolean(item.researched),
+    researchSources: item.researchSources || []
   };
 }
 
@@ -170,7 +173,8 @@ async function scanAndImportWithOpenAI(startUrl, options = {}) {
   const settings = {
     updateExisting: options.updateExisting === true,
     downloadFiles: options.downloadFiles === true,
-    externalImages: options.externalImages !== false
+    externalImages: options.externalImages !== false,
+    externalResearch: options.externalResearch !== false
   };
   const queue = [startUrl];
   const queued = new Set(queue);
@@ -213,9 +217,23 @@ async function scanAndImportWithOpenAI(startUrl, options = {}) {
     }
   }
 
+  const researchedBooks = [];
+  if (settings.externalResearch) {
+    for (const item of allBooks.values()) {
+      try {
+        researchedBooks.push(await researchBook(item));
+      } catch (error) {
+        errors.push({ url: item.bookUrl || item.pageUrl, error: `البحث الخارجي: ${error?.message || "فشل البحث"}` });
+        researchedBooks.push(item);
+      }
+    }
+  } else {
+    researchedBooks.push(...allBooks.values());
+  }
+
   const imported = [];
   if (options.import !== false) {
-    for (const item of allBooks.values()) {
+    for (const item of researchedBooks) {
       try {
         imported.push(await saveBook(item, { pageUrl: item.pageUrl }, settings));
       } catch (error) {
@@ -230,12 +248,14 @@ async function scanAndImportWithOpenAI(startUrl, options = {}) {
     startUrl,
     pages: seen.size,
     discovered: allBooks.size,
-    normalized: allBooks.size,
+    normalized: researchedBooks.length,
+    externallyResearched: researchedBooks.filter(x => x.researched).length,
     imported: imported.filter(x => !x.skipped).length,
     existing: imported.filter(x => x.existed).length,
     authorsDetected: allAuthors.size,
     categoriesDetected: allCategories.size,
     externalImages: settings.externalImages,
+    externalResearch: settings.externalResearch,
     pdfPolicy: "rights-evidence-required",
     errors,
     books: imported
