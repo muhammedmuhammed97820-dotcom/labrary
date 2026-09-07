@@ -91,6 +91,17 @@
                   <span>سبب الرفض: {{ book.rejectionReason }}</span>
                 </div>
               }
+
+              @if (book.status === 'rejected') {
+                <button
+                  type="button"
+                  class="delete-rejected-btn"
+                  [disabled]="deletingId === book._id"
+                  (click)="deleteRejected(book)">
+                  <i class="fa-solid" [class.fa-trash-can]="deletingId !== book._id" [class.fa-spinner]="deletingId === book._id" [class.fa-spin]="deletingId === book._id"></i>
+                  <span>{{ deletingId === book._id ? 'جارٍ الحذف...' : 'حذف الطلب' }}</span>
+                </button>
+              }
             </div>
 
           </div>
