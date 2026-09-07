@@ -88,7 +88,8 @@ function allFields(xml, tags, codes) {
 }
 
 function parseMarcXml(xml, map) {
-  const control001 = clean((xml.match(/<controlfield\\b[^>]*tag=["']001["'][^>]*>([\\s\\S]*?)<\\/controlfield>/i) || [])[1]);
+  const controlMatch = xml.match(/<controlfield\b[^>]*tag=["']001["'][^>]*>([\s\S]*?)<\/controlfield>/i);
+  const control001 = clean(controlMatch ? controlMatch[1] : "");
   const title = firstField(xml, ["245", "246"], ["a", "b", "c"]);
   const author = firstField(xml, ["100", "110", "111", "700"], ["a"]);
   const category = firstField(xml, ["650", "651", "655"], ["a", "x"]);
@@ -261,9 +262,7 @@ async function importOne(record, index, total) {
   if (existing) await Book.updateOne({ _id: existing._id }, { $set: payload });
   else await Book.create(payload);
 
-  if (index % DEFAULT_BATCH === 0 || index === total) {
-    console.log(`[${index}/${total}] ${record.title} | PDF: ${fileId ? "محلي" : "رابط"} | الغلاف: ${coverImageId ? "محلي" : "غير متوفر"}`);
-  }
+  console.log(`[${index}/${total}] ${record.title} | PDF: ${fileId ? "محلي" : "رابط"} | الغلاف: ${coverImageId ? "محلي" : "غير متوفر"}`);
   return { status: "imported", fileId: Boolean(fileId), coverImageId: Boolean(coverImageId) };
 }
 
@@ -282,6 +281,12 @@ async function main() {
   console.log("\n=== مستورد Arabic Collections Online لمكتبة Electronic Library ===");
   console.log(`وضع PDF: ${pdfMode} | تنزيل الأغلفة: ${downloadCovers ? "نعم" : "لا"}`);
   console.log(`الحد: ${limit || "كل السجلات"} | البداية: ${offset}`);
+
+  if (!["none", "low", "high"].includes(pdfMode)) {
+    console.error(`وضع PDF غير صالح: ${pdfMode}. استخدم none أو low أو high.`);
+    process.exitCode = 2;
+    return;
+  }
 
   if ((pdfMode !== "none" || downloadCovers) && !confirm) {
     console.error("\nهذه العملية قد تحتاج مساحة تخزين ضخمة. أضف --confirm للتنفيذ.");
