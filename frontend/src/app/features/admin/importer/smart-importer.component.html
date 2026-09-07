@@ -27,8 +27,8 @@
 
   <div *ngIf="books.length" class="results-head">
     <div>
-      <strong>{{ books.length }} كتاب</strong>
-      <span>تم فحص {{ scannedPages }} صفحة</span>
+      <strong>{{ books.length }} كتاب مكتشف</strong>
+      <span>تم فحص {{ scannedPages }} صفحة — تم استبعاد صفحات الموقع غير الخاصة بالكتب</span>
     </div>
     <div class="actions">
       <button class="secondary" (click)="toggleAll(true)">تحديد الكل</button>
@@ -37,6 +37,10 @@
         {{ approving ? 'جاري الحفظ...' : 'موافق وحفظ المحدد' }}
       </button>
     </div>
+  </div>
+
+  <div *ngIf="!loading && !error && scannedPages && !books.length" class="empty">
+    لم يتم العثور على صفحات كتب موثوقة ضمن الصفحات المفحوصة.
   </div>
 
   <div class="book-list">
@@ -49,8 +53,9 @@
       <div class="book-info">
         <div class="topline">
           <label class="select"><input type="checkbox" [(ngModel)]="book.selected" [disabled]="book.duplicate === true" /></label>
-          <span class="badge" [class.warn]="book.duplicate">{{ book.duplicate ? 'مكرر' : 'جديد' }}</span>
-          <span class="confidence" *ngIf="book.ai">AI {{ book.ai.confidence }}%</span>
+          <span class="badge" [class.warn]="book.duplicate">{{ book.duplicate ? 'مكرر' : 'كتاب' }}</span>
+          <span class="confidence" *ngIf="book.ai?.enabled">AI {{ book.ai.confidence }}%</span>
+          <span class="confidence extraction">ثقة الاستخراج {{ book.extraction?.confidence || 0 }}%</span>
         </div>
 
         <h2>{{ book.title }}</h2>
@@ -62,7 +67,7 @@
           <span>📄 {{ book.pages || '—' }} صفحة</span>
           <span>📅 {{ book.publishedYear || '—' }}</span>
           <span>🔖 {{ book.isbn || 'بدون ISBN' }}</span>
-          <span>🌐 {{ book.language }}</span>
+          <span>🌐 {{ book.language || 'العربية' }}</span>
         </div>
 
         <div class="sources">
