@@ -32,6 +32,7 @@ export class UserManagementComponent implements OnInit {
 
   modalOpen = false;
   editing: ManagedUser | null = null;
+  deletingId: string | null = null;
   form = { name: '', email: '', password: '', role: 'user' as 'user' | 'admin' };
 
   ngOnInit(): void { this.load(); }
@@ -108,20 +109,29 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
-  deleteUser(user: ManagedUser): void {
-    if (!confirm(`هل أنت متأكد من حذف المستخدم "${user.name}"؟ لا يمكن التراجع عن هذه العملية.`)) return;
+  promptDelete(user: ManagedUser): void {
+    if (this.deletingId === user.id) {
+      this.service.remove(user.id).subscribe({
+        next: response => {
+          this.showNotificationMessage('success', response.message || 'تم حذف المستخدم بنجاح');
+          this.deletingId = null;
+          if (this.users.length === 1 && this.page > 1) this.page--;
+          this.load(this.page);
+        },
+        error: err => {
+          const errorMsg = err?.error?.message || 'تعذر حذف المستخدم.';
+          this.showNotificationMessage('error', errorMsg);
+          this.deletingId = null;
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      this.deletingId = user.id;
+    }
+  }
 
-    this.service.remove(user.id).subscribe({
-      next: response => {
-        this.showNotificationMessage('success', response.message || 'تم حذف المستخدم بنجاح');
-        if (this.users.length === 1 && this.page > 1) this.page--;
-        this.load(this.page);
-      },
-      error: err => {
-        const errorMsg = err?.error?.message || 'تعذر حذف المستخدم.';
-        this.showNotificationMessage('error', errorMsg);
-      }
-    });
+  cancelDelete(): void {
+    this.deletingId = null;
   }
 
   avatar(user: ManagedUser): string | null {
