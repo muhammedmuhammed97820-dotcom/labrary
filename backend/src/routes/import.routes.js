@@ -1,7 +1,6 @@
 const express = require("express");
 const { authenticate, requireAdmin } = require("../middleware/auth.middleware");
 const { scanAndImport } = require("../services/smart-library-agent-v6.service");
-const { scanAndImportWithOpenAI } = require("../services/ai-library-import.service");
 
 const router = express.Router();
 let job={running:false,startedAt:null,finishedAt:null,error:"",url:"",stage:"idle",engine:"",pages:0,discovered:0,normalized:0,imported:0,result:null};
@@ -15,27 +14,9 @@ router.post("/smart/scan",authenticate,requireAdmin,async(req,res)=>{
  const maxPages=Math.min(Math.max(Number.parseInt(req.body?.maxPages,10)||100,1),300);
  const importNow=req.body?.importNow!==false,downloadFiles=req.body?.downloadFiles===true,updateExisting=req.body?.updateExisting===true;
  job={running:true,startedAt:new Date().toISOString(),finishedAt:null,error:"",url,stage:"crawling",engine:"V6",pages:0,discovered:0,normalized:0,imported:0,result:null};
- res.status(202).json({message:"بدأ الوكيل الذكي V6 بتحليل الكتب والمؤلفين والتصنيفات والصور الخارجية.",job});
+ res.status(202).json({message:"بدأ الاستيراد الذكي.",job});
  try{const result=await scanAndImport(url,{maxPages,import:importNow,downloadFiles,updateExisting});job.running=false;job.finishedAt=new Date().toISOString();job.stage="completed";job.pages=result.pages;job.discovered=result.discovered;job.normalized=result.normalized;job.imported=result.imported;job.result=result;}
  catch(error){job.running=false;job.finishedAt=new Date().toISOString();job.stage="failed";job.error=error?.message||"فشل الاستيراد الذكي.";}
-});
-
-router.post("/ai/scan",authenticate,requireAdmin,async(req,res)=>{
- if(job.running)return res.status(409).json({message:"يوجد استيراد ذكي يعمل حالياً.",job});
- const url=String(req.body?.url||"").trim();
- if(!/^https?:\/\//i.test(url))return res.status(400).json({message:"أدخل رابطاً صحيحاً يبدأ بـ http أو https."});
- if(!process.env.OPENAI_API_KEY)return res.status(503).json({message:"OPENAI_API_KEY غير مضبوط في backend/.env."});
- const maxPages=Math.min(Math.max(Number.parseInt(req.body?.maxPages,10)||30,1),100);
- const importNow=req.body?.importNow!==false;
- const downloadFiles=req.body?.downloadFiles===true;
- const externalImages=req.body?.externalImages!==false;
- const updateExisting=req.body?.updateExisting===true;
- job={running:true,startedAt:new Date().toISOString(),finishedAt:null,error:"",url,stage:"ai-analyzing",engine:"OpenAI",pages:0,discovered:0,normalized:0,imported:0,result:null};
- res.status(202).json({message:"بدأ OpenAI بتحليل الموقع وتنظيم الكتب والمؤلفين والتصنيفات. الصور ستؤخذ من مصادر خارجية فقط.",job});
- try{
-  const result=await scanAndImportWithOpenAI(url,{maxPages,import:importNow,downloadFiles,externalImages,updateExisting});
-  job.running=false;job.finishedAt=new Date().toISOString();job.stage="completed";job.pages=result.pages;job.discovered=result.discovered;job.normalized=result.normalized;job.imported=result.imported;job.result=result;
- }catch(error){job.running=false;job.finishedAt=new Date().toISOString();job.stage="failed";job.error=error?.message||"فشل استيراد OpenAI.";}
 });
 
 module.exports=router;
