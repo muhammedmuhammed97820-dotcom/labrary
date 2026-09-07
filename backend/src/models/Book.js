@@ -9,6 +9,7 @@ const bookSchema = new mongoose.Schema(
     submittedCategoryName: { type: String, trim: true, default: "" },
     description: { type: String, default: "" },
     publishedYear: { type: Number },
+    language: { type: String, trim: true, default: "" },
     rating: { type: Number, default: 0, min: 0, max: 5 },
     isAvailable: { type: Boolean, default: true },
     fileId: { type: mongoose.Schema.Types.ObjectId, default: null, index: true },
