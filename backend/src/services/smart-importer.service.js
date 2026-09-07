@@ -2,7 +2,7 @@ const { URL } = require('url');
 const { enrichMany } = require('./ai-book.service');
 
 const DEFAULT_HEADERS = {
-  'User-Agent': 'ElectronicLibrarySmartImporter/2.0 (+admin-controlled-library-import)',
+  'User-Agent': 'ElectronicLibrarySmartImporter/2.1 (+admin-controlled-library-import)',
   Accept: 'text/html,application/xhtml+xml'
 };
 
@@ -37,7 +37,7 @@ function cleanText(value = '') {
 function normalizeField(value = '') {
   const text = cleanText(value).replace(/[|•]+/g, ' ').replace(/\s+/g, ' ').trim();
   if (!text || text.length < 2) return '';
-  if (/^(ات|غير معروف|غير محدد|لا يوجد|none|null|n\/a)$/i.test(text)) return '';
+  if (/^(ات|ذات|غير معروف|غير محدد|لا يوجد|none|null|n\/a)$/i.test(text)) return '';
   return text;
 }
 
@@ -113,9 +113,41 @@ function hasStrongRights(text = '') {
 
 function extractLabeledValue(text, labels, maxLength = 160) {
   const label = labels.join('|');
-  const re = new RegExp(`(?:${label})\\s*[:：\\-]?\\s*([^|•]{2,${maxLength}})`, 'i');
+  const re = new RegExp(`(?:^|\\s)(?:${label})(?![\\u0600-\\u06FF])\\s*[:：\\-]?\\s*([^|•]{2,${maxLength}})`, 'i');
   const match = text.match(re);
   return normalizeField(match?.[1] || '');
+}
+
+function cleanBookDescription(value = '', title = '', author = '') {
+  let text = normalizeField(value);
+  if (!text) return '';
+
+  // Some Arabic book sites put the whole navigation menu inside og:description.
+  // Keep the actual book section when a clear book-description marker exists.
+  const startMarkers = ['تحميل كتاب', 'نبذة عن الكتاب', 'عن الكتاب', 'وصف الكتاب', 'ملخص الكتاب'];
+  const startPositions = startMarkers.map(marker => text.indexOf(marker)).filter(position => position >= 0);
+  if (startPositions.length) {
+    text = text.slice(Math.min(...startPositions));
+  }
+
+  const stopPatterns = [
+    /\s+هذا الكتاب من تأليف\s+/i,
+    /\s+حقوق الكتاب محفوظة/i,
+    /\s+جميع الحقوق محفوظة/i,
+    /\s+التصنيفات\s+كل الكتب/i,
+    /\s+صفحة المصدر\s*/i
+  ];
+  for (const pattern of stopPatterns) {
+    text = text.replace(pattern, ' ');
+  }
+
+  text = text.replace(/^تحميل كتاب\s+/i, '').replace(/\s+pdf\s+الكاتب\s+/i, ' — ');
+  text = text.replace(/\s+/g, ' ').trim();
+
+  if (title) text = text.replace(new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '').trim();
+  if (author) text = text.replace(new RegExp(`^${author.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '').trim();
+
+  return text.length >= 30 ? text : normalizeField(value);
 }
 
 function extractTitle(html) {
@@ -129,7 +161,8 @@ function extractBookCandidate(html, pageUrl) {
   const title = extractTitle(html);
   const author = extractLabeledValue(text, ['المؤلف','الكاتب','Author','Writer']);
   const category = extractLabeledValue(text, ['التصنيف','القسم','الفئة','Category','Genre'], 100);
-  const description = normalizeField(meta(html, 'og:description') || meta(html, 'description'));
+  const rawDescription = meta(html, 'og:description') || meta(html, 'description');
+  const description = cleanBookDescription(rawDescription, title, author);
   const pages = extractLabeledValue(text, ['عدد الصفحات','الصفحات','Pages'], 20).replace(/[^0-9٠-٩]/g, '');
   const isbn = extractLabeledValue(text, ['ISBN'], 30).replace(/[^0-9Xx\- ]/g, '').trim();
   const publishedYear = extractLabeledValue(text, ['سنة النشر','تاريخ النشر','سنة الإصدار','Published'], 30).match(/(?:19|20)[0-9٠-٩]{2}/)?.[0] || '';
@@ -189,11 +222,10 @@ function looksLikeBookLink(link, sourceUrl) {
 function looksLikeNavigationLink(link, sourceUrl) {
   if (!sameOrigin(link.url, sourceUrl)) return false;
   if (looksLikeBookLink(link, sourceUrl)) return false;
-  const u = link.url.toLowerCase();
-  const text = (link.text || '').toLowerCase();
   try {
     const path = new URL(link.url).pathname.toLowerCase();
     const query = new URL(link.url).search.toLowerCase();
+    const text = (link.text || '').toLowerCase();
     if (isClearlyNonBookPage(link.url) && path !== '/') return false;
     return /page=|paged=|\/page\/|\bnext\b|\bmore\b|التالي|المزيد|كتب|book|category|categories|search|tag/i.test(`${path} ${query} ${text}`);
   } catch { return false; }
@@ -244,11 +276,11 @@ async function crawlSite(sourceUrl, options = {}) {
       merged.title = normalizeField(merged.title);
       merged.author = normalizeField(merged.author);
       merged.category = normalizeField(merged.category);
-      merged.description = normalizeField(merged.description);
+      merged.description = cleanBookDescription(merged.description, merged.title, merged.author);
       merged.pages = normalizeField(merged.pages).replace(/[^0-9٠-٩]/g, '');
       merged.isbn = normalizeField(merged.isbn);
       merged.publishedYear = normalizeField(merged.publishedYear);
-      merged.rights = hasStrongRights(`${merged.rights || ''} ${merged.rawText || ''}`) ? 'explicit-permission-or-open-license' : (merged.rights || 'unknown');
+      merged.rights = hasStrongRights(`${merged.rights || ''} ${merged.rawText || ''}`) ? 'explicit-permission-or-open-license' : 'unknown';
       merged.extraction = merged.extraction || { score: 0, confidence: 0, signals: [] };
       merged.ai = merged.ai || { enabled: false, confidence: 0, notes: 'لم يتم تشغيل نموذج الذكاء الاصطناعي.' };
       delete merged.rawText;
