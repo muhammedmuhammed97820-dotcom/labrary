@@ -85,26 +85,36 @@ export class AuthorDetailsComponent implements OnInit {
   /**
    * رابط غلاف الكتاب.
    *
-   * ندعم رابط الغلاف الجاهز، كما ندعم coverImageId
-   * الذي قد يرجعه API الخاص بتفاصيل المؤلف.
+   * بعض البيانات القديمة تحتوي على مسار /uploads/covers/... فقط،
+   * بينما التخزين الحالي يعتمد على GridFS عبر /api/books/:id/cover.
+   * لذلك نعطي أولوية لمسار الـ API عندما يكون لدينا معرّف الكتاب.
    */
   bookCoverUrl(book: any): string {
     if (!book) {
       return 'assets/images/default-cover.svg';
     }
 
+    const bookId = String(book._id || book.id || '').trim();
     const coverPath =
       book.coverImage ||
       book.coverUrl ||
       book.cover ||
       book.image;
 
+    // لا نحاول تحميل المسارات القديمة من /uploads/covers لأنها
+    // غير موجودة للملفات المخزنة حالياً في GridFS.
+    if (bookId && typeof coverPath === 'string') {
+      const normalizedCoverPath = coverPath.trim();
+      if (/^\/?uploads\/covers\//i.test(normalizedCoverPath)) {
+        return `${this.api.getFileUrl('/api')}/books/${bookId}/cover`;
+      }
+    }
+
     if (coverPath) {
       return this.api.getFileUrl(coverPath);
     }
 
-    const bookId = String(book._id || book.id || '').trim();
-
+    // API تفاصيل المؤلف قد يعيد coverImageId بدلاً من coverImage.
     if (bookId && book.coverImageId) {
       return `${this.api.getFileUrl('/api')}/books/${bookId}/cover`;
     }
