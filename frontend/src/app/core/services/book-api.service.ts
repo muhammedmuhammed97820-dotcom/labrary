@@ -40,10 +40,48 @@ export interface BookListResponse {
   pagination: BookPagination;
 }
 
+export interface ImportedBookPreview {
+  sourceId: string;
+  source: string;
+  sourceProvider: string;
+  sourceUrl: string;
+  sourceFileUrl: string;
+  title: string;
+  author: string;
+  description: string;
+  publishedYear?: number;
+  language: string;
+  rights: string;
+  subjects: string[];
+  coverUrl: string;
+  pdfAvailable: boolean;
+  openRights: boolean;
+  importable: boolean;
+  reason: string;
+}
+
+export interface ImportPreviewResponse {
+  source: string;
+  query: string;
+  page: number;
+  rows: number;
+  total: number;
+  books: ImportedBookPreview[];
+  note: string;
+}
+
+export interface ImportApprovalResponse {
+  message: string;
+  imported: Array<{ id: string; sourceId: string; title: string }>;
+  skipped: Array<{ sourceId: string; reason: string }>;
+  totalRequested: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class BookApiService {
   private readonly http = inject(HttpClient);
   private readonly api = `${environment.apiUrl}/books`;
+  private readonly smartImporterApi = `${environment.apiUrl}/smart-importer`;
   private readonly apiOrigin = environment.apiOrigin.replace(/\/$/, '');
   private readonly viewerStorageKey = 'electronic_library_viewer_id';
   private readonly viewedBooksStorageKey = 'electronic_library_viewed_books';
@@ -75,6 +113,14 @@ export class BookApiService {
   update(id: string, data: FormData): Observable<{ message: string; book: Book }> { return this.http.put<{ message: string; book: Book }>(`${this.api}/${id}`, data); }
   remove(id: string): Observable<{ message: string }> { return this.http.delete<{ message: string }>(`${this.api}/${id}`); }
 
+  previewArabicBooks(page = 1, rows = 20, onlyImportable = true): Observable<ImportPreviewResponse> {
+    return this.http.post<ImportPreviewResponse>(`${this.smartImporterApi}/preview`, { page, rows, onlyImportable });
+  }
+
+  approveArabicBooks(sourceIds: string[]): Observable<ImportApprovalResponse> {
+    return this.http.post<ImportApprovalResponse>(`${this.smartImporterApi}/approve`, { sourceIds });
+  }
+
   hasViewedBook(id: string): boolean { return this.hasStoredBookId(this.viewedBooksStorageKey, id); }
   markBookAsViewed(id: string): void { this.markStoredBookId(this.viewedBooksStorageKey, id); }
   hasDownloadedBook(id: string): boolean { return this.hasStoredBookId(this.downloadedBooksStorageKey, id); }
@@ -101,13 +147,9 @@ export class BookApiService {
     return this.getFileUrl(cover);
   }
 
-  getAuthorImageUrl(image?: string | null): string {
-    return this.getFileUrl(image);
-  }
-
+  getAuthorImageUrl(image?: string | null): string { return this.getFileUrl(image); }
   getReaderUrl(id: string): string { return `${this.api}/${id}/read`; }
   getDownloadUrl(id: string): string { return `${this.api}/${id}/download`; }
-
   private viewerHeaders(): HttpHeaders { return new HttpHeaders({ 'X-Viewer-Id': this.getViewerId() }); }
 
   private hasStoredBookId(storageKey: string, id: string): boolean {
