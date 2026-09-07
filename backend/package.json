@@ -8,9 +8,10 @@
     "dev": "nodemon server.js",
     "migrate:legacy-books": "node scripts/migrate-legacy-books.js",
     "migrate:avatars": "node src/scripts/migrate-avatars-to-gridfs.js",
-    "migrate:media": "node src/scripts/migrate-media-to-gridfs.js"
+    "migrate:media": "node src/scripts/migrate-media-to-gridfs.js",
+    "import:aco": "node src/scripts/import-aco.js"
   },
-  "keywords": ["electronic-library", "books", "mongodb", "angular"],
+  "keywords": ["electronic-library", "books", "mongodb", "aco", "arabic-books"],
   "author": "Electronic Library",
   "license": "MIT",
   "dependencies": {
@@ -19,7 +20,6 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.2",
-    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.4",
     "morgan": "^1.11.0",
