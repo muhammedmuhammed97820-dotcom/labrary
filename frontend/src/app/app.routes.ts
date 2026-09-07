@@ -18,7 +18,6 @@ import { CategoriesManagementComponent } from './features/admin/categories/categ
 import { BookSubmitComponent } from './features/books/book-submit/book-submit.component';
 import { MySubmissionsComponent } from './features/books/my-submissions/my-submissions.component';
 import { BookSubmissionsComponent } from './features/admin/submissions/book-submissions.component';
-import { AiImportComponent } from './features/admin/ai-import/ai-import.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -35,7 +34,6 @@ export const routes: Routes = [
   { path: 'submit-book', component: BookSubmitComponent, canActivate: [authGuard] },
   { path: 'my-submissions', component: MySubmissionsComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
-  { path: 'admin/ai-import', component: AiImportComponent, canActivate: [adminGuard] },
   { path: 'admin/books', component: AdminBooksComponent, canActivate: [adminGuard] },
   { path: 'admin/books/create', component: BookCreateComponent, canActivate: [adminGuard] },
   { path: 'admin/books/:id/edit', component: BookEditComponent, canActivate: [adminGuard] },
