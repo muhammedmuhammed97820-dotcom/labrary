@@ -4,6 +4,7 @@ const fs = require("fs");
 const fsp = fs.promises;
 const path = require("path");
 const os = require("os");
+const mongoose = require("mongoose");
 
 const connectDatabase = require("../config/database");
 const Book = require("../models/Book");
@@ -12,7 +13,6 @@ const { uploadBuffer } = require("../services/gridfs.service");
 
 const ACO_SITE = "https://aco.dlib.nyu.edu";
 const ACO_RAW = "https://raw.githubusercontent.com/NYULibraries/aco-karms/master/work";
-const IIIF_SITE = "https://sites.dlib.nyu.edu/viewer/api";
 const WORK_DIR = path.resolve(process.env.ACO_IMPORT_DIR || path.join(os.tmpdir(), "electronic-library-aco"));
 const PDF_DIR = path.join(WORK_DIR, "pdf-cache");
 const COVER_DIR = path.join(WORK_DIR, "cover-cache");
@@ -41,75 +41,99 @@ function clean(value) {
     .replace(/\s+/g, " ").trim();
 }
 
-function normalizeRecord(record) {
-  const sourceId = String(record.sourceId || "").trim();
-  return {
-    ...record,
-    sourceId,
-    title: clean(record.title),
-    author: clean(record.author) || "مؤلف غير محدد",
-    category: clean(record.category) || "غير مصنف",
-    description: clean(record.description),
-    publisher: clean(record.publisher),
-    publishedYear: record.publishedYear,
-    isbn: clean(record.isbn).split(/\s+/)[0] || "",
-    subjects: [...new Set((record.subjects || []).map(clean).filter(Boolean))],
-    sourceUrl: clean(record.sourceUrl)
-  };
+function hasArabic(value) {
+  return /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/u.test(String(value || ""));
+}
+
+function extractYear(value) {
+  const match = String(value || "").match(/(1[0-9]{3}|20[0-9]{2})/);
+  return match ? Number(match[1]) : undefined;
 }
 
 function extractAcoId(value) {
   const match = String(value || "").match(/(?:^|[^a-z0-9])([a-z0-9]+_aco\d{4,})(?:[^a-z0-9]|$)/i);
   return match ? match[1] : "";
 }
-function extractYear(value) {
-  const match = String(value || "").match(/(1[0-9]{3}|20[0-9]{2})/);
-  return match ? Number(match[1]) : undefined;
+
+function sourceParts(sourceId) {
+  const match = String(sourceId || "").match(/^([^_]+)_aco(\d+)$/i);
+  return match ? { id: `${match[1]}_aco${match[2]}`, provider: match[1] } : null;
 }
 
-function xmlField(xml, tag) {
-  const match = xml.match(new RegExp(`<datafield\\b[^>]*tag=["']${tag}["'][^>]*>([\\s\\S]*?)</datafield>`, "i"));
-  return match ? match[1] : "";
+function normalizeRecord(record) {
+  const sourceId = String(record.sourceId || "").trim();
+  const title = clean(record.arabicTitle || record.title);
+  const author = clean(record.arabicAuthor || record.author) || "مؤلف غير محدد";
+  return {
+    ...record,
+    sourceId,
+    title,
+    author,
+    category: clean(record.category) || "غير مصنف",
+    description: clean(record.description),
+    publisher: clean(record.publisher),
+    publishedYear: record.publishedYear,
+    isbn: clean(record.isbn).split(/\s+/)[0] || "",
+    subjects: [...new Set((record.subjects || []).map(clean).filter(Boolean))],
+    sourceUrl: clean(record.sourceUrl),
+    language: "ara"
+  };
 }
-function xmlValues(xml, tag, codes) {
-  const block = xmlField(xml, tag);
-  if (!block) return [];
+
+function fieldValues(fields, tag, codes) {
+  const raw = fields.get(tag) || "";
   const out = [];
-  for (const code of codes) {
-    const re = new RegExp(`<subfield\\b[^>]*code=["']${code}["'][^>]*>([\\s\\S]*?)</subfield>`, "gi");
-    let match;
-    while ((match = re.exec(block))) out.push(clean(match[1]));
+  for (const field of raw.split("\x1e")) {
+    const parts = field.split("\x1f");
+    for (let i = 1; i < parts.length; i++) {
+      const code = parts[i][0];
+      if (codes.includes(code)) {
+        const value = clean(parts[i].slice(1));
+        if (value) out.push(value);
+      }
+    }
   }
-  return out.filter(Boolean);
+  return out;
 }
-function firstXml(xml, tags, codes) {
+
+function firstField(fields, tags, codes) {
   for (const tag of tags) {
-    const value = xmlValues(xml, tag, codes)[0];
+    const value = fieldValues(fields, tag, codes)[0];
     if (value) return value;
   }
   return "";
 }
-function parseMarcXml(xml) {
-  const control = xml.match(/<controlfield\b[^>]*tag=["']001["'][^>]*>([\s\S]*?)<\/controlfield>/i);
-  const control001 = clean(control ? control[1] : "");
-  const sourceUrl = firstXml(xml, ["856"], ["u"]);
-  return normalizeRecord({
-    control001,
-    sourceId: extractAcoId(sourceUrl) || control001,
-    title: firstXml(xml, ["245", "246"], ["a", "b", "c"]),
-    author: firstXml(xml, ["100", "110", "111", "700"], ["a"]),
-    category: firstXml(xml, ["650", "651", "655"], ["a", "x"]),
-    description: firstXml(xml, ["520", "500"], ["a"]),
-    publisher: firstXml(xml, ["264", "260"], ["b"]),
-    publishedYear: extractYear(firstXml(xml, ["264", "260"], ["c"])),
-    isbn: firstXml(xml, ["020"], ["a"]),
-    subjects: ["650", "651", "655"].flatMap((tag) => xmlValues(xml, tag, ["a", "x", "y", "z"])),
-    sourceUrl
-  });
+
+function linkedArabicField(fields, targetTag, codes) {
+  const raw = fields.get("880") || "";
+  const candidates = [];
+  for (const field of raw.split("\x1e")) {
+    const parts = field.split("\x1f");
+    let link = "";
+    const values = [];
+    for (let i = 1; i < parts.length; i++) {
+      const code = parts[i][0];
+      const value = clean(parts[i].slice(1));
+      if (code === "6") link = value;
+      if (codes.includes(code) && value) values.push(value);
+    }
+    if (link.startsWith(`${targetTag}-`) && values.length) candidates.push(values.join(" "));
+  }
+  return candidates.find(hasArabic) || "";
 }
 
-// ISO-2709 must be parsed with byte offsets. Converting the whole record to UTF-8
-// first corrupts directory offsets when Arabic UTF-8 characters are present.
+function isArabicMarc(fields) {
+  const fixed008 = (fields.get("008") || "").split("\x1e")[0];
+  const language008 = fixed008.length >= 38 ? fixed008.slice(35, 38).toLowerCase() : "";
+  const language041 = fieldValues(fields, "041", ["a", "d", "e", "j"]).map((v) => v.toLowerCase());
+  if (language008 === "ara" || language041.some((v) => /(^|[^a-z])ara([^a-z]|$)/i.test(v))) return true;
+  if (language008 && language008 !== "|||" && language008 !== "###" && /^[a-z]{3}$/.test(language008)) return false;
+  if (language041.length && language041.some((v) => /^[a-z]{3}$/.test(v)) && !language041.includes("ara")) return false;
+  // Some older ACO records have incomplete language coding. Require Arabic text
+  // in the Arabic linked title when the MARC language field is missing.
+  return hasArabic(linkedArabicField(fields, "245", ["a", "b", "c"])) || hasArabic(firstField(fields, ["245"], ["a", "b", "c"]));
+}
+
 function parseIso2709Record(recordBuffer) {
   if (recordBuffer.length < 25) return null;
   const leader = recordBuffer.subarray(0, 24).toString("ascii");
@@ -128,43 +152,32 @@ function parseIso2709Record(recordBuffer) {
     fields.set(tag, fields.has(tag) ? `${fields.get(tag)}\x1e${value}` : value);
   }
 
-  const control = (tag) => clean((fields.get(tag) || "").split("\x1e")[0]);
-  const values = (tag, codes) => {
-    const raw = fields.get(tag) || "";
-    const out = [];
-    for (const field of raw.split("\x1e")) {
-      const parts = field.split("\x1f");
-      for (let i = 1; i < parts.length; i++) {
-        const code = parts[i][0];
-        if (codes.includes(code)) {
-          const value = clean(parts[i].slice(1));
-          if (value) out.push(value);
-        }
-      }
-    }
-    return out;
-  };
-  const first = (tags, codes) => {
-    for (const tag of tags) {
-      const value = values(tag, codes)[0];
-      if (value) return value;
-    }
-    return "";
-  };
+  if (!isArabicMarc(fields)) return null;
 
-  const control001 = control("001");
-  const sourceUrl = first(["856"], ["u"]);
+  const control001 = clean((fields.get("001") || "").split("\x1e")[0]);
+  const sourceUrl = firstField(fields, ["856"], ["u"]);
+  const arabicTitle = linkedArabicField(fields, "245", ["a", "b", "c"]);
+  const arabicAuthor = linkedArabicField(fields, "100", ["a", "b", "c", "d", "q", "e"]);
+  const primaryAuthor = ["100", "110", "111", "700", "710", "711"]
+    .flatMap((tag) => fieldValues(fields, tag, ["a", "b", "c", "d", "q", "e"]))
+    .find(Boolean) || "";
+  const title = arabicTitle || firstField(fields, ["245", "246"], ["a", "b", "c"]);
+  const author = arabicAuthor || primaryAuthor;
+  const subjects = ["650", "651", "655"].flatMap((tag) => fieldValues(fields, tag, ["a", "x", "y", "z"]));
+
   return normalizeRecord({
     control001,
     sourceId: extractAcoId(sourceUrl) || control001,
-    title: first(["245", "246"], ["a", "b", "c"]),
-    author: first(["100", "110", "111", "700"], ["a"]),
-    category: first(["650", "651", "655"], ["a", "x"]),
-    description: first(["520", "500"], ["a"]),
-    publisher: first(["264", "260"], ["b"]),
-    publishedYear: extractYear(first(["264", "260"], ["c"])),
-    isbn: first(["020"], ["a"]),
-    subjects: [...new Set(["650", "651", "655"].flatMap((tag) => values(tag, ["a", "x", "y", "z"])))],
+    title,
+    arabicTitle,
+    author,
+    arabicAuthor,
+    category: firstField(fields, ["650", "651", "655"], ["a", "x"]),
+    description: firstField(fields, ["520", "500"], ["a"]),
+    publisher: firstField(fields, ["264", "260"], ["b"]),
+    publishedYear: extractYear(firstField(fields, ["264", "260"], ["c"])),
+    isbn: firstField(fields, ["020"], ["a"]),
+    subjects,
     sourceUrl
   });
 }
@@ -173,10 +186,9 @@ function parseMarcFile(buffer) {
   const records = [];
   let cursor = 0;
   while (cursor + 24 <= buffer.length) {
-    while (cursor < buffer.length && (buffer[cursor] === 0x1e || buffer[cursor] === 0x0a || buffer[cursor] === 0x0d || buffer[cursor] === 0x20)) cursor++;
+    while (cursor < buffer.length && [0x1e, 0x0a, 0x0d, 0x20].includes(buffer[cursor])) cursor++;
     if (cursor + 24 > buffer.length) break;
-    const lengthText = buffer.subarray(cursor, cursor + 5).toString("ascii");
-    const recordLength = Number.parseInt(lengthText, 10);
+    const recordLength = Number.parseInt(buffer.subarray(cursor, cursor + 5).toString("ascii"), 10);
     if (!Number.isFinite(recordLength) || recordLength < 25 || cursor + recordLength > buffer.length) break;
     const record = parseIso2709Record(buffer.subarray(cursor, cursor + recordLength));
     if (record) records.push(record);
@@ -185,14 +197,94 @@ function parseMarcFile(buffer) {
   return records;
 }
 
-async function downloadToFile(url, destination) {
-  if (fs.existsSync(destination)) return fsp.readFile(destination);
-  const response = await fetch(url, { headers: { "User-Agent": "ElectronicLibrary/1.0 ACO importer" } });
-  if (!response.ok) throw new Error(`HTTP ${response.status} while downloading ${url}`);
+async function fetchResponse(url) {
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "ElectronicLibrary/1.0 ACO importer",
+      Accept: "text/html,application/pdf,image/*,*/*;q=0.8"
+    },
+    redirect: "follow"
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`);
+  return response;
+}
+
+async function downloadToFile(url, destination, validator) {
+  if (fs.existsSync(destination)) {
+    const cached = await fsp.readFile(destination);
+    if (!validator || validator(cached)) return cached;
+    await fsp.unlink(destination).catch(() => {});
+  }
+  const response = await fetchResponse(url);
   const buffer = Buffer.from(await response.arrayBuffer());
+  if (validator && !validator(buffer, response.headers.get("content-type") || "")) {
+    throw new Error(`المحتوى المستلم ليس الملف المطلوب: ${response.headers.get("content-type") || "unknown"}`);
+  }
   await fsp.mkdir(path.dirname(destination), { recursive: true });
   await fsp.writeFile(destination, buffer);
   return buffer;
+}
+
+function isPdf(buffer, contentType = "") {
+  return buffer.subarray(0, 5).toString("ascii") === "%PDF-" || /application\/pdf/i.test(contentType);
+}
+function isImage(buffer, contentType = "") {
+  const magic = buffer.subarray(0, 12);
+  return magic.subarray(0, 3).toString("binary") === "\xff\xd8\xff" ||
+    magic.subarray(0, 8).toString("binary") === "\x89PNG\r\n\x1a\n" ||
+    magic.subarray(0, 4).toString("ascii") === "RIFF" ||
+    /image\/(jpeg|png|webp)/i.test(contentType);
+}
+
+function absoluteUrl(base, href) {
+  try { return new URL(href, base).href; } catch (_) { return ""; }
+}
+
+function extractHtmlLinks(html, pageUrl) {
+  const links = [];
+  const re = /<(?:a|link|img|source|meta)\b[^>]+(?:href|src|content)=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const url = absoluteUrl(pageUrl, match[1]);
+    if (url) links.push(url);
+  }
+  return [...new Set(links)];
+}
+
+async function resolveAcoAssets(record) {
+  const pageUrl = `${ACO_SITE}/book/${encodeURIComponent(record.sourceId)}/1`;
+  let html = "";
+  try {
+    const response = await fetchResponse(pageUrl);
+    html = await response.text();
+  } catch (error) {
+    if (record.sourceUrl && /^https?:\/\//i.test(record.sourceUrl)) {
+      try {
+        const response = await fetchResponse(record.sourceUrl);
+        html = await response.text();
+      } catch (_) {}
+    }
+  }
+
+  const links = html ? extractHtmlLinks(html, pageUrl) : [];
+  const pdfs = links.filter((url) => /\.pdf(?:[?#]|$)/i.test(url));
+  const lowPdf = pdfs.find((url) => /(^|[-_./])(lo|low)([-_./]|$)|low-resolution/i.test(url));
+  const highPdf = pdfs.find((url) => /(^|[-_./])(hi|high)([-_./]|$)|high-resolution/i.test(url));
+  const anyPdf = pdfs[0] || "";
+
+  let cover = "";
+  const metaImage = html.match(/<meta\b[^>]*(?:property|name)=["'](?:og:image|twitter:image)["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+  if (metaImage) cover = absoluteUrl(pageUrl, metaImage[1]);
+  if (!cover) {
+    cover = links.find((url) => /iiif|image|thumbnail|cover/i.test(url) && !/\.pdf(?:[?#]|$)/i.test(url)) || "";
+  }
+
+  return {
+    pageUrl,
+    lowPdf: lowPdf || anyPdf,
+    highPdf: highPdf || anyPdf,
+    cover
+  };
 }
 
 async function getAcoRecords() {
@@ -209,7 +301,7 @@ async function getAcoRecords() {
       console.log(`جاري جلب ${source.name} من مستودع ACO الرسمي...`);
       const buffer = await downloadToFile(source.url, destination);
       const records = parseMarcFile(buffer);
-      console.log(`${source.name}: ${records.length} سجل MARC`);
+      console.log(`${source.name}: ${records.length} سجل عربي مطابق للغة ara`);
       for (const record of records) {
         const key = record.sourceId || `${record.control001}|${record.title}`;
         if (!key || seen.has(key)) continue;
@@ -223,45 +315,50 @@ async function getAcoRecords() {
   return all;
 }
 
-function sourceParts(sourceId) {
-  const match = String(sourceId || "").match(/^([^_]+)_aco(\d+)$/i);
-  return match ? { id: `${match[1]}_aco${match[2]}`, provider: match[1] } : null;
-}
-function pdfUrl(sourceId, high = false) {
-  const parts = sourceParts(sourceId);
-  return parts ? `https://mc.dlib.nyu.edu/files/books/${parts.id}/${parts.id}_${high ? "hi" : "lo"}.pdf` : "";
-}
-function coverUrl(sourceId) {
-  const parts = sourceParts(sourceId);
-  return parts ? `${IIIF_SITE}/image/books/${parts.id}/1/full/1200,/0/default.jpg` : "";
-}
-
 async function importOne(record, index, total) {
-  if (!record.title || !record.sourceId) return { status: "skipped" };
-  const existing = await Book.findOne({ source: "ACO", sourceId: record.sourceId }).select("_id fileId coverImageId").lean();
+  if (!record.title || !record.sourceId || !hasArabic(record.title)) return { status: "skipped" };
+
+  const existing = await Book.findOne({ source: "ACO", sourceId: record.sourceId })
+    .select("_id fileId coverImageId")
+    .lean();
   let fileId = existing?.fileId || null;
   let coverImageId = existing?.coverImageId || null;
-  const lowUrl = pdfUrl(record.sourceId, false);
-  const highUrl = pdfUrl(record.sourceId, true);
 
-  if (!fileId && (pdfMode === "low" || pdfMode === "high") && lowUrl) {
+  const assets = await resolveAcoAssets(record);
+  const selectedPdfUrl = pdfMode === "high" ? assets.highPdf : assets.lowPdf;
+
+  if (!fileId && (pdfMode === "low" || pdfMode === "high") && selectedPdfUrl) {
     try {
-      const url = pdfMode === "high" ? highUrl : lowUrl;
       const name = `${record.sourceId}_${pdfMode}.pdf`;
-      const buffer = await downloadToFile(url, path.join(PDF_DIR, name));
-      fileId = await uploadBuffer(buffer, name, "application/pdf", { type: "book-file", source: "ACO", sourceId: record.sourceId, rights: "Public Domain" }, "libraryBooks");
-    } catch (error) { console.warn(`  PDF skipped: ${record.title} -> ${error.message}`); }
+      const buffer = await downloadToFile(selectedPdfUrl, path.join(PDF_DIR, name), isPdf);
+      if (!isPdf(buffer)) throw new Error("الملف ليس PDF صالحاً");
+      fileId = await uploadBuffer(
+        buffer,
+        name,
+        "application/pdf",
+        { type: "book-file", source: "ACO", sourceId: record.sourceId, rights: "Public Domain", sourceUrl: selectedPdfUrl },
+        "libraryBooks"
+      );
+    } catch (error) {
+      console.warn(`  PDF skipped: ${record.title} -> ${error.message}`);
+    }
   }
 
-  if (!coverImageId && downloadCovers) {
+  if (!coverImageId && downloadCovers && assets.cover) {
     try {
-      const url = coverUrl(record.sourceId);
-      if (url) {
-        const name = `${record.sourceId}.jpg`;
-        const buffer = await downloadToFile(url, path.join(COVER_DIR, name));
-        coverImageId = await uploadBuffer(buffer, name, "image/jpeg", { type: "book-cover", source: "ACO", sourceId: record.sourceId, rights: "Public Domain", sourceUrl: url }, "libraryCovers");
-      }
-    } catch (error) { console.warn(`  Cover skipped: ${record.title} -> ${error.message}`); }
+      const name = `${record.sourceId}.jpg`;
+      const buffer = await downloadToFile(assets.cover, path.join(COVER_DIR, name), isImage);
+      if (!isImage(buffer)) throw new Error("الصورة غير صالحة");
+      coverImageId = await uploadBuffer(
+        buffer,
+        name,
+        "image/jpeg",
+        { type: "book-cover", source: "ACO", sourceId: record.sourceId, rights: "Public Domain", sourceUrl: assets.cover },
+        "libraryCovers"
+      );
+    } catch (error) {
+      console.warn(`  Cover skipped: ${record.title} -> ${error.message}`);
+    }
   }
 
   const author = await findOrCreateAuthor(record.author);
@@ -274,11 +371,12 @@ async function importOne(record, index, total) {
     submittedCategoryName: "",
     description: record.description,
     publishedYear: record.publishedYear,
+    language: "ara",
     rating: 0,
-    isAvailable: Boolean(fileId || lowUrl),
+    isAvailable: Boolean(fileId),
     fileId,
     coverImageId,
-    filePath: fileId ? "" : lowUrl,
+    filePath: "",
     coverImage: "",
     status: "approved",
     submittedBy: null,
@@ -286,37 +384,37 @@ async function importOne(record, index, total) {
     rejectionReason: "",
     source: "ACO",
     sourceId: record.sourceId,
-    sourceUrl: record.sourceUrl || `${ACO_SITE}/`,
-    sourceFileUrl: lowUrl,
+    sourceUrl: assets.pageUrl || record.sourceUrl || `${ACO_SITE}/`,
+    sourceFileUrl: selectedPdfUrl || "",
     sourceProvider: sourceParts(record.sourceId)?.provider || "",
     rights: "Public Domain",
     isbn: record.isbn,
     subjects: record.subjects
   };
+
   if (existing) await Book.updateOne({ _id: existing._id }, { $set: payload });
   else await Book.create(payload);
 
-  console.log(`[${index}/${total}] ${record.title} | PDF: ${fileId ? "محلي" : "رابط"} | الغلاف: ${coverImageId ? "محلي" : "غير متوفر"}`);
+  console.log(`[${index}/${total}] ${record.title} | المؤلف: ${record.author} | PDF: ${fileId ? "محلي" : "غير محفوظ"} | الغلاف: ${coverImageId ? "محلي" : "غير متوفر"}`);
   return { status: "imported", fileId: Boolean(fileId), coverImageId: Boolean(coverImageId) };
 }
 
 async function main() {
-  console.log("\n=== مستورد Arabic Collections Online لمكتبة Electronic Library ===");
+  console.log("\n=== مستورد Arabic Collections Online — العربية فقط ===");
   console.log(`وضع PDF: ${pdfMode} | تنزيل الأغلفة: ${downloadCovers ? "نعم" : "لا"}`);
   console.log(`الحد: ${limit || "كل الكتب"} | البداية: ${offset} | التوازي: ${concurrency}`);
 
   if (!["none", "low", "high"].includes(pdfMode)) throw new Error(`وضع PDF غير صالح: ${pdfMode}`);
-  if ((pdfMode !== "none" || downloadCovers) && !confirm) throw new Error("هذه العملية قد تحتاج مساحة تخزين ضخمة. أضف --confirm للتنفيذ.");
+  if ((pdfMode !== "none" || downloadCovers) && !confirm) throw new Error("أضف --confirm للتنفيذ لأن التنزيل قد يحتاج مساحة كبيرة.");
 
-  console.log("[1/4] الاتصال بقاعدة البيانات...");
   await connectDatabase();
-  console.log("[2/4] جلب فهرس ACO الرسمي...");
+  console.log("[1/3] جلب وفهرسة سجلات ACO العربية...");
   const allRecords = await getAcoRecords();
-  console.log(`[3/4] إجمالي سجلات ACO بعد إزالة التكرار: ${allRecords.length}`);
-  if (!allRecords.length) throw new Error("لم يتم استخراج أي سجلات من ملفات MARC الرسمية في ACO.");
+  console.log(`[2/3] إجمالي الكتب العربية بعد إزالة التكرار: ${allRecords.length}`);
+  if (!allRecords.length) throw new Error("لم يتم العثور على سجلات عربية. تحقق من ملفات MARC أو ترميز اللغة.");
 
   const selected = allRecords.slice(offset, limit ? offset + limit : undefined);
-  console.log(`[4/4] ستتم معالجة ${selected.length} كتاباً.`);
+  console.log(`[3/3] ستتم معالجة ${selected.length} كتاباً عربياً.`);
 
   let imported = 0, skipped = 0, failed = 0, withPdf = 0, withCover = 0;
   for (let i = 0; i < selected.length; i += concurrency) {
@@ -338,12 +436,12 @@ async function main() {
   console.log(`الأغلفة داخل GridFS: ${withCover}`);
   console.log(`تم التجاوز: ${skipped}`);
   console.log(`فشل: ${failed}`);
-  console.log("صورة المؤلف لا تُختلق ولا تُنزّل دون مصدر موثوق وحقوق واضحة.");
-  await require("mongoose").connection.close();
+  console.log("تم حفظ اللغة ara فقط، ولا يتم إنشاء صورة مؤلف من مصدر غير موثوق.");
+  await mongoose.connection.close();
 }
 
 main().catch(async (error) => {
   console.error(`خطأ عام في مستورد ACO: ${error.stack || error.message}`);
-  try { await require("mongoose").connection.close(); } catch (_) {}
+  try { await mongoose.connection.close(); } catch (_) {}
   process.exitCode = 1;
 });
