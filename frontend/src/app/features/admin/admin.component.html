@@ -44,14 +44,33 @@
             <a routerLink="/admin/books" class="quick-action-card"><div class="quick-icon-box"><i class="fa-solid fa-book-open-reader"></i></div><div class="quick-info"><span class="quick-title">عرض كل الكتب</span><small class="quick-sub">عرض، تعديل، وحذف الكتب</small></div></a>
             <a routerLink="/admin/books/create" class="quick-action-card highlight"><div class="quick-icon-box gold"><i class="fa-solid fa-file-circle-plus"></i></div><div class="quick-info"><span class="quick-title">إضافة كتاب جديد</span><small class="quick-sub">ملف PDF + غلاف + التفاصيل</small></div></a>
             <a routerLink="/admin/book-submissions" class="quick-action-card highlight"><div class="quick-icon-box"><i class="fa-solid fa-inbox"></i></div><div class="quick-info"><span class="quick-title">طلبات الكتب</span><small class="quick-sub">مراجعة وموافقة كتب المستخدمين</small></div></a>
-            <button type="button" class="quick-action-card highlight" (click)="startAcoFullImport()" [disabled]="acoImportRunning">
+          </div>
+
+          <section class="aco-import-box">
+            <div class="aco-import-title">
+              <div class="quick-icon-box gold"><i class="fa-solid fa-cloud-arrow-down"></i></div>
+              <div>
+                <strong>استيراد مكتبة ACO بالكامل</strong>
+                <small>PDF + الأغلفة إلى قاعدة البيانات</small>
+              </div>
+            </div>
+
+            <div class="aco-quality-row">
+              <label for="acoPdfQuality"><i class="fa-solid fa-sliders"></i> دقة تحميل الكتاب</label>
+              <select id="acoPdfQuality" [(ngModel)]="acoPdfQuality" [disabled]="acoImportRunning">
+                <option value="low">منخفضة — حجم أقل وسرعة أعلى</option>
+                <option value="high">عالية — جودة أعلى وحجم أكبر</option>
+              </select>
+            </div>
+
+            <button type="button" class="quick-action-card highlight aco-start-btn" (click)="startAcoFullImport()" [disabled]="acoImportRunning">
               <div class="quick-icon-box gold"><i class="fa-solid" [class.fa-cloud-arrow-down]="!acoImportRunning" [class.fa-spinner]="acoImportRunning" [class.fa-spin]="acoImportRunning"></i></div>
               <div class="quick-info">
-                <span class="quick-title">تنزيل مكتبة ACO كاملة</span>
-                <small class="quick-sub">PDF + أغلفة إلى قاعدة البيانات</small>
+                <span class="quick-title">{{ acoImportRunning ? 'جاري التنزيل...' : 'بدء تنزيل المكتبة' }}</span>
+                <small class="quick-sub">الدقة المختارة: {{ acoPdfQuality === 'high' ? 'عالية' : 'منخفضة' }}</small>
               </div>
             </button>
-          </div>
+          </section>
 
           @if (acoImportMessage || acoImportRunning) {
             <div class="aco-progress-panel" [class.is-running]="acoImportRunning">
