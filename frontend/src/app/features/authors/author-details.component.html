@@ -118,10 +118,12 @@
               <a [routerLink]="['/books', b._id || b.id]" class="book-showcase-card">
                 <span class="book-index-badge">{{ (i + 1).toString().padStart(2, '0') }}</span>
                 <div class="book-cover-wrapper">
-                  @if (b.coverImage) {
+                  @if (bookCoverUrl(b)) {
                     <img
                       [src]="bookCoverUrl(b)"
                       [alt]="b.title"
+                      loading="lazy"
+                      decoding="async"
                       (error)="$any($event.target).src = 'assets/images/default-cover.svg'"
                     >
                   } @else {
