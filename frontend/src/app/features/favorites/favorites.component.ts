@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { BookApiService } from '../../core/services/book-api.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { environment } from '../../../environments/environment';
 
 interface Book {
   _id?: string;
@@ -32,6 +32,7 @@ interface FavoriteResponse {
 export class FavoritesComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
+  private readonly booksApi = inject(BookApiService);
   private readonly notify = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
   public readonly themeService = inject(ThemeService);
@@ -49,7 +50,7 @@ export class FavoritesComponent implements OnInit {
     this.loading = true;
     this.error = '';
     const ids = (this.auth.currentUser?.favorites || []).map(String);
-    
+
     if (!ids.length) {
       this.books = [];
       this.loading = false;
@@ -57,7 +58,7 @@ export class FavoritesComponent implements OnInit {
       return;
     }
 
-    this.http.get<any>(`${environment.apiUrl}/books`).subscribe({
+    this.http.get<any>(`${this.booksApi.getFileUrl('/api')}/books`).subscribe({
       next: r => {
         const all: Book[] = Array.isArray(r) ? r : (r.books ?? r.data ?? []);
         this.books = all.filter(b => ids.includes(this.getBookId(b)));
@@ -84,9 +85,7 @@ export class FavoritesComponent implements OnInit {
 
   getBookCover(book: Book): string {
     const cover = book.coverImage || book.coverUrl;
-    if (!cover) return 'assets/images/default-cover.svg';
-    if (/^data:|^blob:|^https?:\/\//i.test(cover)) return cover;
-    return `${environment.apiUrl.replace('/api', '')}${cover.startsWith('/') ? cover : `/${cover}`}`;
+    return cover ? this.booksApi.getFileUrl(cover) : 'assets/images/default-cover.svg';
   }
 
   remove(book: Book): void {
@@ -94,12 +93,10 @@ export class FavoritesComponent implements OnInit {
     if (!id || this.removing.has(id)) return;
 
     this.removing.add(id);
-    this.http.post<FavoriteResponse>(`${environment.apiUrl}/auth/favorites/${id}/toggle`, {}).subscribe({
+    this.http.post<FavoriteResponse>(`${this.booksApi.getFileUrl('/api')}/auth/favorites/${id}/toggle`, {}).subscribe({
       next: r => {
         const currentUser = this.auth.currentUser;
-        if (currentUser) {
-          this.auth.updateUser({ ...currentUser, favorites: (r.favorites || []).map(String) });
-        }
+        if (currentUser) this.auth.updateUser({ ...currentUser, favorites: (r.favorites || []).map(String) });
         this.books = this.books.filter(b => this.getBookId(b) !== id);
         this.notify.show('تمت إزالة الكتاب من المفضلة ✓', 'success');
         this.removing.delete(id);
