@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService, CurrentUser } from '../../core/services/auth.service';
+import { BookApiService } from '../../core/services/book-api.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
 
@@ -18,12 +19,12 @@ import { NotificationService } from '../../core/services/notification.service';
 export class ProfileComponent {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
+  private readonly media = inject(BookApiService);
   private readonly notify = inject(NotificationService);
-  private readonly cdr = inject(ChangeDetectorRef); // <--- أضفنا كاشف التغييرات
+  private readonly cdr = inject(ChangeDetectorRef);
   public readonly themeService = inject(ThemeService);
-  
-  private readonly api = 'http://localhost:5000/api';
-  private readonly serverOrigin = 'http://localhost:5000';
+
+  private readonly api = `${this.media.getFileUrl('/api')}`;
 
   user: CurrentUser | null = this.auth.currentUser;
   name = this.user?.name || '';
@@ -43,10 +44,7 @@ export class ProfileComponent {
 
   get avatarUrl(): string | null {
     if (!this.avatar) return null;
-    if (/^data:|^blob:|^https?:\/\//i.test(this.avatar)) {
-      return this.avatar;
-    }
-    return `${this.serverOrigin}${this.avatar.startsWith('/') ? this.avatar : `/${this.avatar}`}`;
+    return this.media.getAuthorImageUrl(this.avatar);
   }
 
   resetAvatarInput(event: Event): void {
@@ -63,7 +61,7 @@ export class ProfileComponent {
       this.error = 'اختر صورة بصيغة JPG أو PNG أو WEBP.';
       this.notify.show(this.error, 'error');
       input.value = '';
-      this.cdr.detectChanges(); // <--- تحديث الواجهة عند الخطأ
+      this.cdr.detectChanges();
       return;
     }
 
@@ -71,7 +69,7 @@ export class ProfileComponent {
       this.error = 'حجم الصورة يجب ألا يتجاوز 5 ميجابايت.';
       this.notify.show(this.error, 'error');
       input.value = '';
-      this.cdr.detectChanges(); // <--- تحديث الواجهة عند الخطأ
+      this.cdr.detectChanges();
       return;
     }
 
@@ -82,7 +80,7 @@ export class ProfileComponent {
     const reader = new FileReader();
     reader.onload = () => {
       this.avatar = String(reader.result);
-      this.cdr.detectChanges(); // <--- تحديث واجهة المعاينة فور تحميل قراءة الملف
+      this.cdr.detectChanges();
     };
     reader.readAsDataURL(file);
   }
@@ -92,7 +90,7 @@ export class ProfileComponent {
     this.avatarFile = null;
     this.avatarRemoved = true;
     this.error = '';
-    this.cdr.detectChanges(); // <--- تحديث الواجهة عند الحذف
+    this.cdr.detectChanges();
   }
 
   save(): void {
@@ -107,7 +105,7 @@ export class ProfileComponent {
 
     this.saving = true;
     this.error = '';
-    this.cdr.detectChanges(); // <--- تفعيل حالة التحميل للزر فور الضغط
+    this.cdr.detectChanges();
 
     const hasFileChange = !!this.avatarFile || this.avatarRemoved;
     const requestBody: FormData | { name: string } = hasFileChange
@@ -122,16 +120,15 @@ export class ProfileComponent {
         this.avatarFile = null;
         this.avatarRemoved = false;
         this.auth.updateUser(response.user);
-        
         this.notify.show('تم حفظ التغييرات بنجاح ✓', 'success');
         this.saving = false;
-        this.cdr.detectChanges(); // <--- إيقاف التحميل وتحديث واجهة المستخدم بنجاح
+        this.cdr.detectChanges();
       },
       error: err => {
         this.error = err?.error?.message || 'تعذر حفظ التغييرات. تأكد من تشغيل الخادم ثم حاول مرة أخرى.';
         this.notify.show(this.error, 'error');
         this.saving = false;
-        this.cdr.detectChanges(); // <--- إيقاف التحميل وإظهار رسالة الخطأ فوراً
+        this.cdr.detectChanges();
       }
     });
   }
