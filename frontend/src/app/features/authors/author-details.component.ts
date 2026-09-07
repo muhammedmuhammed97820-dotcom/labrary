@@ -83,10 +83,32 @@ export class AuthorDetailsComponent implements OnInit {
   }
 
   /**
-   * رابط غلاف الكتاب (يطابق تماماً الطريقة الصحيحة في BookDetailsComponent)
+   * رابط غلاف الكتاب.
+   *
+   * ندعم رابط الغلاف الجاهز، كما ندعم coverImageId
+   * الذي قد يرجعه API الخاص بتفاصيل المؤلف.
    */
   bookCoverUrl(book: any): string {
-    const coverPath = book?.coverImage || book?.coverUrl || book?.cover;
-    return coverPath ? this.api.getFileUrl(coverPath) : 'assets/images/default-cover.svg';
+    if (!book) {
+      return 'assets/images/default-cover.svg';
+    }
+
+    const coverPath =
+      book.coverImage ||
+      book.coverUrl ||
+      book.cover ||
+      book.image;
+
+    if (coverPath) {
+      return this.api.getFileUrl(coverPath);
+    }
+
+    const bookId = String(book._id || book.id || '').trim();
+
+    if (bookId && book.coverImageId) {
+      return `${this.api.getFileUrl('/api')}/books/${bookId}/cover`;
+    }
+
+    return 'assets/images/default-cover.svg';
   }
 }
