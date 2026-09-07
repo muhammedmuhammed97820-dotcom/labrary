@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ThemeService } from '../../../core/services/theme.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { environment } from '../../../../environments/environment'; // أو المسار الصحيح حسب بيئتك
+import { BookApiService } from '../../../core/services/book-api.service';
 
 @Component({
   selector: 'app-authors-management',
@@ -19,6 +19,7 @@ export class AuthorsManagementComponent implements OnInit {
   public readonly themeService = inject(ThemeService);
   private readonly notify = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly media = inject(BookApiService);
 
   authors: any[] = [];
   author: any = {};
@@ -29,8 +30,8 @@ export class AuthorsManagementComponent implements OnInit {
   saving = false;
   error = '';
   deletingId: string | null = null;
-  
-  private readonly api = 'http://localhost:5000/api/authors';
+
+  private readonly api = `${this.media.getFileUrl('/api')}/authors`;
 
   ngOnInit(): void {
     this.load();
@@ -65,10 +66,10 @@ export class AuthorsManagementComponent implements OnInit {
 
   edit(a: any): void {
     this.editing = a;
-    this.author = { 
-      ...a, 
-      birthDate: a.birthDate?.slice?.(0, 10), 
-      deathDate: a.deathDate?.slice?.(0, 10) 
+    this.author = {
+      ...a,
+      birthDate: a.birthDate?.slice?.(0, 10),
+      deathDate: a.deathDate?.slice?.(0, 10)
     };
     this.preview = a.image ? this.url(a.image) : '';
     this.deletingId = null;
@@ -90,16 +91,12 @@ export class AuthorsManagementComponent implements OnInit {
     this.saving = true;
     const f = new FormData();
     for (const k of ['name', 'bio', 'birthDate', 'deathDate', 'birthPlace', 'nationality', 'occupation', 'website']) {
-      if (this.author[k] != null) {
-        f.append(k, this.author[k]);
-      }
+      if (this.author[k] != null) f.append(k, this.author[k]);
     }
-    if (this.file) {
-      f.append('avatar', this.file);
-    }
+    if (this.file) f.append('avatar', this.file);
 
-    const r = this.editing 
-      ? this.http.put(`${this.api}/${this.editing._id}`, f) 
+    const r = this.editing
+      ? this.http.put(`${this.api}/${this.editing._id}`, f)
       : this.http.post(this.api, f);
 
     r.subscribe({
@@ -142,8 +139,7 @@ export class AuthorsManagementComponent implements OnInit {
     this.deletingId = null;
   }
 
-  url(v: string): string {
-    if (!v) return '';
-    return /^https?:\/\//i.test(v) ? v : `http://localhost:5000${v.startsWith('/') ? v : `/${v}`}`;
+  url(v?: string | null): string {
+    return this.media.getAuthorImageUrl(v);
   }
 }
