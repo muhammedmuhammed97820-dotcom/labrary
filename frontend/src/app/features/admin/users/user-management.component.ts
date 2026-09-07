@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { UserManagementService, ManagedUser } from '../../../core/services/user-management.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
@@ -14,13 +15,13 @@ import { ThemeService } from '../../../core/services/theme.service';
 })
 export class UserManagementComponent implements OnInit {
   private readonly service = inject(UserManagementService);
+  private readonly notifications = inject(NotificationService);
   readonly themeService = inject(ThemeService);
 
   users: ManagedUser[] = [];
   loading = true;
   saving = false;
   error = '';
-  success = '';
   search = '';
   roleFilter = '';
   page = 1;
@@ -30,6 +31,8 @@ export class UserManagementComponent implements OnInit {
   stats = { totalUsers: 0, totalAdmins: 0, regularUsers: 0 };
 
   modalOpen = false;
+  confirmOpen = false;
+  userToDelete: ManagedUser | null = null;
   editing: ManagedUser | null = null;
   form = { name: '', email: '', password: '', role: 'user' as 'user' | 'admin' };
 
@@ -48,8 +51,8 @@ export class UserManagementComponent implements OnInit {
         this.loading = false;
       },
       error: err => {
-        this.error = err?.error?.message || 'تعذر تحميل المستخدمين.';
         this.loading = false;
+        this.notifications.show(err?.error?.message || 'تعذر تحميل المستخدمين.', 'error');
       }
     });
   }
@@ -61,7 +64,6 @@ export class UserManagementComponent implements OnInit {
     this.editing = null;
     this.form = { name: '', email: '', password: '', role: 'user' };
     this.error = '';
-    this.success = '';
     this.modalOpen = true;
   }
 
@@ -69,7 +71,6 @@ export class UserManagementComponent implements OnInit {
     this.editing = user;
     this.form = { name: user.name, email: user.email, password: '', role: user.role };
     this.error = '';
-    this.success = '';
     this.modalOpen = true;
   }
 
@@ -87,17 +88,44 @@ export class UserManagementComponent implements OnInit {
       : this.service.create(this.form);
 
     request.subscribe({
-      next: response => { this.saving = false; this.modalOpen = false; this.success = response.message; this.load(this.page); },
-      error: err => { this.saving = false; this.error = err?.error?.message || 'تعذر حفظ المستخدم.'; }
+      next: response => {
+        this.saving = false;
+        this.modalOpen = false;
+        this.notifications.show(response.message, 'success');
+        this.load(this.page);
+      },
+      error: err => {
+        this.saving = false;
+        this.notifications.show(err?.error?.message || 'تعذر حفظ المستخدم.', 'error');
+      }
     });
   }
 
   deleteUser(user: ManagedUser): void {
-    if (!confirm(`هل أنت متأكد من حذف المستخدم "${user.name}"؟ لا يمكن التراجع عن هذه العملية.`)) return;
-    this.error = '';
+    this.userToDelete = user;
+    this.confirmOpen = true;
+  }
+
+  cancelDelete(): void {
+    this.confirmOpen = false;
+    this.userToDelete = null;
+  }
+
+  confirmDelete(): void {
+    const user = this.userToDelete;
+    if (!user) return;
+
+    this.confirmOpen = false;
+    this.userToDelete = null;
     this.service.remove(user.id).subscribe({
-      next: response => { this.success = response.message; if (this.users.length === 1 && this.page > 1) this.page--; this.load(this.page); },
-      error: err => this.error = err?.error?.message || 'تعذر حذف المستخدم.'
+      next: response => {
+        this.notifications.show(response.message || 'تم حذف المستخدم بنجاح.', 'success');
+        if (this.users.length === 1 && this.page > 1) this.page--;
+        this.load(this.page);
+      },
+      error: err => {
+        this.notifications.show(err?.error?.message || 'تعذر حذف المستخدم.', 'error');
+      }
     });
   }
 
