@@ -26,6 +26,7 @@ const bookSchema = new mongoose.Schema(
     source: { type: String, trim: true, default: "" },
     sourceId: { type: String, trim: true, default: "", index: true },
     sourceUrl: { type: String, trim: true, default: "" },
+    sourceFileUrl: { type: String, trim: true, default: "" },
     sourceProvider: { type: String, trim: true, default: "" },
     rights: { type: String, trim: true, default: "" },
     isbn: { type: String, trim: true, default: "" },
