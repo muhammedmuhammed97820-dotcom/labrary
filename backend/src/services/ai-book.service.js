@@ -35,10 +35,81 @@ function extractOutputText(data) {
   return chunks.join('\n');
 }
 
-async function enrichBook(candidate) {
-  if (!enabled()) return { ...candidate, ai: { enabled: false, confidence: 0, notes: 'OPENAI_API_KEY is not configured.' } };
+function clean(value = '') {
+  return String(value)
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-  const prompt = `أنت محرر بيانات مكتبة عربية. حلل بيانات الكتاب التالية. لا تخترع أي معلومة. إذا لم تكن المعلومة موجودة أو مؤكدة اتركها فارغة. يجب أن تكون اللغة عربية فقط. إذا كان الكتاب ليس نسخة عربية حقيقية فاجعل language = غير عربي. ابحث عن معلومات موثوقة عبر الويب عند الحاجة. أعد بيانات دقيقة قابلة للمراجعة البشرية.\n\nبيانات المصدر:\n${JSON.stringify(candidate, null, 2)}`;
+function looksLikeSiteNoise(value = '') {
+  const text = clean(value).toLowerCase();
+  if (!text) return true;
+  const markers = [
+    'إقتباسات', 'المزيد', 'القوائم', 'سلاسل وموسوعات', 'مهمتنا', 'انشر معنا',
+    'اتصل بنا', 'دخول', 'حساب جديد', 'التصنيفات كل الكتب', 'الرئيسية التصنيفات',
+    'quotes', 'lists', 'login', 'register', 'contact us', 'our mission'
+  ];
+  const hits = markers.filter(marker => text.includes(marker.toLowerCase())).length;
+  return hits >= 2 || text.length > 6000;
+}
+
+function normalizeCategory(value, fallback = '') {
+  const text = clean(value);
+  if (!text || looksLikeSiteNoise(text) || /^(ات|ذات|غير معروف|غير محدد|لا يوجد|none|null|n\/a)$/i.test(text)) return clean(fallback);
+  if (text.length > 100 || /\b(الرئيسية|التصنيفات|كل الكتب|سلاسل|موسوعات)\b/i.test(text)) return clean(fallback);
+  return text;
+}
+
+function normalizeDescription(value, fallback = '') {
+  const text = clean(value);
+  if (!text || looksLikeSiteNoise(text)) return clean(fallback);
+  return text;
+}
+
+async function enrichBook(candidate) {
+  if (!enabled()) {
+    return {
+      ...candidate,
+      ai: { enabled: false, confidence: 0, notes: 'OPENAI_API_KEY is not configured.' }
+    };
+  }
+
+  const sourceText = clean(candidate.rawText || '').slice(0, 14000);
+  const sourcePayload = {
+    title: candidate.title,
+    author: candidate.author,
+    category: candidate.category,
+    description: candidate.description,
+    pages: candidate.pages,
+    isbn: candidate.isbn,
+    publishedYear: candidate.publishedYear,
+    language: candidate.language,
+    sourceUrl: candidate.sourceUrl,
+    sourceFileUrl: candidate.sourceFileUrl,
+    sourceText
+  };
+
+  const prompt = `أنت محرر بيانات محترف لمكتبة عربية رقمية.
+استخرج بيانات هذا الكتاب من صفحة المصدر، واستخدم البحث على الويب فقط للتحقق عند الحاجة.
+
+قواعد مهمة جداً:
+1) لا تخترع أي معلومة. إذا لم تجدها بوضوح أعد قيمة فارغة.
+2) تعامل مع نص الصفحة كصفحة ويب: تجاهل شريط التنقل، القوائم، التذييل، الإعلانات، روابط الموقع، وعبارات مثل «المزيد» و«إقتباسات» و«القوائم» و«مهمتنا» و«دخول» و«حساب جديد».
+3) category يجب أن تكون تصنيفاً واحداً قصيراً للكتاب فقط، وليس قائمة تصنيفات الموقع. إذا لم يوجد تصنيف واضح اتركها فارغة.
+4) description يجب أن تكون نبذة الكتاب فقط، بدون أي نص من قائمة الموقع أو التنقل.
+5) title يجب أن يكون عنوان الكتاب الحقيقي، واحذف «تحميل كتاب» و«pdf» و«تأليف» من العنوان إذا كانت جزءاً من عنوان الصفحة وليست من اسم الكتاب.
+6) author يجب أن يكون اسم المؤلف الحقيقي فقط، بدون «تأليف» أو نص إضافي.
+7) pages وpublishedYear وisbn لا تملأها إلا إذا كانت ظاهرة أو مؤكدة.
+8) language = العربية فقط إذا كانت نسخة الكتاب عربية فعلاً، وإلا language = غير عربي.
+9) confidence من 0 إلى 100 ويعكس جودة البيانات المستخرجة، وليس ثقة عامة في الموقع.
+10) لا تعتبر عبارة «حقوق الكتاب محفوظة لصاحبها» أو «جميع الحقوق محفوظة» تصريحاً بالنشر.
+
+بيانات المصدر:
+${JSON.stringify(sourcePayload, null, 2)}`;
 
   const response = await fetch(OPENAI_URL, {
     method: 'POST',
@@ -58,7 +129,7 @@ async function enrichBook(candidate) {
           schema
         }
       },
-      max_output_tokens: 1600
+      max_output_tokens: 1800
     })
   });
 
@@ -76,28 +147,33 @@ async function enrichBook(candidate) {
     throw new Error('OpenAI returned invalid structured metadata.');
   }
 
+  const title = clean(parsed.title) || clean(candidate.title);
+  const author = clean(parsed.author) || clean(candidate.author);
+  const category = normalizeCategory(parsed.category, candidate.category);
+  const description = normalizeDescription(parsed.description, candidate.description);
+
   return {
     ...candidate,
-    title: parsed.title || candidate.title,
-    author: parsed.author || candidate.author,
-    category: parsed.category || candidate.category || 'كتب متنوعة',
-    description: parsed.description || candidate.description || '',
-    publishedYear: parsed.publishedYear || candidate.publishedYear || '',
-    language: parsed.language || candidate.language || 'العربية',
-    isbn: parsed.isbn || candidate.isbn || '',
-    pages: parsed.pages || candidate.pages || '',
-    authorBio: parsed.authorBio || '',
-    authorImage: parsed.authorImage || candidate.authorImage || '',
+    title,
+    author,
+    category,
+    description,
+    publishedYear: clean(parsed.publishedYear) || clean(candidate.publishedYear),
+    language: clean(parsed.language) || clean(candidate.language) || 'العربية',
+    isbn: clean(parsed.isbn) || clean(candidate.isbn),
+    pages: clean(parsed.pages) || clean(candidate.pages),
+    authorBio: clean(parsed.authorBio),
+    authorImage: clean(parsed.authorImage) || clean(candidate.authorImage),
     ai: {
       enabled: true,
-      confidence: Number(parsed.confidence || 0),
-      notes: parsed.notes || ''
+      confidence: Math.max(0, Math.min(100, Number(parsed.confidence || 0))),
+      notes: clean(parsed.notes)
     }
   };
 }
 
 async function enrichMany(candidates) {
-  const batchSize = Number(process.env.OPENAI_IMPORT_BATCH_SIZE || 5);
+  const batchSize = Math.max(1, Number(process.env.OPENAI_IMPORT_BATCH_SIZE || 5));
   const result = [];
   for (let i = 0; i < candidates.length; i += batchSize) {
     const batch = candidates.slice(i, i + batchSize);
@@ -105,7 +181,10 @@ async function enrichMany(candidates) {
       try {
         result.push(await enrichBook(candidate));
       } catch (error) {
-        result.push({ ...candidate, ai: { enabled: true, confidence: 0, notes: error.message } });
+        result.push({
+          ...candidate,
+          ai: { enabled: false, confidence: 0, notes: error.message }
+        });
       }
     }
   }
