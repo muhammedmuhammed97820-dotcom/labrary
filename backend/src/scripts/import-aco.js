@@ -13,10 +13,12 @@ const { uploadBuffer } = require("../services/gridfs.service");
 
 const ACO_REPO = "https://github.com/NYULibraries/aco-karms.git";
 const ACO_SITE = "https://aco.dlib.nyu.edu";
+const IIIF_SITE = "https://sites.dlib.nyu.edu/viewer/api";
 const WORK_DIR = path.resolve(process.env.ACO_IMPORT_DIR || path.join(os.tmpdir(), "electronic-library-aco"));
 const REPO_DIR = path.join(WORK_DIR, "aco-karms");
 const PDF_DIR = path.join(WORK_DIR, "pdf-cache");
-const DEFAULT_BATCH = 50;
+const COVER_DIR = path.join(WORK_DIR, "cover-cache");
+const DEFAULT_BATCH = 25;
 
 function arg(name, fallback = null) {
   const prefix = `--${name}=`;
@@ -31,6 +33,7 @@ function hasFlag(name) {
 const limit = Math.max(Number.parseInt(arg("limit", "0"), 10) || 0, 0);
 const offset = Math.max(Number.parseInt(arg("offset", "0"), 10) || 0, 0);
 const pdfMode = String(arg("pdf", "none")).toLowerCase();
+const downloadCovers = hasFlag("cover");
 const concurrency = Math.max(Number.parseInt(arg("concurrency", "1"), 10) || 1, 1);
 const confirm = hasFlag("confirm");
 
@@ -168,6 +171,12 @@ function pdfUrl(sourceId, highResolution = false) {
   return `https://mc.dlib.nyu.edu/files/books/${parts.id}/${parts.id}_${suffix}.pdf`;
 }
 
+function coverUrl(sourceId) {
+  const parts = sourceParts(sourceId);
+  if (!parts) return "";
+  return `${IIIF_SITE}/image/books/${parts.id}/1/full/1200,/0/default.jpg`;
+}
+
 async function downloadToFile(url, destination) {
   const response = await fetch(url, { headers: { "User-Agent": "ElectronicLibrary/1.0 ACO importer" } });
   if (!response.ok) throw new Error(`HTTP ${response.status} while downloading ${url}`);
@@ -183,28 +192,37 @@ async function importOne(record, index, total) {
 
   const existing = await Book.findOne({ source: "ACO", sourceId: record.sourceId }).select("_id fileId coverImageId").lean();
   let fileId = existing?.fileId || null;
+  let coverImageId = existing?.coverImageId || null;
   const lowPdfUrl = pdfUrl(record.sourceId, false);
   const highPdfUrl = pdfUrl(record.sourceId, true);
+  const imageUrl = coverUrl(record.sourceId);
 
-  if (!existing || !fileId) {
-    const shouldDownloadPdf = pdfMode === "low" || pdfMode === "high";
-    if (shouldDownloadPdf) {
-      const url = pdfMode === "high" ? highPdfUrl : lowPdfUrl;
-      if (url) {
-        try {
-          const cacheName = `${record.sourceId}_${pdfMode}.pdf`;
-          const cachePath = path.join(PDF_DIR, cacheName);
-          const buffer = fs.existsSync(cachePath) ? await fsp.readFile(cachePath) : await downloadToFile(url, cachePath);
-          fileId = await uploadBuffer(buffer, cacheName, "application/pdf", {
-            type: "book-file",
-            source: "ACO",
-            sourceId: record.sourceId,
-            rights: "Public Domain"
-          }, "libraryBooks");
-        } catch (error) {
-          console.warn(`  PDF skipped: ${record.title} -> ${error.message}`);
-        }
+  if ((!existing || !fileId) && (pdfMode === "low" || pdfMode === "high")) {
+    const url = pdfMode === "high" ? highPdfUrl : lowPdfUrl;
+    if (url) {
+      try {
+        const cacheName = `${record.sourceId}_${pdfMode}.pdf`;
+        const cachePath = path.join(PDF_DIR, cacheName);
+        const buffer = fs.existsSync(cachePath) ? await fsp.readFile(cachePath) : await downloadToFile(url, cachePath);
+        fileId = await uploadBuffer(buffer, cacheName, "application/pdf", {
+          type: "book-file", source: "ACO", sourceId: record.sourceId, rights: "Public Domain"
+        }, "libraryBooks");
+      } catch (error) {
+        console.warn(`  PDF skipped: ${record.title} -> ${error.message}`);
       }
+    }
+  }
+
+  if ((!existing || !coverImageId) && downloadCovers && imageUrl) {
+    try {
+      const cacheName = `${record.sourceId}.jpg`;
+      const cachePath = path.join(COVER_DIR, cacheName);
+      const buffer = fs.existsSync(cachePath) ? await fsp.readFile(cachePath) : await downloadToFile(imageUrl, cachePath);
+      coverImageId = await uploadBuffer(buffer, cacheName, "image/jpeg", {
+        type: "book-cover", source: "ACO", sourceId: record.sourceId, rights: "Public Domain", sourceUrl: imageUrl
+      }, "libraryCovers");
+    } catch (error) {
+      console.warn(`  Cover skipped: ${record.title} -> ${error.message}`);
     }
   }
 
@@ -223,7 +241,7 @@ async function importOne(record, index, total) {
     rating: 0,
     isAvailable: Boolean(fileId || lowPdfUrl),
     fileId,
-    coverImageId: existing?.coverImageId || null,
+    coverImageId,
     filePath: fileId ? "" : lowPdfUrl,
     coverImage: "",
     status: "approved",
@@ -244,9 +262,9 @@ async function importOne(record, index, total) {
   else await Book.create(payload);
 
   if (index % DEFAULT_BATCH === 0 || index === total) {
-    console.log(`[${index}/${total}] ${record.title} | PDF محلي: ${fileId ? "نعم" : "رابط مباشر"}`);
+    console.log(`[${index}/${total}] ${record.title} | PDF: ${fileId ? "محلي" : "رابط"} | الغلاف: ${coverImageId ? "محلي" : "غير متوفر"}`);
   }
-  return { status: "imported", fileId: Boolean(fileId) };
+  return { status: "imported", fileId: Boolean(fileId), coverImageId: Boolean(coverImageId) };
 }
 
 async function ensureRepository() {
@@ -262,12 +280,12 @@ async function ensureRepository() {
 
 async function main() {
   console.log("\n=== مستورد Arabic Collections Online لمكتبة Electronic Library ===");
-  console.log(`وضع PDF: ${pdfMode}`);
+  console.log(`وضع PDF: ${pdfMode} | تنزيل الأغلفة: ${downloadCovers ? "نعم" : "لا"}`);
   console.log(`الحد: ${limit || "كل السجلات"} | البداية: ${offset}`);
 
-  if (pdfMode !== "none" && !confirm) {
-    console.error("\nلتحميل ملفات PDF إلى MongoDB يجب تشغيل الأمر مع --confirm لأن العملية قد تحتاج مساحة تخزين ضخمة.");
-    console.error("مثال: npm run import:aco -- --pdf=low --confirm");
+  if ((pdfMode !== "none" || downloadCovers) && !confirm) {
+    console.error("\nهذه العملية قد تحتاج مساحة تخزين ضخمة. أضف --confirm للتنفيذ.");
+    console.error("مثال: npm run import:aco -- --pdf=low --cover --confirm");
     process.exitCode = 2;
     return;
   }
@@ -278,13 +296,13 @@ async function main() {
   const map = loadSourceMap();
   const files = xmlFiles();
   const selected = files.slice(offset, limit ? offset + limit : undefined);
-
   console.log(`تم العثور على ${files.length} سجل XML؛ ستتم معالجة ${selected.length}.`);
 
   let imported = 0;
   let skipped = 0;
   let failed = 0;
   let withPdf = 0;
+  let withCover = 0;
 
   for (let i = 0; i < selected.length; i += concurrency) {
     const batch = selected.slice(i, i + concurrency);
@@ -303,6 +321,7 @@ async function main() {
       if (result.status === "imported") {
         imported += 1;
         if (result.fileId) withPdf += 1;
+        if (result.coverImageId) withCover += 1;
       } else if (result.status === "skipped") skipped += 1;
       else failed += 1;
     }
@@ -310,11 +329,11 @@ async function main() {
 
   console.log("\n=== اكتمل الاستيراد ===");
   console.log(`تمت الإضافة/التحديث: ${imported}`);
-  console.log(`مع PDF داخل GridFS: ${withPdf}`);
-  console.log(`مع رابط PDF خارجي: ${Math.max(imported - withPdf, 0)}`);
+  console.log(`PDF داخل GridFS: ${withPdf}`);
+  console.log(`الأغلفة داخل GridFS: ${withCover}`);
   console.log(`تم التجاوز: ${skipped}`);
   console.log(`فشل: ${failed}`);
-  console.log("ملاحظة: لا يتم اختلاق غلاف للكتاب؛ بيانات ACO وملف PDF القانوني يتم ربطهما من المصدر.");
+  console.log("ملاحظة: صورة المؤلف ليست جزءاً مضموناً من بيانات ACO؛ لا يتم اختلاق صورة أو تنزيل صورة غير موثقة الحقوق.");
 
   await require("mongoose").connection.close();
 }
