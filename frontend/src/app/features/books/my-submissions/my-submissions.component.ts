@@ -62,7 +62,7 @@ export class MySubmissionsComponent implements OnInit {
         console.error('Fetch submissions error:', err);
         this.error = err?.error?.message || 'تعذر جلب طلبات الكتب، يرجى المحاولة لاحقاً.';
         this.loading = false;
-        this.notify.error(this.error);
+        this.notify.show(this.error, 'error');
         this.cdr.detectChanges();
       }
     });
@@ -111,13 +111,13 @@ export class MySubmissionsComponent implements OnInit {
       next: (res: any) => {
         this.books = this.books.filter(item => item._id !== id);
         this.deletingId = '';
-        this.notify.success(res?.message || 'تم حذف الطلب المرفوض بنجاح.');
+        this.notify.show(res?.message || 'تم حذف الطلب المرفوض بنجاح.', 'success');
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Delete rejected submission error:', err);
         this.deletingId = '';
-        this.notify.error(err?.error?.message || 'تعذر حذف الطلب المرفوض.');
+        this.notify.show(err?.error?.message || 'تعذر حذف الطلب المرفوض.', 'error');
         this.cdr.detectChanges();
       }
     });
