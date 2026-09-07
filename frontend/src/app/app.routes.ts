@@ -7,6 +7,7 @@ import { AdminComponent } from './features/admin/admin.component';
 import { BookCreateComponent } from './features/admin/books/book-create/book-create.component';
 import { AdminBooksComponent } from './features/admin/books/admin-books.component';
 import { BookEditComponent } from './features/admin/books/book-edit/book-edit.component';
+import { ArabicImportComponent } from './features/admin/arabic-import/arabic-import.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
@@ -37,6 +38,7 @@ export const routes: Routes = [
   { path: 'admin/books', component: AdminBooksComponent, canActivate: [adminGuard] },
   { path: 'admin/books/create', component: BookCreateComponent, canActivate: [adminGuard] },
   { path: 'admin/books/:id/edit', component: BookEditComponent, canActivate: [adminGuard] },
+  { path: 'admin/arabic-import', component: ArabicImportComponent, canActivate: [adminGuard] },
   { path: 'admin/authors', component: AuthorsManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/categories', component: CategoriesManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/book-submissions', component: BookSubmissionsComponent, canActivate: [adminGuard] },
