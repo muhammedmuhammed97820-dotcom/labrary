@@ -87,16 +87,40 @@ export class BookEditComponent implements OnInit {
   }
 
   save(): void {
-    if (!this.book.title.trim()) {
-      this.notify.show('عنوان الكتاب مطلوب بشكل أساسي.', 'error');
+    const title = this.book.title?.trim() || '';
+    const author = this.authorName.trim();
+    const category = this.categoryName.trim();
+
+    if (!title) {
+      this.notify.show('عنوان الكتاب مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
+      return;
+    }
+
+    if (!author) {
+      this.notify.show('اسم المؤلف مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
+      return;
+    }
+
+    if (!category) {
+      this.notify.show('التصنيف مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
+      return;
+    }
+
+    if (this.book.publishedYear != null && (!Number.isInteger(Number(this.book.publishedYear)) || Number(this.book.publishedYear) < 0)) {
+      this.notify.show('سنة النشر يجب أن تكون سنة صحيحة.', 'error');
+      return;
+    }
+
+    if (this.book.rating != null && (Number(this.book.rating) < 0 || Number(this.book.rating) > 5)) {
+      this.notify.show('التقييم يجب أن يكون بين 0 و5.', 'error');
       return;
     }
 
     const fd = new FormData();
-    fd.append('title', this.book.title);
-    fd.append('author', typeof this.book.author === 'string' ? this.book.author : this.book.author?.name || '');
-    fd.append('category', typeof this.book.category === 'string' ? this.book.category : this.book.category?.name || '');
-    fd.append('description', this.book.description || '');
+    fd.append('title', title);
+    fd.append('author', author);
+    fd.append('category', category);
+    fd.append('description', this.book.description?.trim() || '');
     
     if (this.book.publishedYear != null) fd.append('publishedYear', String(this.book.publishedYear));
     if (this.book.rating != null) fd.append('rating', String(this.book.rating));
@@ -110,7 +134,7 @@ export class BookEditComponent implements OnInit {
 
     this.api.update(this.id, fd).subscribe({
       next: () => {
-        this.notify.show(`تم تحديث بيانات كتاب «${this.book.title}» بنجاح.`, 'success');
+        this.notify.show(`تم تحديث بيانات كتاب «${title}» بنجاح.`, 'success');
         this.saving = false;
         setTimeout(() => this.router.navigate(['/admin/books']), 600);
       },
