@@ -48,7 +48,7 @@
 
       <div class="book-info">
         <div class="topline">
-          <label class="select"><input type="checkbox" [(ngModel)]="book.selected" [disabled]="book.duplicate" /></label>
+          <label class="select"><input type="checkbox" [(ngModel)]="book.selected" [disabled]="book.duplicate === true" /></label>
           <span class="badge" [class.warn]="book.duplicate">{{ book.duplicate ? 'مكرر' : 'جديد' }}</span>
           <span class="confidence" *ngIf="book.ai">AI {{ book.ai.confidence }}%</span>
         </div>
