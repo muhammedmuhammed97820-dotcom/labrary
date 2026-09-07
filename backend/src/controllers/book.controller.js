@@ -11,6 +11,18 @@ function serializeBook(book) {
   const id = String(value._id);
   value.filePath = value.fileId ? `/api/books/${id}/read` : value.filePath || "";
   value.coverImage = value.coverImageId ? `/api/books/${id}/cover` : value.coverImage || "";
+
+  // User submissions keep the typed author/category names in submittedAuthorName
+  // and submittedCategoryName until an administrator approves the book. Expose
+  // those names through the same author/category shape used by populated books,
+  // so pending books display correctly in "My Submissions" and the admin panel.
+  if (!value.author && value.submittedAuthorName) {
+    value.author = { name: value.submittedAuthorName };
+  }
+  if (!value.category && value.submittedCategoryName) {
+    value.category = { name: value.submittedCategoryName };
+  }
+
   return value;
 }
 
@@ -267,31 +279,30 @@ async function streamBookFile(req, res, mode = "read") {
     res.setHeader("Content-Type", contentType);
 
     if (mode === "download") {
-      const safeTitle = String(book.title || "book").replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").trim() || "book";
+      const safeTitle = String(book.title || "book").replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").slice(0, 180);
       res.setHeader("Content-Disposition", `attachment; filename="${safeTitle}.pdf"`);
-    } else {
-      res.setHeader("Content-Disposition", "inline");
     }
 
     if (range) {
-      const match = /^bytes=(\d*)-(\d*)$/.exec(range);
-      if (!match) return res.status(416).set("Content-Range", `bytes */${size}`).end();
-      let start = match[1] ? Number(match[1]) : Math.max(0, size - Number(match[2] || 0));
+      const match = range.match(/^bytes=(\d*)-(\d*)$/);
+      if (!match) return res.status(416).end();
+      let start = match[1] ? Number(match[1]) : 0;
       let end = match[2] ? Number(match[2]) : size - 1;
-      if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || start >= size) return res.status(416).set("Content-Range", `bytes */${size}`).end();
-      end = Math.min(end, size - 1);
+      if (match[1] === "" && match[2]) start = Math.max(size - Number(match[2]), 0);
+      if (start >= size || end >= size || start > end) {
+        res.setHeader("Content-Range", `bytes */${size}`);
+        return res.status(416).end();
+      }
+      const chunkSize = end - start + 1;
       res.status(206);
       res.setHeader("Content-Range", `bytes ${start}-${end}/${size}`);
-      res.setHeader("Content-Length", end - start + 1);
+      res.setHeader("Content-Length", chunkSize);
       return openDownloadStream(book.fileId, "libraryBooks", { start, end: end + 1 }).pipe(res);
     }
 
     res.setHeader("Content-Length", size);
     return openDownloadStream(book.fileId, "libraryBooks").pipe(res);
-  } catch (error) {
-    console.error("Book GridFS stream error:", error);
-    if (!res.headersSent) res.status(500).json({ message: "Failed to serve book file." });
-  }
+  } catch (error) { console.error(error); if (!res.headersSent) res.status(500).json({ message: "Failed to stream book file." }); }
 }
 
 async function streamBookCover(req, res) {
@@ -307,4 +318,18 @@ async function streamBookCover(req, res) {
   } catch (error) { console.error(error); res.status(500).json({ message: "Failed to load book cover." }); }
 }
 
-module.exports = { getBooks, getAdminBooks, getBook, createBook, updateBook, deleteBook, getMySubmissions, getPendingBooks, reviewBook, incrementViews, incrementDownloads, streamBookFile, streamBookCover };
+module.exports = {
+  getBooks,
+  getAdminBooks,
+  getBook,
+  createBook,
+  updateBook,
+  deleteBook,
+  getMySubmissions,
+  getPendingBooks,
+  reviewBook,
+  incrementViews,
+  incrementDownloads,
+  streamBookFile,
+  streamBookCover
+};
