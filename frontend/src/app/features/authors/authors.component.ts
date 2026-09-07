@@ -3,14 +3,15 @@ import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
+import { BookApiService } from '../../core/services/book-api.service';
 
-interface Author { 
-  _id: string; 
-  name: string; 
-  bio?: string; 
-  image?: string; 
-  nationality?: string; 
-  booksCount?: number; 
+interface Author {
+  _id: string;
+  name: string;
+  bio?: string;
+  image?: string;
+  nationality?: string;
+  booksCount?: number;
 }
 
 @Component({
@@ -22,9 +23,10 @@ interface Author {
 })
 export class AuthorsComponent implements OnInit {
   private http = inject(HttpClient);
-  private cdr = inject(ChangeDetectorRef); // حقن أداة كشف التغييرات
+  private cdr = inject(ChangeDetectorRef);
+  private readonly media = inject(BookApiService);
   public theme = inject(ThemeService);
-  
+
   authors: Author[] = [];
   loading = true;
   error = '';
@@ -36,25 +38,24 @@ export class AuthorsComponent implements OnInit {
   loadAuthors(): void {
     this.loading = true;
     this.error = '';
-    
-    this.http.get<Author[]>('http://localhost:5000/api/authors').subscribe({
-      next: (data) => { 
-        this.authors = data || []; 
-        this.loading = false; 
-        this.cdr.detectChanges(); // تحديث الواجهة فورياً عند استلام البيانات
+
+    this.http.get<Author[]>(`${this.media.getFileUrl('/api')}/authors`).subscribe({
+      next: (data) => {
+        this.authors = data || [];
+        this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: (err) => { 
+      error: (err) => {
         console.error('Error loading authors:', err);
-        this.error = 'تعذر تحميل المؤلفين.'; 
-        this.loading = false; 
-        this.cdr.detectChanges(); // تحديث الواجهة حتى عند حدوث خطأ
+        this.error = 'تعذر تحميل المؤلفين.';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  imageUrl(v: string): string {
-    if (!v) return '';
-    return /^https?:\/\//i.test(v) ? v : `http://localhost:5000${v.startsWith('/') ? v : `/${v}`}`;
+  imageUrl(v?: string | null): string {
+    return this.media.getAuthorImageUrl(v);
   }
 
   initial(n: string): string {
