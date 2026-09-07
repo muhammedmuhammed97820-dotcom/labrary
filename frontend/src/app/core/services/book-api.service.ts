@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Book {
   _id?: string;
@@ -42,15 +43,14 @@ export interface BookListResponse {
 @Injectable({ providedIn: 'root' })
 export class BookApiService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:5000/api/books';
+  private readonly api = `${environment.apiUrl}/books`;
+  private readonly apiOrigin = environment.apiOrigin.replace(/\/$/, '');
   private readonly viewerStorageKey = 'electronic_library_viewer_id';
   private readonly viewedBooksStorageKey = 'electronic_library_viewed_books';
   private readonly downloadedBooksStorageKey = 'electronic_library_downloaded_books';
 
   getAll(page = 1, limit = 24, search = ''): Observable<Book[]> {
-    let params = new HttpParams()
-      .set('page', Math.max(page, 1))
-      .set('limit', Math.max(limit, 1));
+    let params = new HttpParams().set('page', Math.max(page, 1)).set('limit', Math.max(limit, 1));
     if (search.trim()) params = params.set('search', search.trim());
     return this.http.get<BookListResponse | Book[]>(this.api, { params }).pipe(
       map(response => Array.isArray(response) ? response : response.books)
@@ -58,9 +58,7 @@ export class BookApiService {
   }
 
   getAllPaginated(page = 1, limit = 24, search = ''): Observable<BookListResponse> {
-    let params = new HttpParams()
-      .set('page', Math.max(page, 1))
-      .set('limit', Math.min(Math.max(limit, 1), 100));
+    let params = new HttpParams().set('page', Math.max(page, 1)).set('limit', Math.min(Math.max(limit, 1), 100));
     if (search.trim()) params = params.set('search', search.trim());
     return this.http.get<BookListResponse>(this.api, { params });
   }
@@ -89,6 +87,26 @@ export class BookApiService {
   addDownload(id: string): Observable<{ downloads: number; counted: boolean }> {
     return this.http.post<{ downloads: number; counted: boolean }>(`${this.api}/${id}/downloads`, {}, { headers: this.viewerHeaders() });
   }
+
+  getFileUrl(filePath?: string | null): string {
+    if (!filePath) return '';
+    if (/^(data:|blob:|https?:\/\/)/i.test(filePath)) return filePath;
+    return `${this.apiOrigin}/${filePath.replace(/^\/+/, '')}`;
+  }
+
+  getBookCoverUrl(book: Pick<Book, '_id' | 'coverImage'> | null | undefined): string {
+    if (!book) return '';
+    const cover = book.coverImage?.trim();
+    if (!cover) return '';
+    return this.getFileUrl(cover);
+  }
+
+  getAuthorImageUrl(image?: string | null): string {
+    return this.getFileUrl(image);
+  }
+
+  getReaderUrl(id: string): string { return `${this.api}/${id}/read`; }
+  getDownloadUrl(id: string): string { return `${this.api}/${id}/download`; }
 
   private viewerHeaders(): HttpHeaders { return new HttpHeaders({ 'X-Viewer-Id': this.getViewerId() }); }
 
@@ -124,11 +142,4 @@ export class BookApiService {
       return generated;
     } catch { return `temporary-${Date.now()}`; }
   }
-
-  getFileUrl(filePath: string): string {
-    if (/^https?:\/\//i.test(filePath)) return filePath;
-    return `http://localhost:5000${filePath.startsWith('/') ? filePath : `/${filePath}`}`;
-  }
-  getReaderUrl(id: string): string { return `${this.api}/${id}/read`; }
-  getDownloadUrl(id: string): string { return `${this.api}/${id}/download`; }
 }
