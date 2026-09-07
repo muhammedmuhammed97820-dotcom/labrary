@@ -1,7 +1,6 @@
 <main class="admin-books-wrapper my-submissions-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="admin-container">
 
-    <!-- HEADER SECTION -->
     <header class="admin-header">
       <div class="header-info">
         <span class="admin-badge">
@@ -13,15 +12,12 @@
       </div>
     </header>
 
-    <!-- LOADING STATE -->
     @if (loading) {
       <div class="admin-state-box loading-box">
         <div class="glass-spinner"></div>
         <p>جارٍ تحميل طلباتك...</p>
       </div>
     }
-
-    <!-- ERROR STATE -->
     @else if (error) {
       <div class="admin-state-box error-box">
         <div class="error-content">
@@ -34,8 +30,6 @@
         </button>
       </div>
     }
-
-    <!-- EMPTY STATE -->
     @else if (!books.length) {
       <div class="admin-state-box empty-box">
         <i class="fa-solid fa-folder-open empty-icon"></i>
@@ -46,14 +40,10 @@
         </a>
       </div>
     }
-
-    <!-- SUBMISSIONS GRID -->
     @else {
       <div class="books-grid-container">
         @for (book of books; track book._id) {
           <div class="glass-book-card submission-card">
-            
-            <!-- صورة الغلاف وحالة الطلب -->
             <div class="card-media-header">
               <div class="book-cover-wrapper">
                 @if (book.coverImage) {
@@ -63,23 +53,21 @@
                 }
               </div>
 
-              <!-- شارة الحالة العلوية العائمة -->
-              <span class="category-floating-badge status-badge" 
-                    [class.approved]="book.status === 'approved'" 
+              <span class="category-floating-badge status-badge"
+                    [class.approved]="book.status === 'approved'"
                     [class.rejected]="book.status === 'rejected'"
                     [class.pending]="book.status !== 'approved' && book.status !== 'rejected'">
-                <i class="fa-solid" 
-                   [class.fa-circle-check]="book.status === 'approved'" 
+                <i class="fa-solid"
+                   [class.fa-circle-check]="book.status === 'approved'"
                    [class.fa-circle-xmark]="book.status === 'rejected'"
                    [class.fa-clock]="book.status !== 'approved' && book.status !== 'rejected'"></i>
                 {{ status(book) }}
               </span>
             </div>
 
-            <!-- تفاصيل الكتاب -->
             <div class="card-body-content">
               <h3 class="book-title-text" [title]="book.title">{{ book.title || 'بدون عنوان' }}</h3>
-              
+
               <div class="author-row">
                 <i class="fa-solid fa-pen-nib"></i>
                 <span>{{ author(book) }}</span>
@@ -97,17 +85,51 @@
                   type="button"
                   class="delete-rejected-btn"
                   [disabled]="deletingId === book._id"
-                  (click)="deleteRejected(book)">
-                  <i class="fa-solid" [class.fa-trash-can]="deletingId !== book._id" [class.fa-spinner]="deletingId === book._id" [class.fa-spin]="deletingId === book._id"></i>
+                  (click)="requestDelete(book)"
+                  aria-label="حذف الطلب المرفوض">
+                  <i class="fa-solid"
+                     [class.fa-trash-can]="deletingId !== book._id"
+                     [class.fa-spinner]="deletingId === book._id"
+                     [class.fa-spin]="deletingId === book._id"></i>
                   <span>{{ deletingId === book._id ? 'جارٍ الحذف...' : 'حذف الطلب' }}</span>
                 </button>
               }
             </div>
-
           </div>
         }
       </div>
     }
-
   </div>
+
+  @if (pendingDeleteBook) {
+    <div class="delete-confirm-backdrop" (click)="cancelDelete()">
+      <section class="delete-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title" (click)="$event.stopPropagation()">
+        <div class="delete-confirm-icon">
+          <i class="fa-solid fa-trash-can"></i>
+        </div>
+
+        <div class="delete-confirm-content">
+          <h2 id="delete-dialog-title">حذف الطلب؟</h2>
+          <p>
+            هل أنت متأكد من حذف طلب
+            <strong>«{{ pendingDeleteBook.title || 'بدون عنوان' }}»</strong>؟
+          </p>
+          <span class="delete-warning">
+            <i class="fa-solid fa-circle-info"></i>
+            سيتم حذف الطلب وملفات الكتاب والغلاف نهائياً.
+          </span>
+        </div>
+
+        <div class="delete-confirm-actions">
+          <button type="button" class="delete-cancel-btn" (click)="cancelDelete()">
+            إلغاء
+          </button>
+          <button type="button" class="delete-confirm-btn" (click)="confirmDelete()">
+            <i class="fa-solid fa-trash-can"></i>
+            تأكيد الحذف
+          </button>
+        </div>
+      </section>
+    </div>
+  }
 </main>
