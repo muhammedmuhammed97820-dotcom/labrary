@@ -68,9 +68,22 @@ export class CategoriesManagementComponent implements OnInit {
   }
 
   save(): void {
+    const name = String(this.category?.name ?? '').trim();
+
+    if (!name) {
+      this.notify.show('اسم التصنيف مطلوب ولا يمكن حفظه بدونه.', 'error');
+      return;
+    }
+
+    this.category = {
+      ...this.category,
+      name,
+      description: String(this.category?.description ?? '').trim()
+    };
+
     this.saving = true;
-    const r = this.editing 
-      ? this.http.put(`${this.api}/${this.editing._id}`, this.category) 
+    const r = this.editing
+      ? this.http.put(`${this.api}/${this.editing._id}`, this.category)
       : this.http.post(this.api, this.category);
 
     r.pipe(
