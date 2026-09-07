@@ -2,24 +2,43 @@ const { URL } = require('url');
 const { enrichMany } = require('./ai-book.service');
 
 const DEFAULT_HEADERS = {
-  'User-Agent': 'ElectronicLibrarySmartImporter/1.1 (+admin-controlled-library-import)',
+  'User-Agent': 'ElectronicLibrarySmartImporter/2.0 (+admin-controlled-library-import)',
   Accept: 'text/html,application/xhtml+xml'
 };
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 function decodeHtml(value = '') {
-  return String(value)
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;|&apos;/gi, "'")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+  let result = String(value);
+  for (let i = 0; i < 3; i += 1) {
+    const decoded = result
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;|&apos;/gi, "'")
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+      .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+    if (decoded === result) break;
+    result = decoded;
+  }
+  return result;
 }
 
 function cleanText(value = '') {
-  return decodeHtml(String(value).replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+  let text = String(value)
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ');
+  for (let i = 0; i < 3; i += 1) {
+    text = decodeHtml(text).replace(/<[^>]+>/g, ' ');
+  }
+  return decodeHtml(text).replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeField(value = '') {
+  const text = cleanText(value).replace(/[|•]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!text || text.length < 2) return '';
+  if (/^(ات|غير معروف|غير محدد|لا يوجد|none|null|n\/a)$/i.test(text)) return '';
+  return text;
 }
 
 function absoluteUrl(value, base) {
@@ -33,31 +52,29 @@ function isArabic(value = '') {
 
 function meta(html, name) {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const a = new RegExp(`<meta\\b[^>]*(?:name|property)\\s*=\\s*["']${escaped}["'][^>]*content\\s*=\\s*["']([^"']*)["'][^>]*>`, 'i');
-  const b = new RegExp(`<meta\\b[^>]*content\\s*=\\s*["']([^"']*)["'][^>]*(?:name|property)\\s*=\\s*["']${escaped}["'][^>]*>`, 'i');
-  return decodeHtml((html.match(a) || html.match(b) || [])[1] || '');
+  const patterns = [
+    new RegExp(`<meta\\b[^>]*(?:name|property)\\s*=\\s*["']${escaped}["'][^>]*content\\s*=\\s*["']([^"']*)["'][^>]*>`, 'i'),
+    new RegExp(`<meta\\b[^>]*content\\s*=\\s*["']([^"']*)["'][^>]*(?:name|property)\\s*=\\s*["']${escaped}["'][^>]*>`, 'i')
+  ];
+  for (const re of patterns) {
+    const match = html.match(re);
+    if (match?.[1]) return cleanText(match[1]);
+  }
+  return '';
 }
 
 function attr(html, tag, name) {
   const re = new RegExp(`<${tag}\\b[^>]*\\b${name}\\s*=\\s*["']([^"']+)["'][^>]*>`, 'i');
-  return decodeHtml((html.match(re) || [])[1] || '');
-}
-
-function firstMatch(html, patterns) {
-  for (const pattern of patterns) {
-    const m = html.match(pattern);
-    if (m?.[1]) return cleanText(m[1]);
-  }
-  return '';
+  return cleanText((html.match(re) || [])[1] || '');
 }
 
 function extractLinks(html, pageUrl) {
   const links = [];
   const re = /<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  let m;
-  while ((m = re.exec(html))) {
-    const href = absoluteUrl(m[1], pageUrl);
-    if (href) links.push({ url: href, text: cleanText(m[2]) });
+  let match;
+  while ((match = re.exec(html))) {
+    const href = absoluteUrl(decodeHtml(match[1]), pageUrl);
+    if (href) links.push({ url: href, text: cleanText(match[2]) });
   }
   return links;
 }
@@ -70,7 +87,7 @@ function normalizeUrl(value) {
   try {
     const u = new URL(value);
     u.hash = '';
-    ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(k => u.searchParams.delete(k));
+    ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid'].forEach(k => u.searchParams.delete(k));
     return u.href.replace(/\/$/, '');
   } catch { return value; }
 }
@@ -88,82 +105,70 @@ function isClearlyNonBookPage(pageUrl) {
   } catch { return true; }
 }
 
-function hasBookSignals(html, pageUrl, links = []) {
-  if (isClearlyNonBookPage(pageUrl)) return { score: -100, signals: [] };
-  const text = cleanText(html).toLowerCase();
-  const url = pageUrl.toLowerCase();
-  const title = meta(html, 'og:title') || firstMatch(html, [/<h1[^>]*>([\s\S]*?)<\/h1>/i, /<title[^>]*>([\s\S]*?)<\/title>/i]);
-  const signals = [];
-  let score = 0;
+function hasStrongRights(text = '') {
+  const normalized = cleanText(text).toLowerCase();
+  if (/حقوق الكتاب محفوظة|جميع الحقوق محفوظة|all rights reserved|جميع حقوق الطبع/.test(normalized)) return false;
+  return /creative commons|المشاع الإبداعي|public domain|الملك العام|ترخيص مفتوح|ترخيص حر|مرخص بترخيص|رخصة المشاع|بإذن صريح من المؤلف|إذن رسمي من المؤلف|licensed under/i.test(normalized);
+}
 
-  if (/\/ar\/book(?:\/|-)/i.test(url) || /\/book\//i.test(url)) { score += 5; signals.push('book-url'); }
-  if (/تحميل كتاب|تنزيل كتاب|قراءة كتاب|كتاب pdf/i.test(title)) { score += 4; signals.push('book-title'); }
-  if (/المؤلف|الكاتب|author/i.test(text)) { score += 2; signals.push('author'); }
-  if (/عدد الصفحات|الصفحات|pages/i.test(text)) { score += 2; signals.push('pages'); }
-  if (/isbn/i.test(text)) { score += 2; signals.push('isbn'); }
-  if (links.some(x => /\.pdf(?:$|[?#])/i.test(x.url) || /تحميل.*pdf|pdf.*تحميل/i.test(x.text))) { score += 3; signals.push('pdf'); }
-  if (/(نبذة عن الكتاب|عن الكتاب|وصف الكتاب|ملخص الكتاب)/i.test(text)) { score += 2; signals.push('description'); }
-  if (/إضافة إلى المفضلة|اقرأ|تحميل الكتاب/i.test(text)) { score += 2; signals.push('book-actions'); }
-  if (/تسجيل الدخول|إنشاء حساب|تبرع|انشر معنا|التصنيفات|المؤلفون|اقتباسات|نتائج البحث/i.test(text)) { score -= 5; signals.push('site-page'); }
-  if (!isArabic(`${title} ${text.slice(0, 2500)}`)) score -= 4;
+function extractLabeledValue(text, labels, maxLength = 160) {
+  const label = labels.join('|');
+  const re = new RegExp(`(?:${label})\\s*[:：\\-]?\\s*([^|•]{2,${maxLength}})`, 'i');
+  const match = text.match(re);
+  return normalizeField(match?.[1] || '');
+}
 
-  return { score, signals };
+function extractTitle(html) {
+  return normalizeField(meta(html, 'og:title')) || normalizeField((html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [])[1]) || normalizeField((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1]);
 }
 
 function extractBookCandidate(html, pageUrl) {
+  if (isClearlyNonBookPage(pageUrl)) return null;
   const links = extractLinks(html, pageUrl);
-  const signalResult = hasBookSignals(html, pageUrl, links);
-  if (signalResult.score < 6) return null;
-
-  const title = meta(html, 'og:title') || firstMatch(html, [
-    /<h1[^>]*>([\s\S]*?)<\/h1>/i,
-    /<title[^>]*>([\s\S]*?)<\/title>/i
-  ]);
-  const description = meta(html, 'og:description') || meta(html, 'description') || firstMatch(html, [
-    /(?:الوصف|نبذة عن الكتاب|عن الكتاب|وصف الكتاب|ملخص الكتاب)[^<]{0,80}<[^>]*>([\s\S]*?)<\//i
-  ]);
-  const author = firstMatch(html, [
-    /(?:المؤلف|الكاتب)\s*[:：]?\s*(?:<[^>]+>)*([^<]{2,120})/i,
-    /(?:author|writer)\s*[:：]?\s*(?:<[^>]+>)*([^<]{2,120})/i
-  ]);
-  const category = firstMatch(html, [
-    /(?:التصنيف|القسم|الفئة)\s*[:：]?\s*(?:<[^>]+>)*([^<]{2,100})/i,
-    /(?:category|genre)\s*[:：]?\s*(?:<[^>]+>)*([^<]{2,100})/i
-  ]);
-  const pages = firstMatch(html, [/(?:عدد الصفحات|الصفحات)\s*[:：]?\s*(?:<[^>]+>)*([0-9٠-٩]{1,5})/i]);
-  const isbn = firstMatch(html, [/(?:ISBN|isbn)\s*[:：]?\s*(?:<[^>]+>)*([0-9Xx\- ]{8,20})/i]);
-  const publishedYear = firstMatch(html, [/(?:سنة النشر|تاريخ النشر|النشر)\s*[:：]?\s*(?:<[^>]+>)*((?:19|20)[0-9٠-٩]{2})/i]);
+  const text = cleanText(html);
+  const title = extractTitle(html);
+  const author = extractLabeledValue(text, ['المؤلف','الكاتب','Author','Writer']);
+  const category = extractLabeledValue(text, ['التصنيف','القسم','الفئة','Category','Genre'], 100);
+  const description = normalizeField(meta(html, 'og:description') || meta(html, 'description'));
+  const pages = extractLabeledValue(text, ['عدد الصفحات','الصفحات','Pages'], 20).replace(/[^0-9٠-٩]/g, '');
+  const isbn = extractLabeledValue(text, ['ISBN'], 30).replace(/[^0-9Xx\- ]/g, '').trim();
+  const publishedYear = extractLabeledValue(text, ['سنة النشر','تاريخ النشر','سنة الإصدار','Published'], 30).match(/(?:19|20)[0-9٠-٩]{2}/)?.[0] || '';
   const cover = meta(html, 'og:image') || attr(html, 'img', 'src');
   const validCover = cover && !/foulabook\.com\/images\/foulabook\.jpg/i.test(cover) ? absoluteUrl(cover, pageUrl) : '';
   const pdfLink = links.find(x => /\.pdf(?:$|[?#])/i.test(x.url))?.url || links.find(x => /تحميل|download|pdf/i.test(x.text) && /pdf|download/i.test(x.url))?.url || '';
-  const fullText = cleanText(html);
-  const rights = /creative commons|المشاع الإبداعي|public domain|الملك العام|بإذن المؤلف|بإذن من المؤلف|explicit permission/i.test(fullText)
-    ? 'explicit-permission-or-open-license'
-    : 'unknown';
 
-  if (!title || !isArabic(title) || !author || !isArabic(author)) return null;
+  const url = pageUrl.toLowerCase();
+  const signals = [];
+  let score = 0;
+  if (/\/ar\/book(?:\/|-)|\/book\//i.test(url)) { score += 5; signals.push('book-url'); }
+  if (/تحميل كتاب|تنزيل كتاب|قراءة كتاب|كتاب pdf/i.test(title)) { score += 4; signals.push('book-title'); }
+  if (author) { score += 2; signals.push('author'); }
+  if (pages) { score += 1; signals.push('pages'); }
+  if (isbn) { score += 1; signals.push('isbn'); }
+  if (pdfLink) { score += 2; signals.push('pdf'); }
+  if (/نبذة عن الكتاب|عن الكتاب|وصف الكتاب|ملخص الكتاب/i.test(text)) { score += 2; signals.push('description'); }
+  if (/إضافة إلى المفضلة|اقرأ|تحميل الكتاب/i.test(text)) { score += 2; signals.push('book-actions'); }
+  if (!isArabic(`${title} ${author} ${text.slice(0, 1800)}`)) score -= 3;
+  if (score < 5 || !title || !author || !isArabic(title) || !isArabic(author)) return null;
 
   return {
-    title: cleanText(title),
-    author: cleanText(author),
-    category: cleanText(category),
-    description: cleanText(description),
-    pages: cleanText(pages),
-    isbn: cleanText(isbn),
-    publishedYear: cleanText(publishedYear),
+    title,
+    author,
+    category,
+    description,
+    pages,
+    isbn,
+    publishedYear,
     language: 'العربية',
     coverImage: validCover,
     sourceUrl: normalizeUrl(pageUrl),
     sourceFileUrl: pdfLink,
     source: new URL(pageUrl).hostname,
     sourceId: normalizeUrl(pageUrl),
-    rights,
+    rights: hasStrongRights(text) ? 'explicit-permission-or-open-license' : 'unknown',
     arabic: true,
-    extraction: {
-      score: signalResult.score,
-      confidence: Math.max(0, Math.min(100, signalResult.score * 8)),
-      signals: signalResult.signals
-    }
+    extraction: { score, confidence: Math.max(0, Math.min(100, 45 + score * 7)), signals },
+    rawText: text.slice(0, 12000)
   };
 }
 
@@ -176,28 +181,39 @@ async function fetchPage(url) {
 }
 
 function looksLikeBookLink(link, sourceUrl) {
-  if (!sameOrigin(link.url, sourceUrl)) return false;
-  if (isClearlyNonBookPage(link.url)) return false;
+  if (!sameOrigin(link.url, sourceUrl) || isClearlyNonBookPage(link.url)) return false;
   const u = link.url.toLowerCase();
-  const t = link.text || '';
-  return /\/ar\/book(?:\/|-)|\/book\//i.test(u) || /تحميل كتاب|قراءة كتاب|تنزيل كتاب/i.test(t);
+  return /\/ar\/book(?:\/|-)|\/book\//i.test(u) || /تحميل كتاب|قراءة كتاب|تنزيل كتاب/i.test(link.text || '');
+}
+
+function looksLikeNavigationLink(link, sourceUrl) {
+  if (!sameOrigin(link.url, sourceUrl)) return false;
+  if (looksLikeBookLink(link, sourceUrl)) return false;
+  const u = link.url.toLowerCase();
+  const text = (link.text || '').toLowerCase();
+  try {
+    const path = new URL(link.url).pathname.toLowerCase();
+    const query = new URL(link.url).search.toLowerCase();
+    if (isClearlyNonBookPage(link.url) && path !== '/') return false;
+    return /page=|paged=|\/page\/|\bnext\b|\bmore\b|التالي|المزيد|كتب|book|category|categories|search|tag/i.test(`${path} ${query} ${text}`);
+  } catch { return false; }
 }
 
 async function crawlSite(sourceUrl, options = {}) {
-  const maxPages = Math.min(Number(options.maxPages || process.env.IMPORT_MAX_PAGES || 20), 100);
+  const maxPages = Math.min(Number(options.maxPages || process.env.IMPORT_MAX_PAGES || 40), 150);
   const maxBooks = Math.min(Number(options.maxBooks || process.env.IMPORT_MAX_BOOKS || 50), 200);
-  const delayMs = Math.max(Number(options.delayMs || 700), 300);
+  const delayMs = Math.max(Number(options.delayMs || 500), 250);
   const start = new URL(sourceUrl).href;
-  const queue = [start];
+  const queue = [{ url: start, depth: 0 }];
   const visited = new Set();
   const bookUrls = new Set();
   const rawCandidates = [];
 
   while (queue.length && visited.size < maxPages && bookUrls.size < maxBooks) {
-    const current = queue.shift();
-    const normalized = normalizeUrl(current);
-    if (visited.has(normalized)) continue;
-    visited.add(normalized);
+    const item = queue.shift();
+    const current = normalizeUrl(item.url);
+    if (visited.has(current)) continue;
+    visited.add(current);
 
     let html;
     try { html = await fetchPage(current); } catch { continue; }
@@ -209,8 +225,12 @@ async function crawlSite(sourceUrl, options = {}) {
     }
 
     for (const link of extractLinks(html, current)) {
-      if (queue.length + visited.size >= maxPages * 2) break;
-      if (looksLikeBookLink(link, start)) queue.push(link.url);
+      if (visited.size + queue.length >= maxPages * 2) break;
+      const normalized = normalizeUrl(link.url);
+      if (visited.has(normalized)) continue;
+      if (looksLikeBookLink(link, start) || (item.depth < 4 && looksLikeNavigationLink(link, start))) {
+        queue.push({ url: normalized, depth: item.depth + 1 });
+      }
     }
     await sleep(delayMs);
   }
@@ -219,22 +239,23 @@ async function crawlSite(sourceUrl, options = {}) {
   const enriched = await enrichMany(unique);
   const books = enriched
     .filter(x => x.arabic !== false && x.language !== 'غير عربي')
-    .map(x => ({
-      ...x,
-      category: cleanText(x.category || '') || '',
-      description: cleanText(x.description || ''),
-      title: cleanText(x.title || ''),
-      author: cleanText(x.author || ''),
-      extraction: x.extraction || { score: 0, confidence: 0, signals: [] },
-      ai: x.ai || { enabled: false, confidence: 0, notes: 'لم يتم تشغيل نموذج الذكاء الاصطناعي.' }
-    }));
+    .map(x => {
+      const merged = { ...x };
+      merged.title = normalizeField(merged.title);
+      merged.author = normalizeField(merged.author);
+      merged.category = normalizeField(merged.category);
+      merged.description = normalizeField(merged.description);
+      merged.pages = normalizeField(merged.pages).replace(/[^0-9٠-٩]/g, '');
+      merged.isbn = normalizeField(merged.isbn);
+      merged.publishedYear = normalizeField(merged.publishedYear);
+      merged.rights = hasStrongRights(`${merged.rights || ''} ${merged.rawText || ''}`) ? 'explicit-permission-or-open-license' : (merged.rights || 'unknown');
+      merged.extraction = merged.extraction || { score: 0, confidence: 0, signals: [] };
+      merged.ai = merged.ai || { enabled: false, confidence: 0, notes: 'لم يتم تشغيل نموذج الذكاء الاصطناعي.' };
+      delete merged.rawText;
+      return merged;
+    });
 
-  return {
-    sourceUrl: start,
-    scannedPages: visited.size,
-    discovered: books.length,
-    books
-  };
+  return { sourceUrl: start, scannedPages: visited.size, discovered: books.length, books };
 }
 
-module.exports = { crawlSite, extractBookCandidate, isArabic, isClearlyNonBookPage };
+module.exports = { crawlSite, extractBookCandidate, isArabic, isClearlyNonBookPage, cleanText };
