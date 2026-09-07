@@ -9,6 +9,7 @@
       <button class="primary-btn" type="button" (click)="openCreate()"><span>＋</span> إضافة مستخدم</button>
     </header>
 
+    @if (success) { <div class="alert success">{{ success }}</div> }
     @if (error && !modalOpen) { <div class="alert error">{{ error }}</div> }
 
     <section class="stats">
@@ -69,21 +70,6 @@
           <label>كلمة المرور{{ editing ? ' (اختياري)' : '' }}<input [(ngModel)]="form.password" type="password" [placeholder]="editing ? 'اتركها فارغة للإبقاء عليها' : '6 أحرف على الأقل'"></label>
         </div>
         <footer><button class="ghost-btn" type="button" (click)="closeModal()">إلغاء</button><button class="primary-btn" type="button" [disabled]="saving" (click)="save()">{{ saving ? 'جارِ الحفظ...' : (editing ? 'حفظ التعديلات' : 'إنشاء المستخدم') }}</button></footer>
-      </section>
-    </div>
-  }
-
-  @if (confirmOpen && userToDelete) {
-    <div class="modal-backdrop" (click)="cancelDelete()">
-      <section class="modal confirm-modal" (click)="$event.stopPropagation()">
-        <div class="confirm-icon">⚠</div>
-        <h2>تأكيد حذف المستخدم</h2>
-        <p>هل أنت متأكد من حذف المستخدم <strong>{{ userToDelete.name }}</strong>؟</p>
-        <small>لا يمكن التراجع عن هذه العملية.</small>
-        <footer>
-          <button class="ghost-btn" type="button" (click)="cancelDelete()">إلغاء</button>
-          <button class="danger-btn" type="button" (click)="confirmDelete()">نعم، حذف المستخدم</button>
-        </footer>
       </section>
     </div>
   }
