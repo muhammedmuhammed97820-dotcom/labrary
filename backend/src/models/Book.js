@@ -9,6 +9,7 @@ const bookSchema = new mongoose.Schema(
     submittedCategoryName: { type: String, trim: true, default: "" },
     description: { type: String, default: "" },
     publishedYear: { type: Number },
+    pages: { type: Number, default: null },
     language: { type: String, trim: true, default: "" },
     rating: { type: Number, default: 0, min: 0, max: 5 },
     isAvailable: { type: Boolean, default: true },
