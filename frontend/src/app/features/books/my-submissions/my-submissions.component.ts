@@ -40,6 +40,7 @@ export class MySubmissionsComponent implements OnInit {
   loading = true;
   error = '';
   deletingId = '';
+  pendingDeleteBook: SubmissionBook | null = null;
 
   ngOnInit() {
     this.load();
@@ -61,7 +62,7 @@ export class MySubmissionsComponent implements OnInit {
         console.error('Fetch submissions error:', err);
         this.error = err?.error?.message || 'تعذر جلب طلبات الكتب، يرجى المحاولة لاحقاً.';
         this.loading = false;
-        this.notify.show(this.error, 'error');
+        this.notify.error(this.error);
         this.cdr.detectChanges();
       }
     });
@@ -88,28 +89,35 @@ export class MySubmissionsComponent implements OnInit {
     }
   }
 
-  deleteRejected(book: SubmissionBook): void {
+  requestDelete(book: SubmissionBook): void {
     if (book.status !== 'rejected' || !book._id || this.deletingId) return;
+    this.pendingDeleteBook = book;
+  }
 
-    const confirmed = window.confirm(
-      `هل أنت متأكد من حذف الطلب المرفوض "${book.title || 'بدون عنوان'}"؟\n\nسيتم حذف الطلب وملف الكتاب وصورة الغلاف نهائياً.`
-    );
-    if (!confirmed) return;
+  cancelDelete(): void {
+    if (this.deletingId) return;
+    this.pendingDeleteBook = null;
+  }
+
+  confirmDelete(): void {
+    const book = this.pendingDeleteBook;
+    if (!book || book.status !== 'rejected' || !book._id || this.deletingId) return;
 
     const id = book._id;
     this.deletingId = id;
+    this.pendingDeleteBook = null;
 
     this.http.delete(`${this.serverOrigin}/api/books/${id}/my-rejected-submission`).subscribe({
       next: (res: any) => {
         this.books = this.books.filter(item => item._id !== id);
         this.deletingId = '';
-        this.notify.show(res?.message || 'تم حذف الطلب المرفوض بنجاح.', 'success');
+        this.notify.success(res?.message || 'تم حذف الطلب المرفوض بنجاح.');
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Delete rejected submission error:', err);
         this.deletingId = '';
-        this.notify.show(err?.error?.message || 'تعذر حذف الطلب المرفوض.', 'error');
+        this.notify.error(err?.error?.message || 'تعذر حذف الطلب المرفوض.');
         this.cdr.detectChanges();
       }
     });
