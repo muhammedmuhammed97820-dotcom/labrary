@@ -1,75 +1,252 @@
-<main class="users-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
-  <div class="users-container">
-    <header class="users-header">
-      <div>
-        <span class="eyebrow">إدارة النظام</span>
-        <h1>إدارة المستخدمين</h1>
-        <p>إنشاء الحسابات وإدارة الصلاحيات وتحديث بيانات المستخدمين من مكان واحد.</p>
+<main class="admin-dashboard-wrapper users-management-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
+
+    <!-- رأس الصفحة الفاخر -->
+    <header class="admin-header">
+      <div class="header-info">
+        <span class="admin-badge">
+          <i class="fa-solid fa-shield-halved"></i>
+          DIGITAL LIBRARY · USERS DIRECTORY
+        </span>
+        <h1 class="header-title">إدارة المستخدمين</h1>
+        <p class="header-subtitle">إنشاء الحسابات، إدارة الصلاحيات، وتحديث بيانات المستخدمين من مكان واحد.</p>
       </div>
-      <button class="primary-btn" type="button" (click)="openCreate()"><span>＋</span> إضافة مستخدم</button>
+      <button class="add-user-btn border-0 cursor-pointer" type="button" (click)="openCreate()">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>إضافة مستخدم جديد</span>
+      </button>
     </header>
 
-    @if (success) { <div class="alert success">{{ success }}</div> }
-    @if (error && !modalOpen) { <div class="alert error">{{ error }}</div> }
+    <!-- إحصائيات النظام الفاخرة -->
+    <section class="stats-grid">
+      <div class="panel-glass-card stat-card">
+        <div class="stat-icon-box users-all">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">إجمالي المستخدمين</span>
+          <strong class="stat-value">{{ stats.totalUsers }}</strong>
+        </div>
+      </div>
 
-    <section class="stats">
-      <article><span class="stat-icon">👥</span><div><small>كل المستخدمين</small><strong>{{ stats.totalUsers }}</strong></div></article>
-      <article><span class="stat-icon">🛡️</span><div><small>المديرون</small><strong>{{ stats.totalAdmins }}</strong></div></article>
-      <article><span class="stat-icon">👤</span><div><small>المستخدمون العاديون</small><strong>{{ stats.regularUsers }}</strong></div></article>
+      <div class="panel-glass-card stat-card">
+        <div class="stat-icon-box users-admin">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">المديرون والصلاحيات العليا</span>
+          <strong class="stat-value">{{ stats.totalAdmins }}</strong>
+        </div>
+      </div>
+
+      <div class="panel-glass-card stat-card">
+        <div class="stat-icon-box users-regular">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">المستخدمون العاديون</span>
+          <strong class="stat-value">{{ stats.regularUsers }}</strong>
+        </div>
+      </div>
     </section>
 
-    <section class="toolbar">
-      <div class="search-box"><span>⌕</span><input [(ngModel)]="search" (keyup.enter)="searchUsers()" placeholder="ابحث بالاسم أو البريد الإلكتروني..." /></div>
-      <select [(ngModel)]="roleFilter" (change)="searchUsers()">
-        <option value="">كل الصلاحيات</option><option value="user">مستخدم</option><option value="admin">مدير</option>
-      </select>
-      <button class="secondary-btn" type="button" (click)="searchUsers()">بحث</button>
-      <button class="ghost-btn" type="button" (click)="resetFilters()">إعادة ضبط</button>
+    <!-- شريط البحث والفلترة -->
+    <section class="panel-glass-card toolbar-panel">
+      <div class="search-input-wrapper">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input class="glass-input" [(ngModel)]="search" (keyup.enter)="searchUsers()" placeholder="ابحث بالاسم أو البريد الإلكتروني..." />
+      </div>
+      
+      <div class="filter-select-wrapper">
+        <select class="glass-select" [(ngModel)]="roleFilter" (change)="searchUsers()">
+          <option value="">جميع الصلاحيات</option>
+          <option value="user">مستخدم عادي</option>
+          <option value="admin">مدير النظام</option>
+        </select>
+      </div>
+
+      <div class="toolbar-actions">
+        <button class="btn-secondary-action" type="button" (click)="searchUsers()">
+          <i class="fa-solid fa-filter"></i>
+          <span>تصفية النتائج</span>
+        </button>
+        <button class="btn-ghost-action" type="button" (click)="resetFilters()" title="إعادة ضبط الفلاتر">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة ضبط</span>
+        </button>
+      </div>
     </section>
 
+    <!-- حالات التحميل، الفراغ، وجدول المستخدمين -->
     @if (loading) {
-      <div class="state"><div class="spinner"></div><p>جارِ تحميل المستخدمين...</p></div>
+      <div class="admin-state-box loading-box">
+        <div class="glass-spinner"></div>
+        <p>جاري استحضار سجلات المستخدمين...</p>
+      </div>
     } @else if (!users.length) {
-      <div class="state"><div class="empty-icon">👥</div><h3>لا يوجد مستخدمون</h3><p>جرّب تغيير البحث أو أضف مستخدماً جديداً.</p></div>
+      <div class="admin-state-box empty-box">
+        <i class="fa-solid fa-users-slash"></i>
+        <h3>لا توجد نتائج مطابقة</h3>
+        <p>جرّب تعديل كلمات البحث أو قم بإضافة مستخدم جديد للنظام.</p>
+      </div>
     } @else {
-      <section class="table-card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>المستخدم</th><th>البريد الإلكتروني</th><th>الصلاحية</th><th>المفضلة</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead>
+      <div class="panel-glass-card table-panel">
+        <div class="table-responsive-wrapper">
+          <table class="glass-table">
+            <thead>
+              <tr>
+                <th>المستخدم</th>
+                <th>البريد الإلكتروني</th>
+                <th>الصلاحية</th>
+                <th>المفضلة</th>
+                <th>تاريخ الانضمام</th>
+                <th class="text-center">الإجراءات</th>
+              </tr>
+            </thead>
             <tbody>
               @for (user of users; track user.id) {
                 <tr>
-                  <td><div class="user-cell">@if (avatar(user)) { <img [src]="avatar(user)" [alt]="user.name"> } @else { <span class="avatar-fallback">{{ initials(user.name) }}</span> }<strong>{{ user.name }}</strong></div></td>
-                  <td class="email">{{ user.email }}</td>
-                  <td><span class="role" [class.admin]="user.role === 'admin'">{{ user.role === 'admin' ? 'مدير' : 'مستخدم' }}</span></td>
-                  <td>{{ user.favoritesCount }}</td>
-                  <td>{{ user.createdAt ? (user.createdAt | date:'yyyy/MM/dd') : '—' }}</td>
-                  <td><div class="actions"><button class="edit" type="button" (click)="openEdit(user)">تعديل</button><button class="delete" type="button" (click)="deleteUser(user)">حذف</button></div></td>
+                  <td>
+                    <div class="user-identity-cell">
+                      <div class="user-avatar-box">
+                        @if (avatar(user)) {
+                          <img [src]="avatar(user)" [alt]="user.name">
+                        } @else {
+                          <span>{{ initials(user.name) }}</span>
+                        }
+                      </div>
+                      <strong class="user-fullName">{{ user.name }}</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="user-email-text">{{ user.email }}</span>
+                  </td>
+                  <td>
+                    <span class="role-badge" [class.admin-role]="user.role === 'admin'">
+                      <i class="fa-solid" [class.fa-user-shield]="user.role === 'admin'" [class.fa-user]="user.role !== 'admin'"></i>
+                      {{ user.role === 'admin' ? 'مدير النظام' : 'مستخدم عادي' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="favorites-count-badge">
+                      <i class="fa-solid fa-bookmark"></i> {{ user.favoritesCount || 0 }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="date-text">
+                      <i class="fa-regular fa-calendar"></i>
+                      {{ user.createdAt ? (user.createdAt | date:'yyyy/MM/dd') : '—' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="table-actions-box">
+                      <button class="action-btn edit-btn" type="button" (click)="openEdit(user)" title="تعديل حساب المستخدم">
+                        <i class="fa-solid fa-pen-nib"></i>
+                        <span>تعديل</span>
+                      </button>
+                      <button class="action-btn delete-btn" type="button" (click)="deleteUser(user)" title="حذف المستخدم نهائياً">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>حذف</span>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
-        <footer class="pagination">
-          <span>إجمالي النتائج: <b>{{ total }}</b></span>
-          <div><button type="button" [disabled]="page <= 1" (click)="load(page - 1)">السابق</button><strong>صفحة {{ page }} من {{ totalPages }}</strong><button type="button" [disabled]="page >= totalPages" (click)="load(page + 1)">التالي</button></div>
+
+        <!-- ترقيم الصفحات (Pagination) -->
+        <footer class="table-pagination-footer">
+          <span class="pagination-info">إجمالي النتائج المسجلة: <b>{{ total }}</b> مستخدم</span>
+          <div class="pagination-controls">
+            <button class="pagination-btn" type="button" [disabled]="page <= 1" (click)="load(page - 1)">
+              <i class="fa-solid fa-chevron-right"></i>
+              <span>السابق</span>
+            </button>
+            <span class="page-indicator">صفحة <strong>{{ page }}</strong> من <strong>{{ totalPages }}</strong></span>
+            <button class="pagination-btn" type="button" [disabled]="page >= totalPages" (click)="load(page + 1)">
+              <span>التالي</span>
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+          </div>
         </footer>
-      </section>
+      </div>
     }
+
   </div>
 
+  <!-- النافذة المنبثقة (Modal) لإضافة أو تعديل مستخدم -->
   @if (modalOpen) {
-    <div class="modal-backdrop" (click)="closeModal()">
-      <section class="modal" (click)="$event.stopPropagation()">
-        <header><div><span class="eyebrow">{{ editing ? 'تعديل الحساب' : 'حساب جديد' }}</span><h2>{{ editing ? 'تعديل المستخدم' : 'إضافة مستخدم' }}</h2></div><button type="button" class="close" (click)="closeModal()">×</button></header>
-        @if (error) { <div class="alert error">{{ error }}</div> }
-        <div class="form-grid">
-          <label>الاسم<input [(ngModel)]="form.name" placeholder="اسم المستخدم"></label>
-          <label>البريد الإلكتروني<input [(ngModel)]="form.email" type="email" placeholder="user@example.com"></label>
-          <label>الصلاحية<select [(ngModel)]="form.role"><option value="user">مستخدم</option><option value="admin">مدير</option></select></label>
-          <label>كلمة المرور{{ editing ? ' (اختياري)' : '' }}<input [(ngModel)]="form.password" type="password" [placeholder]="editing ? 'اتركها فارغة للإبقاء عليها' : '6 أحرف على الأقل'"></label>
+    <div class="modal-backdrop-glass" (click)="closeModal()">
+      <section class="modal-glass-container" (click)="$event.stopPropagation()">
+        
+        <header class="modal-header-flex">
+          <div>
+            <span class="panel-tag">{{ editing ? 'ACCOUNT MODIFICATION' : 'NEW REGISTRATION' }}</span>
+            <h2 class="panel-title">{{ editing ? 'تعديل بيانات الحساب' : 'إنشاء حساب مستخدم جديد' }}</h2>
+          </div>
+          <button type="button" class="close-modal-btn" (click)="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </header>
+
+        <div class="glass-form-content">
+          <div class="form-group">
+            <label class="glass-label">الاسم الكامل <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-user-pen"></i>
+              <input class="glass-input" [(ngModel)]="form.name" placeholder="أدخل اسم المستخدم الثلاثي...">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="glass-label">البريد الإلكتروني <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-envelope"></i>
+              <input class="glass-input dir-ltr" [(ngModel)]="form.email" type="email" placeholder="name@example.com">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="glass-label">صلاحية النظام <span class="required">*</span></label>
+              <select class="glass-select" [(ngModel)]="form.role">
+                <option value="user">مستخدم عادي</option>
+                <option value="admin">مدير النظام</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="glass-label">
+                كلمة المرور 
+                @if (editing) {
+                  <span class="optional-hint">(اختياري)</span>
+                } @else {
+                  <span class="required">*</span>
+                }
+              </label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-lock"></i>
+                <input class="glass-input dir-ltr" [(ngModel)]="form.password" type="password" [placeholder]="editing ? 'اتركها فارغة للإبقاء الحالية' : '6 أحرف على الأقل...'">
+              </div>
+            </div>
+          </div>
         </div>
-        <footer><button class="ghost-btn" type="button" (click)="closeModal()">إلغاء</button><button class="primary-btn" type="button" [disabled]="saving" (click)="save()">{{ saving ? 'جارِ الحفظ...' : (editing ? 'حفظ التعديلات' : 'إنشاء المستخدم') }}</button></footer>
+
+        <footer class="modal-actions-footer">
+          <button class="btn-secondary-action" type="button" (click)="closeModal()">إلغاء الأمر</button>
+          <button class="add-user-btn border-0 cursor-pointer" type="button" [disabled]="saving" (click)="save()">
+            @if (saving) {
+              <i class="fa-solid fa-circle-notch spin"></i>
+              <span>جاري الحفظ والمعالجة...</span>
+            } @else {
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>{{ editing ? 'تحديث وتطبيق التغييرات' : 'حفظ وإنشاء الحساب' }}</span>
+            }
+          </button>
+        </footer>
+
       </section>
     </div>
   }
