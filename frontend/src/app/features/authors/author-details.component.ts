@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { BookApiService } from '../../core/services/book-api.service';
 
 @Component({
   selector: 'app-author-details',
@@ -18,8 +19,8 @@ export class AuthorDetailsComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly notify = inject(NotificationService);
+  private readonly media = inject(BookApiService);
   readonly themeService = inject(ThemeService);
-  private readonly serverOrigin = 'http://localhost:5000';
 
   authorId = '';
   author: any = null;
@@ -37,7 +38,7 @@ export class AuthorDetailsComponent implements OnInit {
   }
 
   private loadAuthorDetails(): void {
-    this.http.get<any>(`${this.serverOrigin}/api/authors/${this.authorId}`).subscribe({
+    this.http.get<any>(`${this.media.getFileUrl('/api')}/authors/${this.authorId}`).subscribe({
       next: data => {
         this.author = data;
         this.loading = false;
@@ -52,9 +53,11 @@ export class AuthorDetailsComponent implements OnInit {
     });
   }
 
-  imageUrl(v: string): string {
-    if (!v) return '';
-    if (/^https?:\/\//i.test(v)) return v;
-    return `${this.serverOrigin}${v.startsWith('/') ? v : `/${v}`}`;
+  imageUrl(v?: string | null): string {
+    return this.media.getFileUrl(v);
+  }
+
+  bookCoverUrl(book: any): string {
+    return this.media.getBookCoverUrl(book) || 'assets/images/default-cover.svg';
   }
 }
