@@ -80,17 +80,20 @@ function normalizeRecord(record) {
   };
 }
 
+function rawFields(fields, tag) {
+  return (fields.get(tag) || "").split("\x1e").filter(Boolean);
+}
+
+function parseSubfields(field) {
+  const parts = String(field || "").split("\x1f");
+  return parts.slice(1).map((part) => ({ code: part[0], value: clean(part.slice(1)) })).filter((item) => item.code && item.value);
+}
+
 function fieldValues(fields, tag, codes) {
-  const raw = fields.get(tag) || "";
   const out = [];
-  for (const field of raw.split("\x1e")) {
-    const parts = field.split("\x1f");
-    for (let i = 1; i < parts.length; i++) {
-      const code = parts[i][0];
-      if (codes.includes(code)) {
-        const value = clean(parts[i].slice(1));
-        if (value) out.push(value);
-      }
+  for (const field of rawFields(fields, tag)) {
+    for (const item of parseSubfields(field)) {
+      if (codes.includes(item.code)) out.push(item.value);
     }
   }
   return out;
@@ -104,22 +107,35 @@ function firstField(fields, tags, codes) {
   return "";
 }
 
-function linkedArabicField(fields, targetTag, codes) {
-  const raw = fields.get("880") || "";
-  const candidates = [];
-  for (const field of raw.split("\x1e")) {
-    const parts = field.split("\x1f");
-    let link = "";
-    const values = [];
-    for (let i = 1; i < parts.length; i++) {
-      const code = parts[i][0];
-      const value = clean(parts[i].slice(1));
-      if (code === "6") link = value;
-      if (codes.includes(code) && value) values.push(value);
-    }
-    if (link.startsWith(`${targetTag}-`) && values.length) candidates.push(values.join(" "));
+function linkedArabicValues(fields, targetTags, codes) {
+  const wanted = new Set(targetTags);
+  const out = [];
+  for (const field of rawFields(fields, "880")) {
+    const subfields = parseSubfields(field);
+    const link = subfields.find((item) => item.code === "6")?.value || "";
+    const linkedTag = link.slice(0, 3);
+    if (!wanted.has(linkedTag)) continue;
+    const values = subfields.filter((item) => codes.includes(item.code)).map((item) => item.value);
+    const value = clean(values.join(" "));
+    if (value && hasArabic(value)) out.push({ value, linkedTag, link });
   }
-  return candidates.find(hasArabic) || "";
+  return out;
+}
+
+function linkedArabicField(fields, targetTag, codes) {
+  return linkedArabicValues(fields, [targetTag], codes)[0]?.value || "";
+}
+
+function arabicDirectValues(fields, tags, codes) {
+  return tags.flatMap((tag) => fieldValues(fields, tag, codes)).filter(hasArabic);
+}
+
+function bestArabicValue(fields, tags, codes, linkedCodes = codes) {
+  const linked = linkedArabicValues(fields, tags, linkedCodes).map((item) => item.value);
+  if (linked.length) return linked[0];
+  const direct = arabicDirectValues(fields, tags, codes);
+  if (direct.length) return direct[0];
+  return firstField(fields, tags, codes);
 }
 
 function isArabicMarc(fields) {
@@ -129,9 +145,7 @@ function isArabicMarc(fields) {
   if (language008 === "ara" || language041.some((v) => /(^|[^a-z])ara([^a-z]|$)/i.test(v))) return true;
   if (language008 && language008 !== "|||" && language008 !== "###" && /^[a-z]{3}$/.test(language008)) return false;
   if (language041.length && language041.some((v) => /^[a-z]{3}$/.test(v)) && !language041.includes("ara")) return false;
-  // Some older ACO records have incomplete language coding. Require Arabic text
-  // in the Arabic linked title when the MARC language field is missing.
-  return hasArabic(linkedArabicField(fields, "245", ["a", "b", "c"])) || hasArabic(firstField(fields, ["245"], ["a", "b", "c"]));
+  return hasArabic(bestArabicValue(fields, ["245"], ["a", "b", "c"])) || hasArabic(bestArabicValue(fields, ["246"], ["a", "b", "c"]));
 }
 
 function parseIso2709Record(recordBuffer) {
@@ -156,27 +170,36 @@ function parseIso2709Record(recordBuffer) {
 
   const control001 = clean((fields.get("001") || "").split("\x1e")[0]);
   const sourceUrl = firstField(fields, ["856"], ["u"]);
-  const arabicTitle = linkedArabicField(fields, "245", ["a", "b", "c"]);
-  const arabicAuthor = linkedArabicField(fields, "100", ["a", "b", "c", "d", "q", "e"]);
-  const primaryAuthor = ["100", "110", "111", "700", "710", "711"]
-    .flatMap((tag) => fieldValues(fields, tag, ["a", "b", "c", "d", "q", "e"]))
-    .find(Boolean) || "";
-  const title = arabicTitle || firstField(fields, ["245", "246"], ["a", "b", "c"]);
-  const author = arabicAuthor || primaryAuthor;
-  const subjects = ["650", "651", "655"].flatMap((tag) => fieldValues(fields, tag, ["a", "x", "y", "z"]));
+  const title = bestArabicValue(fields, ["245", "246"], ["a", "b", "c"]);
+
+  const authorTags = ["100", "110", "111", "700", "710", "711"];
+  const authorLinked = linkedArabicValues(fields, authorTags, ["a", "b", "c", "d", "q", "e"]).map((item) => item.value);
+  const authorDirect = arabicDirectValues(fields, authorTags, ["a", "b", "c", "d", "q", "e"]);
+  const primaryAuthor = [...authorLinked, ...authorDirect, ...authorTags.flatMap((tag) => fieldValues(fields, tag, ["a", "b", "c", "d", "q", "e"]))].find(Boolean) || "";
+
+  const subjectTags = ["650", "651", "655"];
+  const linkedSubjects = linkedArabicValues(fields, subjectTags, ["a", "x", "y", "z"]).map((item) => item.value);
+  const directArabicSubjects = arabicDirectValues(fields, subjectTags, ["a", "x", "y", "z"]);
+  const subjects = [...new Set([...linkedSubjects, ...directArabicSubjects])];
+  const category = subjects[0] || firstField(fields, subjectTags, ["a", "x"]);
+
+  const description = bestArabicValue(fields, ["520", "500"], ["a"]);
+  const publisher = bestArabicValue(fields, ["264", "260"], ["b"]);
+  const publishedYear = extractYear(bestArabicValue(fields, ["264", "260"], ["c"]));
+  const isbn = firstField(fields, ["020"], ["a"]);
 
   return normalizeRecord({
     control001,
     sourceId: extractAcoId(sourceUrl) || control001,
     title,
-    arabicTitle,
-    author,
-    arabicAuthor,
-    category: firstField(fields, ["650", "651", "655"], ["a", "x"]),
-    description: firstField(fields, ["520", "500"], ["a"]),
-    publisher: firstField(fields, ["264", "260"], ["b"]),
-    publishedYear: extractYear(firstField(fields, ["264", "260"], ["c"])),
-    isbn: firstField(fields, ["020"], ["a"]),
+    arabicTitle: title,
+    author: primaryAuthor,
+    arabicAuthor: primaryAuthor,
+    category,
+    description,
+    publisher,
+    publishedYear,
+    isbn,
     subjects,
     sourceUrl
   });
@@ -279,12 +302,7 @@ async function resolveAcoAssets(record) {
     cover = links.find((url) => /iiif|image|thumbnail|cover/i.test(url) && !/\.pdf(?:[?#]|$)/i.test(url)) || "";
   }
 
-  return {
-    pageUrl,
-    lowPdf: lowPdf || anyPdf,
-    highPdf: highPdf || anyPdf,
-    cover
-  };
+  return { pageUrl, lowPdf: lowPdf || anyPdf, highPdf: highPdf || anyPdf, cover };
 }
 
 async function getAcoRecords() {
@@ -332,13 +350,7 @@ async function importOne(record, index, total) {
       const name = `${record.sourceId}_${pdfMode}.pdf`;
       const buffer = await downloadToFile(selectedPdfUrl, path.join(PDF_DIR, name), isPdf);
       if (!isPdf(buffer)) throw new Error("الملف ليس PDF صالحاً");
-      fileId = await uploadBuffer(
-        buffer,
-        name,
-        "application/pdf",
-        { type: "book-file", source: "ACO", sourceId: record.sourceId, rights: "Public Domain", sourceUrl: selectedPdfUrl },
-        "libraryBooks"
-      );
+      fileId = await uploadBuffer(buffer, name, "application/pdf", { type: "book-file", source: "ACO", sourceId: record.sourceId, rights: "Public Domain", sourceUrl: selectedPdfUrl }, "libraryBooks");
     } catch (error) {
       console.warn(`  PDF skipped: ${record.title} -> ${error.message}`);
     }
@@ -349,13 +361,7 @@ async function importOne(record, index, total) {
       const name = `${record.sourceId}.jpg`;
       const buffer = await downloadToFile(assets.cover, path.join(COVER_DIR, name), isImage);
       if (!isImage(buffer)) throw new Error("الصورة غير صالحة");
-      coverImageId = await uploadBuffer(
-        buffer,
-        name,
-        "image/jpeg",
-        { type: "book-cover", source: "ACO", sourceId: record.sourceId, rights: "Public Domain", sourceUrl: assets.cover },
-        "libraryCovers"
-      );
+      coverImageId = await uploadBuffer(buffer, name, "image/jpeg", { type: "book-cover", source: "ACO", sourceId: record.sourceId, rights: "Public Domain", sourceUrl: assets.cover }, "libraryCovers");
     } catch (error) {
       console.warn(`  Cover skipped: ${record.title} -> ${error.message}`);
     }
@@ -395,7 +401,7 @@ async function importOne(record, index, total) {
   if (existing) await Book.updateOne({ _id: existing._id }, { $set: payload });
   else await Book.create(payload);
 
-  console.log(`[${index}/${total}] ${record.title} | المؤلف: ${record.author} | PDF: ${fileId ? "محلي" : "غير محفوظ"} | الغلاف: ${coverImageId ? "محلي" : "غير متوفر"}`);
+  console.log(`[${index}/${total}] ${record.title} | المؤلف: ${record.author} | التصنيف: ${record.category} | PDF: ${fileId ? "محلي" : "غير محفوظ"} | الغلاف: ${coverImageId ? "محلي" : "غير متوفر"}`);
   return { status: "imported", fileId: Boolean(fileId), coverImageId: Boolean(coverImageId) };
 }
 
