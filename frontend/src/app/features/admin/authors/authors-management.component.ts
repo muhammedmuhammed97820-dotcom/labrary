@@ -88,6 +88,28 @@ export class AuthorsManagementComponent implements OnInit {
   }
 
   save(): void {
+    const name = String(this.author?.name ?? '').trim();
+
+    if (!name) {
+      this.notify.show('اسم المؤلف مطلوب ولا يمكن حفظ البيانات بدونه.', 'error');
+      return;
+    }
+
+    this.author = {
+      ...this.author,
+      name,
+      bio: String(this.author?.bio ?? '').trim(),
+      birthPlace: String(this.author?.birthPlace ?? '').trim(),
+      nationality: String(this.author?.nationality ?? '').trim(),
+      occupation: String(this.author?.occupation ?? '').trim(),
+      website: String(this.author?.website ?? '').trim()
+    };
+
+    if (this.author.birthDate && this.author.deathDate && this.author.deathDate < this.author.birthDate) {
+      this.notify.show('تاريخ الوفاة لا يمكن أن يكون قبل تاريخ الميلاد.', 'error');
+      return;
+    }
+
     this.saving = true;
     const f = new FormData();
     for (const k of ['name', 'bio', 'birthDate', 'deathDate', 'birthPlace', 'nationality', 'occupation', 'website']) {
