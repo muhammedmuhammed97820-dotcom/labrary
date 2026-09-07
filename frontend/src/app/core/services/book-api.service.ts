@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 export interface Book {
   _id?: string;
@@ -25,6 +25,20 @@ export interface Book {
   updatedAt?: string;
 }
 
+export interface BookPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface BookListResponse {
+  books: Book[];
+  pagination: BookPagination;
+}
+
 @Injectable({ providedIn: 'root' })
 export class BookApiService {
   private readonly http = inject(HttpClient);
@@ -34,11 +48,21 @@ export class BookApiService {
   private readonly downloadedBooksStorageKey = 'electronic_library_downloaded_books';
 
   getAll(page = 1, limit = 24, search = ''): Observable<Book[]> {
-    let params = new HttpParams();
-    if (page > 1) params = params.set('page', page);
-    if (limit > 0) params = params.set('limit', limit);
+    let params = new HttpParams()
+      .set('page', Math.max(page, 1))
+      .set('limit', Math.max(limit, 1));
     if (search.trim()) params = params.set('search', search.trim());
-    return this.http.get<Book[]>(this.api, { params });
+    return this.http.get<BookListResponse | Book[]>(this.api, { params }).pipe(
+      map(response => Array.isArray(response) ? response : response.books)
+    );
+  }
+
+  getAllPaginated(page = 1, limit = 24, search = ''): Observable<BookListResponse> {
+    let params = new HttpParams()
+      .set('page', Math.max(page, 1))
+      .set('limit', Math.min(Math.max(limit, 1), 100));
+    if (search.trim()) params = params.set('search', search.trim());
+    return this.http.get<BookListResponse>(this.api, { params });
   }
 
   getAdminAll(): Observable<Book[]> { return this.http.get<Book[]>(`${this.api}/admin/all`); }
@@ -86,9 +110,7 @@ export class BookApiService {
         stored.push(id);
         localStorage.setItem(storageKey, JSON.stringify(stored));
       }
-    } catch {
-      // Backend remains the source of truth if localStorage is unavailable.
-    }
+    } catch {}
   }
 
   private getViewerId(): string {
