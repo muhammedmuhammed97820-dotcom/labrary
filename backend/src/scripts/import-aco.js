@@ -11,8 +11,10 @@ const Book = require("../models/Book");
 const { findOrCreateAuthor, findOrCreateCategory } = require("../services/book.service");
 const { uploadBuffer } = require("../services/gridfs.service");
 
-const ACO_SITE = "https://aco.dlib.nyu.edu";
+const ACO_SITE = "https://dlib.nyu.edu/aco";
+const ACO_VIEWER = "https://sites.dlib.nyu.edu/viewer";
 const ACO_RAW = "https://raw.githubusercontent.com/NYULibraries/aco-karms/master/work";
+const ACO_MEDIA = "https://mc.dlib.nyu.edu/files/books";
 const WORK_DIR = path.resolve(process.env.ACO_IMPORT_DIR || path.join(os.tmpdir(), "electronic-library-aco"));
 const PDF_DIR = path.join(WORK_DIR, "pdf-cache");
 const COVER_DIR = path.join(WORK_DIR, "cover-cache");
@@ -122,10 +124,6 @@ function linkedArabicValues(fields, targetTags, codes) {
   return out;
 }
 
-function linkedArabicField(fields, targetTag, codes) {
-  return linkedArabicValues(fields, [targetTag], codes)[0]?.value || "";
-}
-
 function arabicDirectValues(fields, tags, codes) {
   return tags.flatMap((tag) => fieldValues(fields, tag, codes)).filter(hasArabic);
 }
@@ -224,7 +222,7 @@ async function fetchResponse(url) {
   const response = await fetch(url, {
     headers: {
       "User-Agent": "ElectronicLibrary/1.0 ACO importer",
-      Accept: "text/html,application/pdf,image/*,*/*;q=0.8"
+      Accept: "text/html,application/json,application/pdf,image/*,*/*;q=0.8"
     },
     redirect: "follow"
   });
@@ -274,35 +272,54 @@ function extractHtmlLinks(html, pageUrl) {
   return [...new Set(links)];
 }
 
+function findManifestImage(manifest) {
+  const bodyIds = [];
+  const walk = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (typeof node.id === "string" && /\/full\//.test(node.id) && /\.(?:jpg|jpeg|png|webp)(?:\?|$)/i.test(node.id)) bodyIds.push(node.id);
+    if (Array.isArray(node)) node.forEach(walk);
+    else Object.values(node).forEach(walk);
+  };
+  walk(manifest);
+  return bodyIds[0] || "";
+}
+
 async function resolveAcoAssets(record) {
-  const pageUrl = `${ACO_SITE}/book/${encodeURIComponent(record.sourceId)}/1`;
+  const sourceId = String(record.sourceId || "").trim();
+  const pageUrl = `${ACO_VIEWER}/books/${encodeURIComponent(sourceId)}/1`;
+  const lowPdf = `${ACO_MEDIA}/${encodeURIComponent(sourceId)}/${encodeURIComponent(sourceId)}_lo.pdf`;
+  const highPdf = `${ACO_MEDIA}/${encodeURIComponent(sourceId)}/${encodeURIComponent(sourceId)}_hi.pdf`;
+  const iiifCover = `${ACO_VIEWER}/api/image/books/${encodeURIComponent(sourceId)}/1/full/1200,/0/default.jpg`;
+  const manifestUrl = `${ACO_VIEWER}/api/presentation/books/${encodeURIComponent(sourceId)}/manifest.json`;
+
   let html = "";
   try {
     const response = await fetchResponse(pageUrl);
     html = await response.text();
-  } catch (error) {
-    if (record.sourceUrl && /^https?:\/\//i.test(record.sourceUrl)) {
-      try {
-        const response = await fetchResponse(record.sourceUrl);
-        html = await response.text();
-      } catch (_) {}
-    }
-  }
+  } catch (_) {}
 
   const links = html ? extractHtmlLinks(html, pageUrl) : [];
   const pdfs = links.filter((url) => /\.pdf(?:[?#]|$)/i.test(url));
-  const lowPdf = pdfs.find((url) => /(^|[-_./])(lo|low)([-_./]|$)|low-resolution/i.test(url));
-  const highPdf = pdfs.find((url) => /(^|[-_./])(hi|high)([-_./]|$)|high-resolution/i.test(url));
-  const anyPdf = pdfs[0] || "";
+  const discoveredLow = pdfs.find((url) => /(^|[-_./])(lo|low)([-_./]|$)|low-resolution/i.test(url));
+  const discoveredHigh = pdfs.find((url) => /(^|[-_./])(hi|high)([-_./]|$)|high-resolution/i.test(url));
 
-  let cover = "";
-  const metaImage = html.match(/<meta\b[^>]*(?:property|name)=["'](?:og:image|twitter:image)["'][^>]*content=["']([^"']+)["'][^>]*>/i);
-  if (metaImage) cover = absoluteUrl(pageUrl, metaImage[1]);
+  let cover = iiifCover;
+  try {
+    const response = await fetchResponse(manifestUrl);
+    const manifest = await response.json();
+    cover = findManifestImage(manifest) || cover;
+  } catch (_) {}
   if (!cover) {
-    cover = links.find((url) => /iiif|image|thumbnail|cover/i.test(url) && !/\.pdf(?:[?#]|$)/i.test(url)) || "";
+    const metaImage = html.match(/<meta\b[^>]*(?:property|name)=["'](?:og:image|twitter:image)["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+    if (metaImage) cover = absoluteUrl(pageUrl, metaImage[1]);
   }
 
-  return { pageUrl, lowPdf: lowPdf || anyPdf, highPdf: highPdf || anyPdf, cover };
+  return {
+    pageUrl,
+    lowPdf: discoveredLow || lowPdf,
+    highPdf: discoveredHigh || highPdf,
+    cover
+  };
 }
 
 async function getAcoRecords() {
