@@ -3,6 +3,7 @@ const router = express.Router();
 const upload = require("../middleware/upload.middleware");
 const controller = require("../controllers/book.controller");
 const coverController = require("../controllers/cover.controller");
+const submissionController = require("../controllers/submission.controller");
 const { authenticate, requireAdmin } = require("../middleware/auth.middleware");
 
 const bookUpload = upload.fields([
@@ -15,6 +16,7 @@ router.get("/admin/all", authenticate, requireAdmin, controller.getAdminBooks);
 router.get("/my-submissions", authenticate, controller.getMySubmissions);
 router.get("/admin/pending", authenticate, requireAdmin, controller.getPendingBooks);
 router.patch("/admin/:id/review", authenticate, requireAdmin, controller.reviewBook);
+router.delete("/:id/my-rejected-submission", authenticate, submissionController.deleteMyRejectedSubmission);
 router.get("/:id/read", controller.streamBookFile);
 router.get("/:id/download", controller.downloadBookFile || ((req, res) => controller.streamBookFile(req, res, "download")));
 router.get("/:id/cover", coverController.streamBookCover);
