@@ -50,6 +50,8 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   pageInput = '1';
   private hideTimer?: ReturnType<typeof setTimeout>;
   private destroyed = false;
+  private renderQueue: Promise<void> = Promise.resolve();
+  private renderGeneration = 0;
 
   readonly zoomSteps = [0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 
@@ -85,6 +87,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyed = true;
+    this.renderGeneration++;
     if (this.hideTimer) clearTimeout(this.hideTimer);
     try { this.pdf?.destroy?.(); } catch { /* noop */ }
   }
@@ -103,6 +106,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       cMapUrl: 'assets/pdfjs/cmaps/',
       cMapPacked: true,
       standardFontDataUrl: 'assets/pdfjs/standard_fonts/',
+      wasmUrl: 'assets/pdfjs/wasm/',
       useSystemFonts: true,
       disableFontFace: false,
     });
@@ -120,10 +124,20 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   }
 
   async renderPage(): Promise<void> {
-    if (!this.pdf || !this.pageCanvas || this.rendering) return;
+    const generation = ++this.renderGeneration;
+    this.renderQueue = this.renderQueue.then(() => this.renderPageInternal(generation)).catch(error => {
+      if (!this.destroyed) console.warn('PDF page render warning:', error);
+    });
+    return this.renderQueue;
+  }
+
+  private async renderPageInternal(generation: number): Promise<void> {
+    if (!this.pdf || !this.pageCanvas || this.destroyed || generation !== this.renderGeneration) return;
     this.rendering = true;
     try {
       const pdfPage = await this.pdf.getPage(this.page);
+      if (this.destroyed || generation !== this.renderGeneration) return;
+
       const canvas = this.pageCanvas.nativeElement;
       const context = canvas.getContext('2d', { alpha: false });
       if (!context) return;
@@ -133,6 +147,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
         await new Promise(resolve => setTimeout(resolve, 60));
         clientWidth = this.readerViewport?.nativeElement.clientWidth || 800;
       }
+      if (this.destroyed || generation !== this.renderGeneration) return;
 
       let scale = this.zoom;
       const viewportAtOne = pdfPage.getViewport({ scale: 1, rotation: this.rotation });
@@ -156,7 +171,10 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
       context.fillStyle = '#ffffff';
       context.fillRect(0, 0, viewport.width, viewport.height);
+
+      if (this.destroyed || generation !== this.renderGeneration) return;
       await pdfPage.render({ canvasContext: context, viewport }).promise;
+      if (this.destroyed || generation !== this.renderGeneration) return;
       this.saveProgress();
     } finally {
       this.rendering = false;
