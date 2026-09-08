@@ -24,7 +24,7 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'books', loadComponent: () => import('./features/books/books.component').then(m => m.BooksComponent) },
   { path: 'books/:id/read', component: BookReaderComponent },
-  { path: 'books/:id/community', loadComponent: () => import('./components/community/community.component').then(m => m.CommunityComponent), canActivate: [authGuard] },
+  { path: 'books/:id/community', loadComponent: () => import('./components/community/community.component').then(m => m.CommunityComponent) },
   { path: 'books/:id', component: BookDetailsComponent },
   { path: 'categories', component: CategoriesComponent },
   { path: 'authors', component: AuthorsComponent },
