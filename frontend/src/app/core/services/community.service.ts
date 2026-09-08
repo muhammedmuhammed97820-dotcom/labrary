@@ -16,7 +16,9 @@ export class CommunityService {
   private readonly http = inject(HttpClient);
   private readonly api = `${environment.apiUrl}/community`;
 
-  quotes(book: string): Observable<Quote[]> { return this.http.get<Quote[]>(`${this.api}/quotes`, { params: { book } }); }
+  quotes(book?: string): Observable<Quote[]> {
+    return this.http.get<Quote[]>(`${this.api}/quotes`, book ? { params: { book } } : {});
+  }
   comments(book: string): Observable<CommunityComment[]> { return this.http.get<CommunityComment[]>(`${this.api}/comments`, { params: { book } }); }
   addQuote(data: { book: string; text: string; page?: number | null }): Observable<Quote> { return this.http.post<Quote>(`${this.api}/quotes`, data); }
   addComment(data: { book: string; quote?: string | null; parent?: string | null; text: string }): Observable<CommunityComment> { return this.http.post<CommunityComment>(`${this.api}/comments`, data); }
