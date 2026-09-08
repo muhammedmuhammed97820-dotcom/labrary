@@ -20,12 +20,13 @@ import { BookSubmitComponent } from './features/books/book-submit/book-submit.co
 import { MySubmissionsComponent } from './features/books/my-submissions/my-submissions.component';
 import { BookSubmissionsComponent } from './features/admin/submissions/book-submissions.component';
 import { UserManagementComponent } from './features/admin/users/user-management.component';
-
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'books', loadComponent: () => import('./features/books/books.component').then(m => m.BooksComponent) },
   { path: 'books/:id/read', component: BookReaderComponent },
   { path: 'books/:id', component: BookDetailsComponent },
+  { path: 'books/:id/community', loadComponent: () => import('./components/community/community.component').then(m => m.CommunityComponent), canActivate: [authGuard] },
+  { path: 'quotes', loadComponent: () => import('./components/quotes/quotes.component').then(m => m.QuotesComponent) },
   { path: 'categories', component: CategoriesComponent },
   { path: 'authors', component: AuthorsComponent },
   { path: 'authors/:id', component: AuthorDetailsComponent },
@@ -44,5 +45,6 @@ export const routes: Routes = [
   { path: 'admin/authors', component: AuthorsManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/categories', component: CategoriesManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/book-submissions', component: BookSubmissionsComponent, canActivate: [adminGuard] },
+  { path: 'admin/reports', loadComponent: () => import('./components/admin-reports/admin-reports.component').then(m => m.AdminReportsComponent), canActivate: [adminGuard] },
   { path: '**', redirectTo: '' }
 ];
