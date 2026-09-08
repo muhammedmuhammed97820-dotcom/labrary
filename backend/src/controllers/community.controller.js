@@ -8,30 +8,44 @@ const populateUser = { path: 'user', select: 'name email avatar' };
 const validId = id => mongoose.Types.ObjectId.isValid(id);
 const modelFor = type => type === 'quote' ? Quote : Comment;
 
+function withLikeState(item, userId) {
+  const likedBy = Array.isArray(item.likedBy) ? item.likedBy : [];
+  const liked = !!userId && likedBy.some(id => String(id) === String(userId));
+  const result = { ...item, likesCount: Number(item.likesCount || likedBy.length || 0), liked };
+  delete result.likedBy;
+  return result;
+}
+
 async function listQuotes(req, res, next) {
   try {
     const filter = { status: 'visible' };
     if (req.query.book && validId(req.query.book)) filter.book = req.query.book;
-    res.json(await Quote.find(filter).populate(populateUser).populate('book', 'title').sort({ createdAt: -1 }).limit(Math.min(Number(req.query.limit) || 50, 100)).lean());
+    const items = await Quote.find(filter).select('+likedBy').populate(populateUser).populate('book', 'title').sort({ createdAt: -1 }).limit(Math.min(Number(req.query.limit) || 50, 100)).lean();
+    res.json(items.map(item => withLikeState(item, req.user?._id)));
   } catch (e) { next(e); }
 }
+
 async function createQuote(req, res, next) {
   try {
     const { book, text, page } = req.body || {};
     if (!validId(book) || !String(text || '').trim()) return res.status(400).json({ message: 'الكتاب ونص الاقتباس مطلوبان.' });
     if (!(await Book.exists({ _id: book, status: 'approved' }))) return res.status(404).json({ message: 'الكتاب غير موجود.' });
     const q = await Quote.create({ book, user: req.user._id, text: String(text).trim(), page: page ? Number(page) : null });
-    res.status(201).json(await Quote.findById(q._id).populate(populateUser).populate('book', 'title').lean());
+    const item = await Quote.findById(q._id).populate(populateUser).populate('book', 'title').lean();
+    res.status(201).json({ ...item, likesCount: 0, liked: false });
   } catch (e) { next(e); }
 }
+
 async function listComments(req, res, next) {
   try {
     if (!validId(req.query.book)) return res.status(400).json({ message: 'معرّف الكتاب غير صحيح.' });
     const filter = { status: 'visible', book: req.query.book };
     if (req.query.quote && validId(req.query.quote)) filter.quote = req.query.quote;
-    res.json(await Comment.find(filter).populate(populateUser).sort({ createdAt: 1 }).lean());
+    const items = await Comment.find(filter).select('+likedBy').populate(populateUser).sort({ createdAt: 1 }).lean();
+    res.json(items.map(item => withLikeState(item, req.user?._id)));
   } catch (e) { next(e); }
 }
+
 async function createComment(req, res, next) {
   try {
     const { book, quote, parent, text } = req.body || {};
@@ -40,9 +54,37 @@ async function createComment(req, res, next) {
     if (quote && (!validId(quote) || !(await Quote.exists({ _id: quote, book, status: 'visible' })))) return res.status(400).json({ message: 'الاقتباس غير صحيح.' });
     if (parent && (!validId(parent) || !(await Comment.exists({ _id: parent, book, status: 'visible' })))) return res.status(400).json({ message: 'التعليق الأب غير صحيح.' });
     const c = await Comment.create({ book, quote: quote || null, parent: parent || null, user: req.user._id, text: String(text).trim() });
-    res.status(201).json(await Comment.findById(c._id).populate(populateUser).lean());
+    const item = await Comment.findById(c._id).populate(populateUser).lean();
+    res.status(201).json({ ...item, likesCount: 0, liked: false });
   } catch (e) { next(e); }
 }
+
+async function toggleLike(req, res, next) {
+  try {
+    const { type, id } = req.params;
+    if (!validId(id) || !['quote', 'comment'].includes(type)) return res.status(400).json({ message: 'بيانات الإعجاب غير صحيحة.' });
+    const Model = modelFor(type);
+    const target = await Model.findOne({ _id: id, status: 'visible' }).select('+likedBy');
+    if (!target) return res.status(404).json({ message: 'المحتوى غير موجود.' });
+
+    const userId = String(req.user._id);
+    const likedBy = Array.isArray(target.likedBy) ? target.likedBy : [];
+    const alreadyLiked = likedBy.some(id => String(id) === userId);
+
+    if (alreadyLiked) {
+      await Model.updateOne({ _id: id }, { $pull: { likedBy: req.user._id } });
+    } else {
+      await Model.updateOne({ _id: id }, { $addToSet: { likedBy: req.user._id } });
+    }
+
+    const updated = await Model.findById(id).select('+likedBy').lean();
+    const count = Array.isArray(updated?.likedBy) ? updated.likedBy.length : 0;
+    await Model.updateOne({ _id: id }, { $set: { likesCount: count } });
+
+    res.json({ liked: !alreadyLiked, likesCount: count, message: alreadyLiked ? 'تم إلغاء الإعجاب.' : 'تم تسجيل الإعجاب.' });
+  } catch (e) { next(e); }
+}
+
 async function report(req, res, next) {
   try {
     const { type, id, reason = 'other', note = '' } = req.body || {};
@@ -60,6 +102,7 @@ async function report(req, res, next) {
     res.status(201).json({ message: count >= THRESHOLD ? 'وصل المحتوى إلى 15 بلاغاً وتم إخفاؤه مؤقتاً.' : 'تم إرسال البلاغ للإدارة للمراجعة.', reportCount: count, flagged: count >= THRESHOLD });
   } catch (e) { next(e); }
 }
+
 async function adminList(req, res, next) {
   try {
     const reports = await Report.find({ status: 'pending' }).populate('reporter', 'name email avatar').populate({ path: 'quote', populate: [populateUser, { path: 'book', select: 'title' }] }).populate({ path: 'comment', populate: [populateUser, { path: 'book', select: 'title' }] }).sort({ createdAt: -1 }).lean();
@@ -74,6 +117,7 @@ async function adminList(req, res, next) {
     res.json({ items: [...groups.values()].sort((a, b) => b.reports.length - a.reports.length), total: reports.length, threshold: THRESHOLD });
   } catch (e) { next(e); }
 }
+
 async function review(req, res, next) {
   try {
     const { type, id } = req.params;
@@ -88,4 +132,5 @@ async function review(req, res, next) {
     res.json({ message: action === 'restore' ? 'تمت إعادة المحتوى.' : 'تم إخفاء المحتوى.', item: target });
   } catch (e) { next(e); }
 }
-module.exports = { listQuotes, createQuote, listComments, createComment, report, adminList, review, THRESHOLD };
+
+module.exports = { listQuotes, createQuote, listComments, createComment, toggleLike, report, adminList, review, THRESHOLD };
