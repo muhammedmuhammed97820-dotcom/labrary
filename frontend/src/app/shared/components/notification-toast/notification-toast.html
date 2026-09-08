@@ -1,17 +1,30 @@
-<div class="toast-wrapper" dir="rtl">
+<div class="toast-wrapper" dir="rtl" aria-live="polite" aria-atomic="true">
   @for (toast of notifyService.toasts$ | async; track toast.id) {
-    <div class="glass-toast" [ngClass]="toast.type">
-      <i class="fa-solid icon" [ngClass]="{
-        'fa-circle-check': toast.type === 'success',
-        'fa-circle-exclamation': toast.type === 'error',
-        'fa-circle-info': toast.type === 'info'
-      }"></i>
+    <article class="glass-toast" [ngClass]="toast.type" role="status">
+      <div class="toast-icon-wrap">
+        <i class="fa-solid icon" [ngClass]="{
+          'fa-circle-check': toast.type === 'success',
+          'fa-circle-exclamation': toast.type === 'error',
+          'fa-triangle-exclamation': toast.type === 'warning',
+          'fa-circle-info': toast.type === 'info'
+        }"></i>
+      </div>
 
-      <span class="toast-text">{{ toast.message }}</span>
+      <div class="toast-content">
+        <span class="toast-title">
+          {{ toast.type === 'success' ? 'تمت العملية' : toast.type === 'error' ? 'تعذر تنفيذ العملية' : toast.type === 'warning' ? 'تنبيه' : 'إشعار' }}
+        </span>
+        <span class="toast-text">{{ toast.message }}</span>
+      </div>
 
-      <button type="button" class="close-btn" (click)="notifyService.remove(toast.id)">
+      <button
+        type="button"
+        class="close-btn"
+        (click)="notifyService.remove(toast.id)"
+        aria-label="إغلاق الإشعار"
+        title="إغلاق">
         <i class="fa-solid fa-xmark"></i>
       </button>
-    </div>
+    </article>
   }
 </div>
