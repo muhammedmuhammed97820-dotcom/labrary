@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface CommunityUser { _id: string; name: string; email?: string; avatar?: string; }
-export interface Quote { _id: string; text: string; page?: number | null; likesCount: number; liked: boolean; reportCount: number; status: string; user: CommunityUser; book: { _id: string; title: string }; createdAt: string; }
+export interface Quote { _id: string; text: string; likesCount: number; liked: boolean; reportCount: number; status: string; user: CommunityUser; createdAt: string; }
 export interface CommunityComment { _id: string; book: string | { _id: string; title: string }; quote?: string | { _id: string; text: string } | null; parent?: string | null; text: string; likesCount: number; liked: boolean; reportCount: number; status: string; user: CommunityUser; createdAt: string; }
 export interface ModerationReport { _id: string; reason: string; note: string; reporter: CommunityUser; createdAt: string; }
 export interface ModerationItem { type: 'quote' | 'comment'; item: Quote | CommunityComment; reports: ModerationReport[]; }
@@ -16,11 +16,11 @@ export class CommunityService {
   private readonly http = inject(HttpClient);
   private readonly api = `${environment.apiUrl}/community`;
 
-  quotes(book?: string): Observable<Quote[]> {
-    return this.http.get<Quote[]>(`${this.api}/quotes`, book ? { params: { book } } : {});
-  }
+  quotes(): Observable<Quote[]> { return this.http.get<Quote[]>(`${this.api}/quotes`); }
   comments(book: string): Observable<CommunityComment[]> { return this.http.get<CommunityComment[]>(`${this.api}/comments`, { params: { book } }); }
-  addQuote(data: { book: string; text: string; page?: number | null }): Observable<Quote> { return this.http.post<Quote>(`${this.api}/quotes`, data); }
+  addQuote(text: string): Observable<Quote> { return this.http.post<Quote>(`${this.api}/quotes`, { text }); }
+  updateQuote(id: string, text: string): Observable<Quote> { return this.http.patch<Quote>(`${this.api}/quotes/${id}`, { text }); }
+  deleteQuote(id: string): Observable<{ message: string }> { return this.http.delete<{ message: string }>(`${this.api}/quotes/${id}`); }
   addComment(data: { book: string; quote?: string | null; parent?: string | null; text: string }): Observable<CommunityComment> { return this.http.post<CommunityComment>(`${this.api}/comments`, data); }
   toggleLike(type: 'quote' | 'comment', id: string): Observable<LikeResponse> { return this.http.post<LikeResponse>(`${this.api}/likes/${type}/${id}/toggle`, {}); }
   report(type: 'quote' | 'comment', id: string, reason: string, note = '') { return this.http.post<{ message: string; reportCount: number; flagged: boolean }>(`${this.api}/reports`, { type, id, reason, note }); }
