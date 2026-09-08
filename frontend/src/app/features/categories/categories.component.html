@@ -1,123 +1,17 @@
-<section class="categories-archive-page" [class.dark-theme]="theme.isDarkMode()" dir="rtl">
-  <div class="categories-container">
-    
-    <!-- رأس الصفحة الفاخر -->
-    <header class="categories-hero-section">
-      <div class="hero-copy-box">
-        <span class="eyebrow-badge">
-          <i class="fa-solid fa-layer-group"></i>
-          مَكتبة الحكمة · فهرس التصنيفات والمجالات
-        </span>
-        <h1 class="hero-main-title">اكتشف <em>مجالك</em><br>واقرأ ما يليق بك.</h1>
-        <p class="hero-subtitle">تصفح مجموعات المكتبة حسب المجال، واعثر على الكتب التي توسّع أفكارك وتفتح لك أبوابًا جديدة للمعرفة والفكر.</p>
-      </div>
-      <div class="hero-signature-stamp">
-        <strong>ت</strong>
-        <span>CATEGORIES</span>
-        <small>DIRECTORY</small>
-      </div>
-    </header>
-
-    <!-- شريط المعلومات والتحكم -->
+<main class="categories-page" [class.dark-theme]="theme.isDarkMode()" dir="rtl">
+  <div class="categories-shell">
+    <header class="categories-header"><div><span class="eyebrow"><i class="fa-solid fa-layer-group"></i> DIRECTORY</span><h1>اكتشف <span>مجال معرفتك.</span></h1><p>تصفح التصنيفات واختصر الطريق إلى الكتب التي تناسب اهتماماتك.</p></div><div class="header-count"><strong>{{ categories.length }}</strong><span>تصنيف</span></div></header>
     @if (!loading && !error) {
-      <div class="categories-toolbar">
-        <div class="toolbar-counter">
-          <span>إجمالي المجالات التصنيفية</span>
-          <strong>{{ categories.length }} تصنيف رئيسي</strong>
-        </div>
-        <div class="toolbar-hint">
-          <i class="fa-solid fa-hand-pointer"></i>
-          <span>انقر على أي تصنيف لاستعراض الكتب، أو اضغط "المزيد" لقراءة الوصف كاملاً</span>
-        </div>
-      </div>
-    }
-
-    <!-- شبكة التصنيفات الفاخرة -->
-    @if (!loading && !error) {
-      @if (categories.length > 0) {
-        <div class="categories-grid-showcase">
+      <div class="categories-toolbar"><span><i class="fa-solid fa-compass"></i> اختر تصنيفاً للانتقال مباشرة إلى كتبه</span><b>{{ categories.length }} مجال متاح</b></div>
+      @if (categories.length) {
+        <section class="category-grid">
           @for (item of categories; track item._id; let i = $index) {
-            <div class="category-glass-card">
-              <!-- رابط الانتقال للكتب عبر الأيقونة أو العنوان -->
-              <a [routerLink]="['/books']" [queryParams]="{category: item._id}" class="card-main-link-area">
-                <div class="card-top-row">
-                  <span class="card-index-badge">{{ (i + 1).toString().padStart(2, '0') }}</span>
-                  <span class="card-arrow-icon"><i class="fa-solid fa-arrow-up-left"></i></span>
-                </div>
-
-                <div class="category-symbol-box">
-                  <i class="fa-solid fa-bookmark"></i>
-                </div>
-
-                <div class="category-content-box">
-                  <h2>{{ item.name }}</h2>
-                  <p class="category-desc-snippet">
-                    {{ item.description || 'مجموعة منتقاة بعناية من الكتب والأبحاث والمراجع ضمن هذا المجال المعرفي.' }}
-                  </p>
-                </div>
-              </a>
-
-              <!-- زر المزيد لعرض الوصف كاملاً في النافذة المنبثقة -->
-              <div class="category-meta-footer">
-                <span class="meta-tag books">
-                  <i class="fa-solid fa-book-open"></i>
-                  {{ item.booksCount || 0 }} كتاب متاح
-                </span>
-                <button type="button" class="read-more-btn" (click)="openDescriptionModal(item)">
-                  انقر للمزيد <i class="fa-solid fa-chevron-left"></i>
-                </button>
-              </div>
-            </div>
+            <article class="category-card"><a class="category-main" [routerLink]="['/books']" [queryParams]="{category:item._id}"><div class="category-number">{{ (i+1).toString().padStart(2,'0') }}</div><div class="category-icon"><i class="fa-solid fa-book-bookmark"></i></div><h2>{{ item.name }}</h2><p>{{ item.description || 'مجموعة كتب ومراجع مختارة ضمن هذا المجال.' }}</p><span class="explore">استكشف الكتب <i class="fa-solid fa-arrow-left"></i></span></a><footer><span><i class="fa-solid fa-book-open"></i> {{ item.booksCount || 0 }} كتاب</span><button type="button" (click)="openDescriptionModal(item)">الوصف الكامل</button></footer></article>
           }
-        </div>
-      } @else {
-        <div class="empty-categories-state">
-          <i class="fa-solid fa-folder-open"></i>
-          <p>لا توجد أي تصنيفات مسجلة في المكتبة حالياً.</p>
-        </div>
-      }
-    } @else if (loading) {
-      <!-- حالة التحميل الفاخرة -->
-      <div class="state-container loading-state">
-        <div class="glass-spinner"></div>
-        <p>نجهّز مجموعات المعرفة وفهرس التصنيفات...</p>
-      </div>
-    }
-
-    <!-- حالة الخطأ -->
-    @if (error) {
-      <div class="state-container error-state">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span>{{ error }}</span>
-      </div>
-    }
-
+        </section>
+      } @else { <section class="state-card"><i class="fa-solid fa-folder-open"></i><h2>لا توجد تصنيفات حالياً</h2><p>ستظهر المجالات هنا عند إضافتها للمكتبة.</p></section> }
+    } @else if (loading) { <section class="state-card"><div class="spinner"></div><h2>نجهز الفهرس...</h2><p>جارِ تحميل مجالات المكتبة.</p></section> }
+    @if (error) { <section class="state-card error"><i class="fa-solid fa-triangle-exclamation"></i><h2>حدث خطأ</h2><p>{{ error }}</p></section> }
   </div>
-
-  <!-- النافذة المنبثقة الاحترافية المنحنية لقراءة الوصف كاملاً -->
-  @if (selectedCategory) {
-    <div class="category-modal-overlay" (click)="closeDescriptionModal()">
-      <div class="category-modal-card" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <div class="modal-title-box">
-            <i class="fa-solid fa-circle-info"></i>
-            <h3>تفاصيل التصنيف: {{ selectedCategory.name }}</h3>
-          </div>
-          <button type="button" class="close-modal-btn" (click)="closeDescriptionModal()">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        
-        <div class="modal-body">
-          <p>{{ selectedCategory.description || 'مجموعة منتقاة بعناية من الكتب والأبحاث والمراجع ضمن هذا المجال المعرفي.' }}</p>
-        </div>
-
-        <div class="modal-footer">
-          <a [routerLink]="['/books']" [queryParams]="{category: selectedCategory._id}" class="modal-explore-btn" (click)="closeDescriptionModal()">
-            <i class="fa-solid fa-book-open"></i> استعراض كتب هذا التصنيف
-          </a>
-        </div>
-      </div>
-    </div>
-  }
-</section>
+  @if (selectedCategory) { <div class="category-modal" (click)="closeDescriptionModal()"><div class="modal-card" (click)="$event.stopPropagation()"><button class="modal-close" type="button" (click)="closeDescriptionModal()"><i class="fa-solid fa-xmark"></i></button><span class="eyebrow">CATEGORY</span><h2>{{ selectedCategory.name }}</h2><p>{{ selectedCategory.description || 'مجموعة كتب ومراجع مختارة ضمن هذا المجال.' }}</p><a [routerLink]="['/books']" [queryParams]="{category:selectedCategory._id}" (click)="closeDescriptionModal()">استعرض الكتب <i class="fa-solid fa-arrow-left"></i></a></div></div> }
+</main>
