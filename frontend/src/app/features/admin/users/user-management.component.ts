@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // 1. استيراد ChangeDetectorRef
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { UserManagementService, ManagedUser } from '../../../core/services/user-management.service';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -18,6 +17,7 @@ export class UserManagementComponent implements OnInit {
   private readonly service = inject(UserManagementService);
   readonly themeService = inject(ThemeService);
   private readonly notify = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef); // 2. حقن الـ ChangeDetectorRef
 
   users: ManagedUser[] = [];
   loading = true;
@@ -34,16 +34,18 @@ export class UserManagementComponent implements OnInit {
   editing: ManagedUser | null = null;
   form = { name: '', email: '', password: '', role: 'user' as 'user' | 'admin' };
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void { 
+    this.load(); 
+  }
 
   load(page = this.page): void {
     this.loading = true;
     this.page = page;
 
     this.service.list(this.page, this.limit, this.search, this.roleFilter)
-      .pipe(finalize(() => { this.loading = false; }))
       .subscribe({
         next: response => {
+          this.loading = false;
           const users = Array.isArray(response?.users) ? response.users : [];
           const pagination = response?.pagination;
           const stats = response?.stats;
@@ -56,16 +58,31 @@ export class UserManagementComponent implements OnInit {
             totalAdmins: users.filter(user => user.role === 'admin').length,
             regularUsers: users.filter(user => user.role !== 'admin').length
           };
+
+          // 3. إجبار الواجهة على التحديث فوراً عند نجاح جلب البيانات
+          this.cdr.markForCheck();
         },
         error: err => {
+          this.loading = false;
           const errorMsg = err?.error?.message || 'تعذر تحميل المستخدمين.';
           this.showNotificationMessage('error', errorMsg);
+          
+          // 4. إجبار الواجهة على التحديث حتى عند حدوث خطأ
+          this.cdr.markForCheck();
         }
       });
   }
 
-  searchUsers(): void { this.page = 1; this.load(1); }
-  resetFilters(): void { this.search = ''; this.roleFilter = ''; this.searchUsers(); }
+  searchUsers(): void { 
+    this.page = 1; 
+    this.load(1); 
+  }
+
+  resetFilters(): void { 
+    this.search = ''; 
+    this.roleFilter = ''; 
+    this.searchUsers(); 
+  }
 
   openCreate(): void {
     this.editing = null;
@@ -79,7 +96,9 @@ export class UserManagementComponent implements OnInit {
     this.modalOpen = true;
   }
 
-  closeModal(): void { if (!this.saving) this.modalOpen = false; }
+  closeModal(): void { 
+    if (!this.saving) this.modalOpen = false; 
+  }
 
   save(): void {
     if (!this.form.name.trim() || !this.form.email.trim()) {
@@ -111,6 +130,7 @@ export class UserManagementComponent implements OnInit {
         this.saving = false;
         const errorMsg = err?.error?.message || 'تعذر حفظ المستخدم.';
         this.showNotificationMessage('error', errorMsg);
+        this.cdr.markForCheck();
       }
     });
   }
@@ -127,6 +147,7 @@ export class UserManagementComponent implements OnInit {
       error: err => {
         const errorMsg = err?.error?.message || 'تعذر حذف المستخدم.';
         this.showNotificationMessage('error', errorMsg);
+        this.cdr.markForCheck();
       }
     });
   }
@@ -137,7 +158,9 @@ export class UserManagementComponent implements OnInit {
     return `${environment.apiOrigin}${user.avatar.startsWith('/') ? user.avatar : '/' + user.avatar}`;
   }
 
-  initials(name: string): string { return name.trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase(); }
+  initials(name: string): string { 
+    return name.trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase(); 
+  }
 
   private showNotificationMessage(type: 'success' | 'error' | 'warning', message: string): void {
     const notifyAny = this.notify as any;
