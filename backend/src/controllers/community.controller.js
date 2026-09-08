@@ -32,6 +32,36 @@ async function createQuote(req, res, next) {
   } catch (e) { next(e); }
 }
 
+async function updateQuote(req, res, next) {
+  try {
+    if (!validId(req.params.id)) return res.status(400).json({ message: 'الاقتباس غير صحيح.' });
+    const text = String(req.body?.text || '').trim();
+    if (!text) return res.status(400).json({ message: 'نص الاقتباس مطلوب.' });
+    const quote = await Quote.findOne({ _id: req.params.id, user: req.user._id });
+    if (!quote) return res.status(404).json({ message: 'الاقتباس غير موجود أو لا تملك صلاحية تعديله.' });
+    if (quote.status === 'rejected') return res.status(400).json({ message: 'لا يمكن تعديل اقتباس مرفوض.' });
+    quote.text = text;
+    quote.status = 'visible';
+    quote.reviewedAt = null;
+    quote.rejectionReason = '';
+    quote.reportCount = 0;
+    await quote.save();
+    const item = await Quote.findById(quote._id).select('+likedBy').populate(populateUser).lean();
+    res.json(withLikeState(item, req.user._id));
+  } catch (e) { next(e); }
+}
+
+async function deleteQuote(req, res, next) {
+  try {
+    if (!validId(req.params.id)) return res.status(400).json({ message: 'الاقتباس غير صحيح.' });
+    const quote = await Quote.findOne({ _id: req.params.id, user: req.user._id });
+    if (!quote) return res.status(404).json({ message: 'الاقتباس غير موجود أو لا تملك صلاحية حذفه.' });
+    await Report.deleteMany({ quote: quote._id });
+    await Quote.deleteOne({ _id: quote._id });
+    res.json({ message: 'تم حذف الاقتباس.' });
+  } catch (e) { next(e); }
+}
+
 async function listComments(req, res, next) {
   try {
     if (!validId(req.query.book)) return res.status(400).json({ message: 'معرّف الكتاب غير صحيح.' });
@@ -123,4 +153,4 @@ async function review(req, res, next) {
   } catch (e) { next(e); }
 }
 
-module.exports = { listQuotes, createQuote, listComments, createComment, toggleLike, report, adminList, review, THRESHOLD };
+module.exports = { listQuotes, createQuote, updateQuote, deleteQuote, listComments, createComment, toggleLike, report, adminList, review, THRESHOLD };
