@@ -7,7 +7,7 @@
     <header class="quotes-header"><span class="panel-tag">COMMUNITY</span><h1 class="panel-title">اقتباسات من كتب المكتبة</h1><p>اكتشف أجمل الاقتباسات التي شاركها القرّاء من مختلف الكتب.</p></header>
     <section class="panel-glass-card filters-card">
       <div class="filter-search"><i class="fa-solid fa-magnifying-glass"></i><input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="ابحث في الاقتباسات أو الكتب أو أسماء القرّاء..." /></div>
-      <select [(ngModel)]="sort" (ngModelChange)="applyFilters"><option value="latest">الأحدث</option><option value="likes">الأكثر إعجابًا</option></select>
+      <select [(ngModel)]="sort" (ngModelChange)="applyFilters()"><option value="latest">الأحدث</option><option value="likes">الأكثر إعجابًا</option></select>
     </section>
     <div *ngIf="loading" class="admin-state-box loading-box"><span class="glass-spinner"></span><span>جاري تحميل الاقتباسات...</span></div>
     <section *ngIf="!loading" class="quotes-grid">
