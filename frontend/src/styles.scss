@@ -85,21 +85,11 @@ app-root,
 
 main { background: transparent !important; }
 img { max-width: 100%; }
-
 h1, h2, h3, h4, h5, h6 { color: var(--text-primary); font-weight: 800; }
 .text-secondary, .text-muted { color: var(--text-secondary) !important; }
 
 /* Glass surfaces */
-.glass,
-.glass-card,
-.glass-panel,
-.glass-container,
-.toolbar-glass-card,
-.admin-state-box,
-.auth-form-card,
-.auth-hero-card,
-.hero-glass-section,
-.user-pill-wrapper {
+.glass, .glass-card, .glass-panel, .glass-container, .toolbar-glass-card, .admin-state-box, .auth-form-card, .auth-hero-card, .hero-glass-section, .user-pill-wrapper {
   background: var(--surface) !important;
   border: 1px solid var(--border-glass) !important;
   box-shadow: var(--shadow-soft) !important;
@@ -107,21 +97,19 @@ h1, h2, h3, h4, h5, h6 { color: var(--text-primary); font-weight: 800; }
   -webkit-backdrop-filter: blur(22px) saturate(145%);
 }
 
-/* Common form controls */
+/* Forms */
 input, textarea, select, .form-control, .form-select, .glass-control {
   background: var(--surface-strong) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-glass) !important;
   border-radius: var(--radius-sm) !important;
-  transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+  transition: border-color .25s ease, box-shadow .25s ease;
 }
-
 input:focus, textarea:focus, select:focus, .form-control:focus, .form-select:focus, .glass-control:focus {
   border-color: rgba(99,102,241,.55) !important;
   box-shadow: 0 0 0 4px rgba(99,102,241,.10) !important;
   outline: none !important;
 }
-
 input::placeholder, textarea::placeholder { color: var(--text-muted) !important; }
 
 /* Primary actions */
@@ -133,7 +121,6 @@ input::placeholder, textarea::placeholder { color: var(--text-muted) !important;
   box-shadow: 0 10px 25px rgba(99,102,241,.22) !important;
   transition: transform .25s ease, box-shadow .25s ease !important;
 }
-
 .btn-primary:hover, .submit-btn:hover, .primary-btn:hover, .read-btn:hover, .action-primary:hover, .btn-register:not(.btn-login):hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 30px rgba(99,102,241,.30) !important;
@@ -150,7 +137,6 @@ input::placeholder, textarea::placeholder { color: var(--text-muted) !important;
   border-radius: var(--radius-md) !important;
   transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
 }
-
 .card:hover, .book-card:hover, .glass-book-card:hover, .author-card:hover, .category-card:hover, .stat-card:hover, .submission-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-glass) !important;
@@ -167,31 +153,24 @@ input::placeholder, textarea::placeholder { color: var(--text-muted) !important;
   backdrop-filter: blur(22px);
 }
 
-/* Existing major wrappers: unify their old gold palette. */
-body .admin-dashboard-wrapper.home-page,
-body .admin-books-wrapper,
-body .auth-wrapper {
+/* Existing major wrappers: unify their old gold identity with indigo/cyan. */
+body .admin-dashboard-wrapper.home-page, body .admin-books-wrapper, body .auth-wrapper {
   --admin-bg: transparent !important;
   --glass-bg: var(--surface) !important;
   --glass-border: var(--border-glass) !important;
   --glass-shadow: var(--shadow-soft) !important;
-  --text-secondary: var(--text-secondary) !important;
-  --accent-gold: var(--primary) !important;
-  --accent-gold-hover: var(--primary-dark) !important;
+  --accent-gold: #6366f1 !important;
+  --accent-gold-hover: #4f46e5 !important;
   --card-inner-bg: var(--surface-soft) !important;
   --glow-color: rgba(99,102,241,.14) !important;
 }
-
-body.dark-mode .admin-dashboard-wrapper.home-page,
-body.dark-mode .admin-books-wrapper,
-body.dark-mode .auth-wrapper {
+body.dark-mode .admin-dashboard-wrapper.home-page, body.dark-mode .admin-books-wrapper, body.dark-mode .auth-wrapper {
   --admin-bg: transparent !important;
   --glass-bg: var(--surface) !important;
   --glass-border: var(--border-glass) !important;
   --glass-shadow: var(--shadow-glass) !important;
-  --text-secondary: var(--text-secondary) !important;
-  --accent-gold: var(--primary-light) !important;
-  --accent-gold-hover: var(--primary) !important;
+  --accent-gold: #818cf8 !important;
+  --accent-gold-hover: #6366f1 !important;
   --card-inner-bg: var(--surface-soft) !important;
   --glow-color: rgba(129,140,248,.16) !important;
 }
