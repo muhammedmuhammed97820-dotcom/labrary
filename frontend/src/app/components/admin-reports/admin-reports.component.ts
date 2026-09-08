@@ -38,6 +38,7 @@ export class AdminReportsComponent implements OnInit {
   }
 
   bookTitle(item: ModerationItem): string {
+    if (this.isQuote(item)) return 'اقتباس عام';
     const book = item.item.book;
     return typeof book === 'object' && book ? book.title : 'غير معروف';
   }
