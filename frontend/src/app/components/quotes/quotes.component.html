@@ -1,46 +1,23 @@
-<main class="admin-dashboard-wrapper quotes-page" [class.dark-theme]="false" dir="rtl">
+<main class="admin-dashboard-wrapper quotes-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="admin-container">
     <div class="details-top-bar">
       <a routerLink="/" class="back-nav-btn"><i class="fa-solid fa-arrow-right"></i><span>العودة للرئيسية</span></a>
       <span class="book-id-badge"><i class="fa-solid fa-quote-right"></i> اقتباسات المكتبة</span>
     </div>
-
-    <header class="quotes-header">
-      <span class="panel-tag">COMMUNITY</span>
-      <h1 class="panel-title">اقتباسات من كتب المكتبة</h1>
-      <p>اكتشف أجمل الاقتباسات التي شاركها القرّاء من مختلف الكتب.</p>
-    </header>
-
+    <header class="quotes-header"><span class="panel-tag">COMMUNITY</span><h1 class="panel-title">اقتباسات من كتب المكتبة</h1><p>اكتشف أجمل الاقتباسات التي شاركها القرّاء من مختلف الكتب.</p></header>
     <section class="panel-glass-card filters-card">
-      <div class="filter-search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="ابحث في الاقتباسات أو الكتب أو أسماء القرّاء..." />
-      </div>
-      <select [(ngModel)]="sort" (ngModelChange)="applyFilters()">
-        <option value="latest">الأحدث</option>
-        <option value="likes">الأكثر إعجابًا</option>
-      </select>
+      <div class="filter-search"><i class="fa-solid fa-magnifying-glass"></i><input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="ابحث في الاقتباسات أو الكتب أو أسماء القرّاء..." /></div>
+      <select [(ngModel)]="sort" (ngModelChange)="applyFilters"><option value="latest">الأحدث</option><option value="likes">الأكثر إعجابًا</option></select>
     </section>
-
     <div *ngIf="loading" class="admin-state-box loading-box"><span class="glass-spinner"></span><span>جاري تحميل الاقتباسات...</span></div>
-
     <section *ngIf="!loading" class="quotes-grid">
       <article *ngFor="let q of filteredQuotes" class="panel-glass-card quote-card">
-        <div class="quote-mark"><i class="fa-solid fa-quote-right"></i></div>
-        <blockquote>{{ q.text }}</blockquote>
-        <div class="content-meta">
-          <a [routerLink]="['/books', q.book?._id]" class="book-link"><i class="fa-solid fa-book"></i>{{ q.book?.title || 'كتاب' }}</a>
-          <span *ngIf="q.page"><i class="fa-regular fa-file-lines"></i> صفحة {{ q.page }}</span>
-        </div>
+        <div class="quote-mark"><i class="fa-solid fa-quote-right"></i></div><blockquote>{{ q.text }}</blockquote>
+        <div class="content-meta"><a [routerLink]="['/books', q.book?._id]" class="book-link"><i class="fa-solid fa-book"></i>{{ q.book?.title || 'كتاب' }}</a><span *ngIf="q.page"><i class="fa-regular fa-file-lines"></i> صفحة {{ q.page }}</span></div>
         <div class="author-meta"><span class="avatar">{{ (q.user?.name || '؟').charAt(0) }}</span><span><strong>{{ q.user?.name || 'قارئ' }}</strong><small>{{ q.createdAt | date:'mediumDate' }}</small></span></div>
-        <div class="quote-actions">
-          <button class="community-action like-btn" [class.liked]="q.liked" [disabled]="isLiking(q._id)" (click)="toggleLike(q)"><i [class]="q.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i><span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b></button>
-          <button class="community-action report" (click)="report(q)"><i class="fa-regular fa-flag"></i><span>إبلاغ</span></button>
-          <a class="community-action" [routerLink]="['/books', q.book?._id, 'community']"><i class="fa-solid fa-comments"></i><span>مناقشة الكتاب</span></a>
-        </div>
+        <div class="quote-actions"><button class="community-action like-btn" [class.liked]="q.liked" [disabled]="isLiking(q._id)" (click)="toggleLike(q)"><i [class]="q.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i><span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b></button><button class="community-action report" (click)="report(q)"><i class="fa-regular fa-flag"></i><span>إبلاغ</span></button><a class="community-action" [routerLink]="['/books', q.book?._id, 'community']"><i class="fa-solid fa-comments"></i><span>مناقشة الكتاب</span></a></div>
       </article>
     </section>
-
     <div *ngIf="!loading && !filteredQuotes.length" class="admin-state-box empty-state"><i class="fa-solid fa-quote-right"></i><h3>لا توجد اقتباسات</h3><p>لم نجد اقتباسات تطابق البحث الحالي.</p></div>
   </div>
 </main>
