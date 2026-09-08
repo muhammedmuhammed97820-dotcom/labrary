@@ -29,17 +29,18 @@ export class AdminReportsComponent implements OnInit {
     });
   }
 
-  isQuote(item: ModerationItem): item is ModerationItem & { item: Quote } {
+  isQuote(item: ModerationItem): boolean {
     return item.type === 'quote';
   }
 
-  isComment(item: ModerationItem): item is ModerationItem & { item: CommunityComment } {
+  isComment(item: ModerationItem): boolean {
     return item.type === 'comment';
   }
 
   bookTitle(item: ModerationItem): string {
     if (this.isQuote(item)) return 'اقتباس عام';
-    const book = item.item.book;
+    const comment = item as ModerationItem & { item: CommunityComment };
+    const book = comment.item.book;
     return typeof book === 'object' && book ? book.title : 'غير معروف';
   }
 
