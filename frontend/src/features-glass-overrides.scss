@@ -1,0 +1,50 @@
+/* Central visual contract for every feature page. Keep feature SCSS for layout-only rules. */
+:root{--feature-radius:24px;--feature-gap:18px}
+
+/* Shared feature shells */
+.authors-archive-page,.categories-page,.profile-page,.books-page,.home-page,.admin-dashboard-wrapper,.page-container,.community-page,.reports-page,.auth-page{color:var(--text)!important;background:transparent!important;font-family:'Cairo',system-ui,sans-serif!important}
+
+/* Legacy feature variables now inherit the global glass system. */
+.authors-archive-page,.auth-wrapper,.auth-page,.categories-page,.profile-page,.books-page,.admin-dashboard-wrapper,.page-container{--admin-bg:var(--bg);--glass-bg:var(--surface);--glass-border:var(--border);--glass-shadow:var(--shadow);--text-primary:var(--text);--text-secondary:var(--muted);--accent-gold:var(--accent);--accent-gold-hover:var(--accent2);--card-inner-bg:var(--surface-soft);--glow-color:rgba(124,92,255,.16)}
+
+/* Cards / panels */
+.author-glass-card,.category-card,.profile-card,.details-card,.admin-card,.feature-card,.stat-card,.table-card,.search-panel,.filters-card,.auth-card,.auth-form-card,.auth-hero-card,.panel-glass-card,.composer-card,.community-card,.empty-authors-state,.state-container,.loading-panel,.empty-panel{background:var(--surface)!important;border-color:var(--border)!important;box-shadow:var(--shadow)!important;backdrop-filter:blur(var(--blur)) saturate(145%)!important;-webkit-backdrop-filter:blur(var(--blur)) saturate(145%)!important;color:var(--text)!important;border-radius:var(--feature-radius)}
+
+/* Typography */
+.authors-archive-page h1,.authors-archive-page h2,.authors-archive-page h3,.categories-page h1,.categories-page h2,.categories-page h3,.profile-page h1,.profile-page h2,.books-page h1,.books-page h2,.admin-dashboard-wrapper h1,.admin-dashboard-wrapper h2,.page-container h1,.page-container h2{color:var(--text)!important}
+.authors-archive-page p,.categories-page p,.profile-page p,.books-page p,.admin-dashboard-wrapper p,.page-container p{color:var(--muted)}
+
+/* Glass controls */
+.authors-archive-page input,.authors-archive-page select,.authors-archive-page textarea,.categories-page input,.categories-page select,.categories-page textarea,.profile-page input,.profile-page select,.profile-page textarea,.books-page input,.books-page select,.books-page textarea,.admin-dashboard-wrapper input,.admin-dashboard-wrapper select,.admin-dashboard-wrapper textarea,.page-container input,.page-container select,.page-container textarea,.auth-page input,.auth-page select,.auth-page textarea{color:var(--text)!important;background:var(--surface-soft)!important;border:1px solid var(--border)!important;border-radius:14px!important;outline:none!important}
+.authors-archive-page input:focus,.authors-archive-page select:focus,.authors-archive-page textarea:focus,.categories-page input:focus,.categories-page select:focus,.categories-page textarea:focus,.profile-page input:focus,.profile-page select:focus,.profile-page textarea:focus,.books-page input:focus,.books-page select:focus,.books-page textarea:focus,.admin-dashboard-wrapper input:focus,.admin-dashboard-wrapper select:focus,.admin-dashboard-wrapper textarea:focus,.page-container input:focus,.page-container select:focus,.page-container textarea:focus,.auth-page input:focus{border-color:rgba(124,92,255,.7)!important;box-shadow:0 0 0 4px rgba(124,92,255,.1)!important}
+
+/* Buttons */
+.authors-archive-page button,.categories-page button,.profile-page button,.books-page button,.admin-dashboard-wrapper button,.page-container button{font-family:inherit;transition:.2s}
+.authors-archive-page button:hover:not(:disabled),.categories-page button:hover:not(:disabled),.profile-page button:hover:not(:disabled),.books-page button:hover:not(:disabled),.admin-dashboard-wrapper button:hover:not(:disabled),.page-container button:hover:not(:disabled){transform:translateY(-1px)}
+
+/* Author archive: replace old gold-only identity with the approved violet/cyan glass identity. */
+.eyebrow-badge,.toolbar-hint,.meta-tag,.card-index-badge{border-color:var(--border)!important;background:var(--surface-soft)!important;color:var(--accent)!important}
+.hero-signature-stamp{background:var(--surface)!important;border-color:var(--accent)!important;box-shadow:var(--shadow)!important}
+.hero-signature-stamp strong,.hero-signature-stamp span,.hero-main-title em,.portrait-fallback,.toolbar-counter strong,.toolbar-hint i,.meta-tag i,.meta-tag.books{color:var(--accent)!important}
+.author-glass-card:hover{border-color:var(--accent)!important}
+
+/* Category cards */
+.category-main{color:var(--text)!important;text-decoration:none}
+.category-icon{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;color:#fff!important}
+.category-card:hover{border-color:var(--accent)!important;transform:translateY(-5px)}
+.category-modal{background:rgba(3,8,20,.62)!important;backdrop-filter:blur(8px)!important}
+.modal-card{background:var(--surface-strong)!important;border:1px solid var(--border)!important;box-shadow:var(--shadow)!important;color:var(--text)!important}
+
+/* Feature grids */
+.books-grid,.book-grid,.authors-grid-showcase,.category-grid,.cards-grid,.features-grid{gap:var(--feature-gap)!important}
+
+/* Tables */
+.admin-dashboard-wrapper table,.page-container table,.profile-page table{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
+.admin-dashboard-wrapper th,.admin-dashboard-wrapper td,.page-container th,.page-container td,.profile-page th,.profile-page td{border-color:var(--border)!important;color:var(--text)!important}
+.admin-dashboard-wrapper th,.page-container th,.profile-page th{background:var(--surface-soft)!important;color:var(--muted)!important}
+
+/* Modals and overlays */
+.modal-backdrop,.overlay{background:rgba(3,8,20,.62)!important;backdrop-filter:blur(8px)}
+
+/* Mobile consistency */
+@media(max-width:760px){.authors-archive-page,.categories-page,.profile-page,.books-page,.home-page,.admin-dashboard-wrapper,.page-container,.community-page,.reports-page,.auth-page{width:min(100% - 20px,1400px)!important;padding-top:26px!important}.authors-grid-showcase,.category-grid{grid-template-columns:1fr!important}.auth-shell{grid-template-columns:1fr!important}.nav-links-desktop{overflow-x:auto;justify-content:flex-start;scrollbar-width:none}.nav-links-desktop::-webkit-scrollbar{display:none}}
