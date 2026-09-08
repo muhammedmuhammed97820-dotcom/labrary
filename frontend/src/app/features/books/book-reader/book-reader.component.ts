@@ -75,8 +75,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       this.page = Math.max(1, savedPage);
       this.pageInput = String(this.page);
 
-      // لا نقرأ الملف من /uploads مباشرة. الـBackend يقدمه كـPDF inline
-      // بعد التحقق من حالة الكتاب ومسار الملف الفعلي.
       await this.openPdf(this.api.getReaderUrl(id));
     } catch (error) {
       console.error('Reader loading error:', error);
@@ -95,7 +93,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     const status = Number(error?.status || 0);
     if (status === 404) return 'ملف الكتاب غير موجود على الخادم.';
     if (status === 415) return 'هذا الكتاب ليس PDF. القارئ الحالي يدعم ملفات PDF فقط.';
-    if (status === 0) return 'تعذر الاتصال بخادم المكتبة. تأكد أن الـBackend يعمل على المنفذ 5000.';
+    if (status === 0) return 'تعذر الاتصال بخادم المكتبة. تأكد من تشغيل الخادم بنجاح.';
     return 'تعذر فتح الكتاب. تأكد أن ملف PDF متوفر ثم حاول مرة أخرى.';
   }
 
@@ -107,7 +105,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       standardFontDataUrl: 'assets/pdfjs/standard_fonts/',
       useSystemFonts: true,
       disableFontFace: false,
-    //  isEvalSupported: true,
     });
 
     this.pdf = await loadingTask.promise;
@@ -224,7 +221,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       this.notify.show('تمت إزالة العلامة المرجعية.', 'success');
     } else {
       this.bookmarks = [...this.bookmarks, this.page].sort((a, b) => a - b);
-      this.notify.show('تم حفظ العلامة المرجعية.', 'success');
+      this.notify.show('تم حفظ العلامة المرجعية بنجاح.', 'success');
     }
     localStorage.setItem(this.bookmarkKey(), JSON.stringify(this.bookmarks));
   }
@@ -255,8 +252,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   }
 
   private getTextForSearch(items: any[]): string {
-    // PDF.js already returns the visual text order for most PDFs. Keep spaces
-    // between text runs, but remove accidental line-break spacing and controls.
     return items
       .map(item => String(item?.str || '').replace(/[\r\n\t]+/g, ' ').trim())
       .filter(Boolean)
@@ -309,12 +304,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     this.renderPage();
     this.searchOpen = false;
     this.scrollReaderTop();
-  }
-
-  nextSearchResult(): void {
-    if (!this.searchResults.length) return;
-    this.currentSearchIndex = (this.currentSearchIndex + 1) % this.searchResults.length;
-    this.jumpToSearchResult(this.searchResults[this.currentSearchIndex]);
   }
 
   async toggleFullscreen(): Promise<void> {
