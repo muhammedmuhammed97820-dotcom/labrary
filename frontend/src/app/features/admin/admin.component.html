@@ -1,11 +1,145 @@
 <main class="admin-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="admin-shell">
-    <header class="admin-hero"><div><span class="eyebrow"><i class="fa-solid fa-shield-halved"></i> CONTROL CENTER</span><h1>لوحة <span>إدارة المكتبة.</span></h1><p>نظرة سريعة على المحتوى، المستخدمين، الإحصائيات وكل ما يحدث داخل المنصة.</p></div><div class="admin-actions"><a routerLink="/admin/books/create"><i class="fa-solid fa-plus"></i> كتاب جديد</a><a routerLink="/admin/users"><i class="fa-solid fa-users"></i> المستخدمون</a><a routerLink="/admin/reports"><i class="fa-solid fa-flag"></i> البلاغات</a></div></header>
-    @if(loading){<section class="admin-state"><div class="spinner"></div><h2>جارِ تحميل لوحة التحكم</h2><p>نستخرج آخر البيانات من المكتبة.</p></section>}
-    @else if(error){<section class="admin-state error"><i class="fa-solid fa-triangle-exclamation"></i><h2>تعذر تحميل البيانات</h2><p>{{ error }}</p><button (click)="load()">إعادة المحاولة</button></section>}
-    @else{
-      <section class="admin-stats"><article><i class="fa-solid fa-book"></i><span>إجمالي الكتب</span><strong>{{total}}</strong></article><article><i class="fa-solid fa-circle-check"></i><span>الكتب المتاحة</span><strong>{{available}}</strong></article><article><i class="fa-solid fa-eye"></i><span>المشاهدات</span><strong>{{views}}</strong></article><article><i class="fa-solid fa-download"></i><span>التحميلات</span><strong>{{downloads}}</strong></article><a routerLink="/admin/authors"><i class="fa-solid fa-user-pen"></i><span>المؤلفون</span><strong>{{authors}}</strong></a><a routerLink="/admin/categories"><i class="fa-solid fa-layer-group"></i><span>التصنيفات</span><strong>{{categories}}</strong></a></section>
-      <section class="admin-content-grid"><article class="admin-panel"><div class="panel-heading"><div><span>ACTIVITY</span><h2>آخر الكتب المضافة</h2></div><a routerLink="/admin/books">إدارة الكتب <i class="fa-solid fa-arrow-left"></i></a></div>@if(!recent.length){<div class="empty-admin"><i class="fa-solid fa-box-open"></i><p>لا توجد كتب مضافة حتى الآن.</p></div>}@else{<div class="recent-list">@for(book of recent;track book._id){<div class="recent-item"><div class="mini-cover">@if(getBookCover(book)){<img [src]="getBookCover(book)" [alt]="book.title">}@else{<span>{{book.title.slice(0,1)}}</span>}</div><div><strong>{{book.title}}</strong><small><i class="fa-solid fa-pen-nib"></i> {{getAuthorName(book.author)}}</small></div><a [routerLink]="['/admin/books',book._id,'edit']" title="تعديل"><i class="fa-solid fa-pen"></i></a></div>}}</div>}</article><aside class="admin-panel quick-panel"><span>QUICK ACTIONS</span><h2>اختصارات الإدارة</h2><a routerLink="/admin/books"><i class="fa-solid fa-book"></i><div><b>إدارة الكتب</b><small>إضافة وتعديل وحذف</small></div><i class="fa-solid fa-chevron-left"></i></a><a routerLink="/admin/authors"><i class="fa-solid fa-user-pen"></i><div><b>المؤلفون</b><small>تنظيم بيانات المؤلفين</small></div><i class="fa-solid fa-chevron-left"></i></a><a routerLink="/admin/categories"><i class="fa-solid fa-layer-group"></i><div><b>التصنيفات</b><small>إدارة مجالات المكتبة</small></div><i class="fa-solid fa-chevron-left"></i></a><a routerLink="/admin/book-submissions"><i class="fa-solid fa-inbox"></i><div><b>طلبات الكتب</b><small>مراجعة المشاركات</small></div><i class="fa-solid fa-chevron-left"></i></a></aside></section>
+    <header class="admin-hero">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-shield-halved"></i> CONTROL CENTER</span>
+        <h1>لوحة <span>إدارة المكتبة.</span></h1>
+        <p>نظرة سريعة على المحتوى، المستخدمين، الإحصائيات وكل ما يحدث داخل المنصة.</p>
+      </div>
+      <div class="admin-actions">
+        <a routerLink="/admin/books/create"><i class="fa-solid fa-plus"></i> كتاب جديد</a>
+        <a routerLink="/admin/users"><i class="fa-solid fa-users"></i> المستخدمون</a>
+        <a routerLink="/admin/reports"><i class="fa-solid fa-flag"></i> البلاغات</a>
+      </div>
+    </header>
+
+    @if (loading) {
+      <section class="admin-state">
+        <div class="spinner"></div>
+        <h2>جارِ تحميل لوحة التحكم</h2>
+        <p>نستخرج آخر البيانات من المكتبة.</p>
+      </section>
+    } @else if (error) {
+      <section class="admin-state error">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <h2>تعذر تحميل البيانات</h2>
+        <p>{{ error }}</p>
+        <button type="button" (click)="load()">إعادة المحاولة</button>
+      </section>
+    } @else {
+      <section class="admin-stats">
+        <article>
+          <i class="fa-solid fa-book"></i>
+          <span>إجمالي الكتب</span>
+          <strong>{{ total }}</strong>
+        </article>
+        <article>
+          <i class="fa-solid fa-circle-check"></i>
+          <span>الكتب المتاحة</span>
+          <strong>{{ available }}</strong>
+        </article>
+        <article>
+          <i class="fa-solid fa-eye"></i>
+          <span>المشاهدات</span>
+          <strong>{{ views }}</strong>
+        </article>
+        <article>
+          <i class="fa-solid fa-download"></i>
+          <span>التحميلات</span>
+          <strong>{{ downloads }}</strong>
+        </article>
+        <a routerLink="/admin/authors">
+          <i class="fa-solid fa-user-pen"></i>
+          <span>المؤلفون</span>
+          <strong>{{ authors }}</strong>
+        </a>
+        <a routerLink="/admin/categories">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>التصنيفات</span>
+          <strong>{{ categories }}</strong>
+        </a>
+      </section>
+
+      <section class="admin-content-grid">
+        <article class="admin-panel">
+          <div class="panel-heading">
+            <div>
+              <span>ACTIVITY</span>
+              <h2>آخر الكتب المضافة</h2>
+            </div>
+            <a routerLink="/admin/books">إدارة الكتب <i class="fa-solid fa-arrow-left"></i></a>
+          </div>
+
+          @if (!recent.length) {
+            <div class="empty-admin">
+              <i class="fa-solid fa-box-open"></i>
+              <p>لا توجد كتب مضافة حتى الآن.</p>
+            </div>
+          } @else {
+            <div class="recent-list">
+              @for (book of recent; track book._id) {
+                <div class="recent-item">
+                  <div class="mini-cover">
+                    @if (getBookCover(book)) {
+                      <img [src]="getBookCover(book)" [alt]="book.title">
+                    } @else {
+                      <span>{{ book.title.slice(0, 1) }}</span>
+                    }
+                  </div>
+                  <div>
+                    <strong>{{ book.title }}</strong>
+                    <small><i class="fa-solid fa-pen-nib"></i> {{ getAuthorName(book.author) }}</small>
+                  </div>
+                  <a [routerLink]="['/admin/books', book._id, 'edit']" title="تعديل" aria-label="تعديل الكتاب">
+                    <i class="fa-solid fa-pen"></i>
+                  </a>
+                </div>
+              }
+            </div>
+          }
+        </article>
+
+        <aside class="admin-panel quick-panel">
+          <span>QUICK ACTIONS</span>
+          <h2>اختصارات الإدارة</h2>
+
+          <a routerLink="/admin/books">
+            <i class="fa-solid fa-book"></i>
+            <div>
+              <b>إدارة الكتب</b>
+              <small>إضافة وتعديل وحذف</small>
+            </div>
+            <i class="fa-solid fa-chevron-left"></i>
+          </a>
+
+          <a routerLink="/admin/authors">
+            <i class="fa-solid fa-user-pen"></i>
+            <div>
+              <b>المؤلفون</b>
+              <small>تنظيم بيانات المؤلفين</small>
+            </div>
+            <i class="fa-solid fa-chevron-left"></i>
+          </a>
+
+          <a routerLink="/admin/categories">
+            <i class="fa-solid fa-layer-group"></i>
+            <div>
+              <b>التصنيفات</b>
+              <small>إدارة مجالات المكتبة</small>
+            </div>
+            <i class="fa-solid fa-chevron-left"></i>
+          </a>
+
+          <a routerLink="/admin/book-submissions">
+            <i class="fa-solid fa-inbox"></i>
+            <div>
+              <b>طلبات الكتب</b>
+              <small>مراجعة المشاركات</small>
+            </div>
+            <i class="fa-solid fa-chevron-left"></i>
+          </a>
+        </aside>
+      </section>
     }
   </div>
 </main>
