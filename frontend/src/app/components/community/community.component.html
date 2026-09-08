@@ -1,0 +1,22 @@
+<main class="community-page" dir="rtl">
+  <div class="community-container">
+    <a routerLink="/books" class="back-link">← العودة إلى المكتبة</a>
+    <header><span>COMMUNITY</span><h1>الاقتباسات والتعليقات</h1><p>شارك أجمل ما قرأت وناقش الكتب مع القرّاء.</p></header>
+    @if (loading) { <div class="state">جارِ التحميل...</div> } @else {
+      <section class="community-grid">
+        <div class="panel">
+          <h2>✦ اقتباس جديد</h2>
+          @if (auth.isLoggedIn) { <textarea [(ngModel)]="quoteText" placeholder="اكتب اقتباساً من الكتاب..."></textarea><input type="number" [(ngModel)]="quotePage" placeholder="رقم الصفحة (اختياري)"><button (click)="addQuote()" [disabled]="saving">إضافة الاقتباس</button> } @else { <p class="muted">سجّل الدخول لإضافة اقتباس.</p> }
+          <h2 class="section-title">الاقتباسات</h2>
+          @for (q of quotes; track q._id) { <article class="quote"><blockquote>“{{ q.text }}”</blockquote><small>— {{ q.user?.name || 'قارئ' }} @if(q.page){ · ص {{q.page}} }</small><button class="report" (click)="report('quote', q._id)">🚩 إبلاغ</button></article> } @empty { <p class="muted">لا توجد اقتباسات بعد.</p> }
+        </div>
+        <div class="panel">
+          <h2>💬 تعليق جديد</h2>
+          @if (auth.isLoggedIn) { @if(replyTo){<div class="replying">أنت ترد على تعليق <button (click)="replyTo=''">إلغاء</button></div>}<textarea [(ngModel)]="commentText" placeholder="اكتب تعليقك..."></textarea><button (click)="addComment()" [disabled]="saving">إضافة التعليق</button> } @else { <p class="muted">سجّل الدخول لإضافة تعليق.</p> }
+          <h2 class="section-title">التعليقات</h2>
+          @for (c of comments; track c._id) { <article class="comment" [class.reply]="c.parent"><strong>{{ c.user?.name || 'قارئ' }}</strong><p>{{ c.text }}</p><div><button class="reply-btn" (click)="reply(c)">↩ رد</button><button class="report" (click)="report('comment', c._id)">🚩 إبلاغ</button></div></article> } @empty { <p class="muted">لا توجد تعليقات بعد.</p> }
+        </div>
+      </section>
+    }
+  </div>
+</main>
