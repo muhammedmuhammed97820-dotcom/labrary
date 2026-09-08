@@ -5,6 +5,8 @@ const router = express.Router();
 router.get('/quotes', controller.listQuotes);
 router.get('/comments', controller.listComments);
 router.post('/quotes', authenticate, controller.createQuote);
+router.patch('/quotes/:id', authenticate, controller.updateQuote);
+router.delete('/quotes/:id', authenticate, controller.deleteQuote);
 router.post('/comments', authenticate, controller.createComment);
 router.post('/likes/:type/:id/toggle', authenticate, controller.toggleLike);
 router.post('/reports', authenticate, controller.report);
