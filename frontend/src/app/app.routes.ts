@@ -26,6 +26,7 @@ export const routes: Routes = [
   { path: 'books/:id/read', component: BookReaderComponent },
   { path: 'books/:id/community', loadComponent: () => import('./components/community/community.component').then(m => m.CommunityComponent) },
   { path: 'books/:id', component: BookDetailsComponent },
+  { path: 'quotes', loadComponent: () => import('./components/quotes/quotes.component').then(m => m.QuotesComponent) },
   { path: 'categories', component: CategoriesComponent },
   { path: 'authors', component: AuthorsComponent },
   { path: 'authors/:id', component: AuthorDetailsComponent },
