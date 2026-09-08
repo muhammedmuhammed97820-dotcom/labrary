@@ -1,73 +1,311 @@
 @import "bootstrap/scss/bootstrap";
 
+/* =========================================================
+   Maktabati — Global Glassmorphism Design System
+   Shared by every Angular page/component.
+========================================================= */
+
 :root {
-  --bg-primary: #f8f9fa;
-  --text-primary: #1e293b;
-  --text-muted: #64748b;
-  --card-bg: #ffffff;
-  --border-color: #e2e8f0;
-  --accent-color: #d97706;
+  --bg-primary: #eef2ff;
+  --bg-secondary: #e8f4ff;
+  --surface: rgba(255, 255, 255, 0.62);
+  --surface-strong: rgba(255, 255, 255, 0.82);
+  --surface-soft: rgba(255, 255, 255, 0.42);
+  --text-primary: #111827;
+  --text-secondary: #667085;
+  --text-muted: #98a2b3;
+  --border-glass: rgba(255, 255, 255, 0.78);
+  --border-soft: rgba(99, 102, 241, 0.14);
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --primary-light: #818cf8;
+  --cyan: #06b6d4;
+  --purple: #8b5cf6;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --shadow-glass: 0 22px 60px rgba(31, 38, 135, 0.12);
+  --shadow-soft: 0 10px 30px rgba(31, 38, 135, 0.09);
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
   color-scheme: light;
 }
 
 html.dark-mode,
 body.dark-mode {
-  --bg-primary: #0f172a;
-  --text-primary: #f8fafc;
-  --text-muted: #94a3b8;
-  --card-bg: #1e293b;
-  --border-color: #334155;
-  --accent-color: #f59e0b;
+  --bg-primary: #070b16;
+  --bg-secondary: #0d1425;
+  --surface: rgba(17, 25, 45, 0.58);
+  --surface-strong: rgba(20, 30, 52, 0.78);
+  --surface-soft: rgba(17, 25, 45, 0.42);
+  --text-primary: #f7f8fc;
+  --text-secondary: #a4aec0;
+  --text-muted: #6f7b91;
+  --border-glass: rgba(255, 255, 255, 0.10);
+  --border-soft: rgba(129, 140, 248, 0.18);
+  --shadow-glass: 0 28px 75px rgba(0, 0, 0, 0.42);
+  --shadow-soft: 0 12px 35px rgba(0, 0, 0, 0.28);
   color-scheme: dark;
 }
 
 html,
 body {
   font-family: 'Cairo', sans-serif;
-  background-color: var(--bg-primary) !important;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(99, 102, 241, .16), transparent 28%),
+    radial-gradient(circle at 92% 18%, rgba(6, 182, 212, .12), transparent 25%),
+    radial-gradient(circle at 55% 105%, rgba(139, 92, 246, .12), transparent 30%),
+    var(--bg-primary) !important;
   color: var(--text-primary) !important;
   margin: 0 !important;
   padding: 0 !important;
   min-height: 100vh;
   width: 100%;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background .4s ease, color .3s ease;
 }
 
-body.light-mode,
-html.light-mode {
-  background-color: #f8f9fa !important;
-}
-
-body.dark-mode,
-html.dark-mode {
-  background-color: #0f172a !important;
+html::before,
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.08), transparent 45%),
+    radial-gradient(circle at 70% 60%, rgba(99,102,241,.05), transparent 22%);
 }
 
 app-root {
   display: block;
   min-height: 100vh;
   width: 100%;
-  background-color: var(--bg-primary) !important;
+  background: transparent !important;
   color: var(--text-primary) !important;
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
 .app-main-container {
   min-height: 100vh;
-  background-color: var(--bg-primary) !important;
+  position: relative;
+  background: transparent !important;
   color: var(--text-primary) !important;
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
 main {
-  background-color: transparent !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  background: transparent !important;
 }
 
 img {
   max-width: 100%;
+}
+
+/* Unified typography */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+p, label, small, span {
+  transition: color .25s ease;
+}
+
+.text-secondary,
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* Glass utility */
+.glass,
+.glass-card,
+.glass-panel,
+.glass-container,
+.toolbar-glass-card,
+.admin-state-box,
+.auth-form-card,
+.auth-hero-card,
+.hero-glass-section,
+.user-pill-wrapper {
+  background: var(--surface) !important;
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+
+/* Common form controls */
+input,
+textarea,
+select,
+.form-control,
+.form-select,
+.glass-control {
+  background: var(--surface-strong) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+  transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.form-control:focus,
+.form-select:focus,
+.glass-control:focus {
+  border-color: rgba(99,102,241,.55) !important;
+  box-shadow: 0 0 0 4px rgba(99,102,241,.10) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Common buttons */
+.btn-primary,
+.submit-btn,
+.primary-btn,
+.read-btn,
+.action-primary,
+.btn-register:not(.btn-login) {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+  border: 0 !important;
+  color: #fff !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: 0 10px 25px rgba(99,102,241,.22) !important;
+  transition: transform .25s ease, box-shadow .25s ease !important;
+}
+
+.btn-primary:hover,
+.submit-btn:hover,
+.primary-btn:hover,
+.read-btn:hover,
+.action-primary:hover,
+.btn-register:not(.btn-login):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(99,102,241,.30) !important;
+}
+
+/* Common cards */
+.card,
+.book-card,
+.glass-book-card,
+.author-card,
+.category-card,
+.stat-card,
+.quote-card,
+.notification-card,
+.submission-card {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: var(--radius-md) !important;
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.card:hover,
+.book-card:hover,
+.glass-book-card:hover,
+.author-card:hover,
+.category-card:hover,
+.stat-card:hover,
+.submission-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-glass) !important;
+  border-color: rgba(99,102,241,.28) !important;
+}
+
+/* Bootstrap surfaces should follow the theme */
+.bg-white,
+.bg-light {
+  background: var(--surface) !important;
+}
+
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--text-primary);
+  --bs-table-border-color: var(--border-soft);
+}
+
+.modal-content,
+.dropdown-menu,
+.popover {
+  background: var(--surface-strong) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glass) !important;
+  backdrop-filter: blur(22px);
+}
+
+/* Existing feature wrappers: replace the old gold identity with indigo/cyan. */
+body .admin-dashboard-wrapper.home-page,
+body .admin-books-wrapper,
+body .auth-wrapper {
+  --admin-bg: transparent !important;
+  --glass-bg: var(--surface) !important;
+  --glass-border: var(--border-glass) !important;
+  --glass-shadow: var(--shadow-soft) !important;
+  --text-primary: var(--text-primary) !important;
+  --text-secondary: var(--text-secondary) !important;
+  --accent-gold: var(--primary) !important;
+  --accent-gold-hover: var(--primary-dark) !important;
+  --card-inner-bg: var(--surface-soft) !important;
+  --glow-color: rgba(99,102,241,.14) !important;
+}
+
+body.dark-mode .admin-dashboard-wrapper.home-page,
+body.dark-mode .admin-books-wrapper,
+body.dark-mode .auth-wrapper {
+  --admin-bg: transparent !important;
+  --glass-bg: var(--surface) !important;
+  --glass-border: var(--border-glass) !important;
+  --glass-shadow: var(--shadow-glass) !important;
+  --text-primary: var(--text-primary) !important;
+  --text-secondary: var(--text-secondary) !important;
+  --accent-gold: var(--primary-light) !important;
+  --accent-gold-hover: var(--primary) !important;
+  --card-inner-bg: var(--surface-soft) !important;
+  --glow-color: rgba(129,140,248,.16) !important;
+}
+
+/* Focus and selection */
+::selection {
+  background: rgba(99,102,241,.25);
+  color: var(--text-primary);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(99,102,241,.25) !important;
+  outline-offset: 2px;
+}
+
+/* Smooth page entrance */
+router-outlet + * {
+  animation: libraryPageIn .45s ease both;
+}
+
+@keyframes libraryPageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .card,
+  .book-card,
+  .glass-book-card,
+  .glass-panel,
+  .glass-card {
+    border-radius: 18px !important;
+  }
 }
