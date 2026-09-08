@@ -5,41 +5,30 @@ import { RouterLink } from '@angular/router';
 import { CommunityService, Quote } from '../../core/services/community.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { BookApiService, Book } from '../../core/services/book-api.service';
 import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
-  selector: 'app-quotes',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './quotes.component.html',
-  styleUrl: './quotes.component.scss'
+  selector: 'app-quotes', standalone: true, imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './quotes.component.html', styleUrl: './quotes.component.scss'
 })
 export class QuotesComponent implements OnInit {
   private readonly service = inject(CommunityService);
-  private readonly bookService = inject(BookApiService);
   private readonly notify = inject(NotificationService);
   readonly auth = inject(AuthService);
   readonly themeService = inject(ThemeService);
 
   quotes: Quote[] = [];
   filteredQuotes: Quote[] = [];
-  books: Book[] = [];
   search = '';
   sort = 'latest';
   loading = true;
-  loadingBooks = false;
   saving = false;
   showComposer = false;
-  liking = new Set<string>();
+  editingId = '';
   quoteText = '';
-  selectedBookId = '';
-  quotePage: number | null = null;
+  liking = new Set<string>();
 
-  ngOnInit(): void {
-    this.load();
-    if (this.auth.isLoggedIn) this.loadBooks();
-  }
+  ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading = true;
@@ -49,71 +38,69 @@ export class QuotesComponent implements OnInit {
     });
   }
 
-  loadBooks(): void {
-    this.loadingBooks = true;
-    this.bookService.getAll(1, 100).subscribe({
-      next: books => { this.books = books.filter(book => book._id && book.status !== 'rejected'); this.loadingBooks = false; },
-      error: () => { this.loadingBooks = false; this.notify.error('تعذر تحميل قائمة الكتب.'); }
-    });
+  openComposer(): void {
+    if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول لإضافة اقتباس.');
+    this.editingId = '';
+    this.quoteText = '';
+    this.showComposer = true;
   }
 
-  openComposer(): void {
-    if (!this.auth.isLoggedIn) {
-      this.notify.warning('سجّل الدخول لإضافة اقتباس.');
-      return;
-    }
-    this.showComposer = !this.showComposer;
-    if (this.showComposer && !this.books.length && !this.loadingBooks) this.loadBooks();
+  startEdit(q: Quote): void {
+    this.editingId = q._id;
+    this.quoteText = q.text;
+    this.showComposer = true;
   }
 
   cancelComposer(): void {
     if (this.saving) return;
     this.showComposer = false;
+    this.editingId = '';
     this.quoteText = '';
-    this.selectedBookId = '';
-    this.quotePage = null;
   }
 
-  addQuote(): void {
-    if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول لإضافة اقتباس.');
-    if (!this.selectedBookId) return this.notify.warning('اختر الكتاب أولاً.');
-    if (!this.quoteText.trim()) return this.notify.warning('اكتب نص الاقتباس.');
-    if (this.quoteText.trim().length < 3) return this.notify.warning('نص الاقتباس قصير جدًا.');
-    if (this.quotePage !== null && (!Number.isInteger(Number(this.quotePage)) || Number(this.quotePage) < 1)) return this.notify.warning('رقم الصفحة غير صحيح.');
-
+  saveQuote(): void {
+    if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول أولاً.');
+    const text = this.quoteText.trim();
+    if (!text) return this.notify.warning('اكتب نص الاقتباس.');
+    if (text.length < 3) return this.notify.warning('نص الاقتباس قصير جدًا.');
     this.saving = true;
-    this.service.addQuote({
-      book: this.selectedBookId,
-      text: this.quoteText.trim(),
-      page: this.quotePage
-    }).subscribe({
+    const request = this.editingId ? this.service.updateQuote(this.editingId, text) : this.service.addQuote(text);
+    request.subscribe({
       next: quote => {
-        this.quotes = [quote, ...this.quotes];
+        if (this.editingId) this.quotes = this.quotes.map(q => q._id === quote._id ? quote : q);
+        else this.quotes = [quote, ...this.quotes];
         this.applyFilters();
         this.saving = false;
-        this.notify.success('تمت إضافة الاقتباس بنجاح.');
+        this.notify.success(this.editingId ? 'تم تعديل الاقتباس.' : 'تم نشر الاقتباس.');
         this.cancelComposer();
       },
-      error: e => {
-        this.saving = false;
-        this.notify.error(e?.error?.message || 'تعذر إضافة الاقتباس.');
-      }
+      error: e => { this.saving = false; this.notify.error(e?.error?.message || 'تعذر حفظ الاقتباس.'); }
     });
+  }
+
+  deleteQuote(q: Quote): void {
+    if (!this.auth.isLoggedIn || !confirm('هل تريد حذف هذا الاقتباس نهائيًا؟')) return;
+    this.service.deleteQuote(q._id).subscribe({
+      next: r => { this.quotes = this.quotes.filter(item => item._id !== q._id); this.applyFilters(); this.notify.success(r.message); },
+      error: e => this.notify.error(e?.error?.message || 'تعذر حذف الاقتباس.')
+    });
+  }
+
+  isOwner(q: Quote): boolean {
+    const current = this.auth.user;
+    return !!current && String(current._id) === String(q.user?._id);
   }
 
   applyFilters(): void {
     const term = this.search.trim().toLowerCase();
-    let items = term
-      ? this.quotes.filter(q => q.text.toLowerCase().includes(term) || q.book?.title?.toLowerCase().includes(term) || q.user?.name?.toLowerCase().includes(term))
-      : [...this.quotes];
-
+    let items = term ? this.quotes.filter(q => q.text.toLowerCase().includes(term) || q.user?.name?.toLowerCase().includes(term)) : [...this.quotes];
     if (this.sort === 'likes') items.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
     else items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     this.filteredQuotes = items;
   }
 
   toggleLike(q: Quote): void {
-    if (!this.auth.isLoggedIn) { this.notify.warning('سجّل الدخول للإعجاب.'); return; }
+    if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول للإعجاب.');
     if (this.liking.has(q._id)) return;
     this.liking.add(q._id);
     this.service.toggleLike('quote', q._id).subscribe({
@@ -123,12 +110,11 @@ export class QuotesComponent implements OnInit {
   }
 
   report(q: Quote): void {
-    if (!this.auth.isLoggedIn) { this.notify.warning('سجّل الدخول للإبلاغ.'); return; }
+    if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول للإبلاغ.');
     const reason = prompt('سبب البلاغ: abuse / spam / misinformation / copyright / other', 'other') || 'other';
     const note = prompt('ملاحظة إضافية (اختياري):', '') || '';
     this.service.report('quote', q._id, reason, note).subscribe({
-      next: r => this.notify.success(r.message),
-      error: e => this.notify.error(e?.error?.message || 'تعذر إرسال البلاغ.')
+      next: r => this.notify.success(r.message), error: e => this.notify.error(e?.error?.message || 'تعذر إرسال البلاغ.')
     });
   }
 
