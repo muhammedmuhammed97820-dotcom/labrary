@@ -22,6 +22,7 @@ export class UserManagementComponent implements OnInit {
   users: ManagedUser[] = [];
   loading = true;
   saving = false;
+  deletingId: string | null = null;
   search = '';
   roleFilter = '';
   page = 1;
@@ -135,15 +136,21 @@ export class UserManagementComponent implements OnInit {
   }
 
   deleteUser(user: ManagedUser): void {
-    if (!confirm(`هل أنت متأكد من حذف المستخدم "${user.name}"؟ لا يمكن التراجع عن هذه العملية.`)) return;
+    if (this.deletingId) return;
 
+    const confirmed = confirm(`هل أنت متأكد من حذف المستخدم "${user.name}"؟ لا يمكن التراجع عن هذه العملية.`);
+    if (!confirmed) return;
+
+    this.deletingId = user.id;
     this.service.remove(user.id).subscribe({
       next: response => {
+        this.deletingId = null;
         this.notify.success(response.message || `تم حذف المستخدم "${user.name}" بنجاح.`);
         if (this.users.length === 1 && this.page > 1) this.page--;
         this.load(this.page);
       },
       error: err => {
+        this.deletingId = null;
         this.notify.error(err?.error?.message || 'تعذر حذف المستخدم.');
         this.cdr.markForCheck();
       }
