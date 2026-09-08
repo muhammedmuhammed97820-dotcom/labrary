@@ -26,8 +26,7 @@
           @if (auth.isLoggedIn) {
             <div class="composer-card">
               <h3><i class="fa-solid fa-pen-nib"></i> إضافة اقتباس</h3>
-              <textarea [(ngModel)]="quoteText" placeholder="اكتب اقتباساً من الكتاب..."></textarea>
-              <input type="number" [(ngModel)]="quotePage" placeholder="رقم الصفحة (اختياري)">
+              <textarea [(ngModel)]="quoteText" placeholder="اكتب اقتباسك هنا..."></textarea>
               <button class="add-book-btn primary-action" (click)="addQuote()" [disabled]="saving"><i class="fa-solid fa-plus"></i><span>إضافة الاقتباس</span></button>
             </div>
           } @else {
@@ -39,7 +38,7 @@
               <article class="community-card quote-card">
                 <div class="quote-mark"><i class="fa-solid fa-quote-right"></i></div>
                 <blockquote>{{ q.text }}</blockquote>
-                <div class="content-meta"><i class="fa-solid fa-user"></i><span>{{ q.user?.name || 'قارئ' }}</span>@if(q.page){<span>· الصفحة {{q.page}}</span>}</div>
+                <div class="content-meta"><i class="fa-solid fa-user"></i><span>{{ q.user?.name || 'قارئ' }}</span></div>
                 <div class="community-actions">
                   <button class="community-action like-btn" [class.liked]="q.liked" (click)="toggleLike('quote', q)" [disabled]="isLiking('quote', q._id)">
                     <i class="fa-solid fa-heart"></i><span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b>
