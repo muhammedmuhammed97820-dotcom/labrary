@@ -2,9 +2,7 @@
 
 /* =========================================================
    Maktabati — Global Glassmorphism Design System
-   Shared by every Angular page/component.
 ========================================================= */
-
 :root {
   --bg-primary: #eef2ff;
   --bg-secondary: #e8f4ff;
@@ -73,12 +71,11 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.08), transparent 45%),
-    radial-gradient(circle at 70% 60%, rgba(99,102,241,.05), transparent 22%);
+  background: linear-gradient(135deg, rgba(255,255,255,.08), transparent 45%), radial-gradient(circle at 70% 60%, rgba(99,102,241,.05), transparent 22%);
 }
 
-app-root {
+app-root,
+.app-main-container {
   display: block;
   min-height: 100vh;
   width: 100%;
@@ -86,37 +83,13 @@ app-root {
   color: var(--text-primary) !important;
 }
 
-.app-main-container {
-  min-height: 100vh;
-  position: relative;
-  background: transparent !important;
-  color: var(--text-primary) !important;
-}
+main { background: transparent !important; }
+img { max-width: 100%; }
 
-main {
-  background: transparent !important;
-}
+h1, h2, h3, h4, h5, h6 { color: var(--text-primary); font-weight: 800; }
+.text-secondary, .text-muted { color: var(--text-secondary) !important; }
 
-img {
-  max-width: 100%;
-}
-
-/* Unified typography */
-h1, h2, h3, h4, h5, h6 {
-  color: var(--text-primary);
-  font-weight: 800;
-}
-
-p, label, small, span {
-  transition: color .25s ease;
-}
-
-.text-secondary,
-.text-muted {
-  color: var(--text-secondary) !important;
-}
-
-/* Glass utility */
+/* Glass surfaces */
 .glass,
 .glass-card,
 .glass-panel,
@@ -135,43 +108,24 @@ p, label, small, span {
 }
 
 /* Common form controls */
-input,
-textarea,
-select,
-.form-control,
-.form-select,
-.glass-control {
+input, textarea, select, .form-control, .form-select, .glass-control {
   background: var(--surface-strong) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-glass) !important;
   border-radius: var(--radius-sm) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
   transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
 }
 
-input:focus,
-textarea:focus,
-select:focus,
-.form-control:focus,
-.form-select:focus,
-.glass-control:focus {
+input:focus, textarea:focus, select:focus, .form-control:focus, .form-select:focus, .glass-control:focus {
   border-color: rgba(99,102,241,.55) !important;
   box-shadow: 0 0 0 4px rgba(99,102,241,.10) !important;
   outline: none !important;
 }
 
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-muted) !important;
-}
+input::placeholder, textarea::placeholder { color: var(--text-muted) !important; }
 
-/* Common buttons */
-.btn-primary,
-.submit-btn,
-.primary-btn,
-.read-btn,
-.action-primary,
-.btn-register:not(.btn-login) {
+/* Primary actions */
+.btn-primary, .submit-btn, .primary-btn, .read-btn, .action-primary, .btn-register:not(.btn-login) {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
   border: 0 !important;
   color: #fff !important;
@@ -180,26 +134,13 @@ textarea::placeholder {
   transition: transform .25s ease, box-shadow .25s ease !important;
 }
 
-.btn-primary:hover,
-.submit-btn:hover,
-.primary-btn:hover,
-.read-btn:hover,
-.action-primary:hover,
-.btn-register:not(.btn-login):hover {
+.btn-primary:hover, .submit-btn:hover, .primary-btn:hover, .read-btn:hover, .action-primary:hover, .btn-register:not(.btn-login):hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 30px rgba(99,102,241,.30) !important;
 }
 
 /* Common cards */
-.card,
-.book-card,
-.glass-book-card,
-.author-card,
-.category-card,
-.stat-card,
-.quote-card,
-.notification-card,
-.submission-card {
+.card, .book-card, .glass-book-card, .author-card, .category-card, .stat-card, .quote-card, .notification-card, .submission-card {
   background: var(--surface) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-glass) !important;
@@ -210,33 +151,15 @@ textarea::placeholder {
   transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
 }
 
-.card:hover,
-.book-card:hover,
-.glass-book-card:hover,
-.author-card:hover,
-.category-card:hover,
-.stat-card:hover,
-.submission-card:hover {
+.card:hover, .book-card:hover, .glass-book-card:hover, .author-card:hover, .category-card:hover, .stat-card:hover, .submission-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-glass) !important;
   border-color: rgba(99,102,241,.28) !important;
 }
 
-/* Bootstrap surfaces should follow the theme */
-.bg-white,
-.bg-light {
-  background: var(--surface) !important;
-}
-
-.table {
-  --bs-table-bg: transparent;
-  --bs-table-color: var(--text-primary);
-  --bs-table-border-color: var(--border-soft);
-}
-
-.modal-content,
-.dropdown-menu,
-.popover {
+.bg-white, .bg-light { background: var(--surface) !important; }
+.table { --bs-table-bg: transparent; --bs-table-color: var(--text-primary); --bs-table-border-color: var(--border-soft); }
+.modal-content, .dropdown-menu, .popover {
   background: var(--surface-strong) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-glass) !important;
@@ -244,7 +167,7 @@ textarea::placeholder {
   backdrop-filter: blur(22px);
 }
 
-/* Existing feature wrappers: replace the old gold identity with indigo/cyan. */
+/* Existing major wrappers: unify their old gold palette. */
 body .admin-dashboard-wrapper.home-page,
 body .admin-books-wrapper,
 body .auth-wrapper {
@@ -252,7 +175,6 @@ body .auth-wrapper {
   --glass-bg: var(--surface) !important;
   --glass-border: var(--border-glass) !important;
   --glass-shadow: var(--shadow-soft) !important;
-  --text-primary: var(--text-primary) !important;
   --text-secondary: var(--text-secondary) !important;
   --accent-gold: var(--primary) !important;
   --accent-gold-hover: var(--primary-dark) !important;
@@ -267,7 +189,6 @@ body.dark-mode .auth-wrapper {
   --glass-bg: var(--surface) !important;
   --glass-border: var(--border-glass) !important;
   --glass-shadow: var(--shadow-glass) !important;
-  --text-primary: var(--text-primary) !important;
   --text-secondary: var(--text-secondary) !important;
   --accent-gold: var(--primary-light) !important;
   --accent-gold-hover: var(--primary) !important;
@@ -275,37 +196,11 @@ body.dark-mode .auth-wrapper {
   --glow-color: rgba(129,140,248,.16) !important;
 }
 
-/* Focus and selection */
-::selection {
-  background: rgba(99,102,241,.25);
-  color: var(--text-primary);
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid rgba(99,102,241,.25) !important;
-  outline-offset: 2px;
-}
-
-/* Smooth page entrance */
-router-outlet + * {
-  animation: libraryPageIn .45s ease both;
-}
-
-@keyframes libraryPageIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+::selection { background: rgba(99,102,241,.25); color: var(--text-primary); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid rgba(99,102,241,.25) !important; outline-offset: 2px; }
+router-outlet + * { animation: libraryPageIn .45s ease both; }
+@keyframes libraryPageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 768px) {
-  .card,
-  .book-card,
-  .glass-book-card,
-  .glass-panel,
-  .glass-card {
-    border-radius: 18px !important;
-  }
+  .card, .book-card, .glass-book-card, .glass-panel, .glass-card { border-radius: 18px !important; }
 }
