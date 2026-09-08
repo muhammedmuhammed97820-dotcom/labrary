@@ -1,133 +1,35 @@
-<main class="admin-books-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
-  <div class="admin-container">
-
-    <!-- HEADER SECTION -->
-    <header class="admin-header">
-      <div class="header-info">
-        <span class="admin-badge">
-          <i class="fa-solid fa-book-open-reader"></i>
-          DIGITAL LIBRARY · COLLECTION
-        </span>
-        <h1 class="header-title">اكتشف ما يستحق القراءة</h1>
-        <p class="header-subtitle">مكتبة رقمية حقيقية تجمع كتبك المفضلة في تجربة بسيطة، سريعة وحديثة.</p>
-      </div>
+<main class="library-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="library-shell">
+    <header class="library-header">
+      <div><span class="eyebrow"><i class="fa-solid fa-book-open"></i> COLLECTION</span><h1>مكتبتك، <span>بلا حدود.</span></h1><p>ابحث عن الكتاب الذي يناسبك واستكشف مجموعة المعرفة المتاحة في مكتبتك الرقمية.</p></div>
+      <div class="header-actions"><a routerLink="/categories" class="soft-action"><i class="fa-solid fa-layer-group"></i> التصنيفات</a><a routerLink="/favorites" class="soft-action"><i class="fa-solid fa-heart"></i> المفضلة</a></div>
     </header>
 
-    <!-- SEARCH & FILTER TOOLBAR -->
-    <section class="toolbar-glass-card">
-      <div class="search-input-box">
-        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input 
-          type="text" 
-          class="glass-control" 
-          [(ngModel)]="query" 
-          placeholder="ابحث عن كتاب، مؤلف، تصنيف أو وصف..."
-        >
-        @if (query) {
-          <button class="clear-search-btn" (click)="query = ''" title="مسح البحث">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        }
-      </div>
-
-      <div class="toolbar-side-actions">
-        <button class="refresh-btn" type="button" (click)="load(true)" [disabled]="loading">
-          <i class="fa-solid fa-rotate-right" [class.spin]="loading"></i>
-          <span>تحديث</span>
-        </button>
-        <div class="count-pill">
-          <i class="fa-solid fa-layer-group"></i>
-          <span>{{ filteredBooks.length }} كتاب</span>
-        </div>
-      </div>
+    <section class="library-toolbar">
+      <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input type="text" [(ngModel)]="query" placeholder="ابحث بالعنوان، المؤلف، التصنيف أو الوصف..."><button *ngIf="query" type="button" (click)="query=''" aria-label="مسح"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="toolbar-meta"><span class="result-count"><strong>{{ filteredBooks.length }}</strong> كتاب</span><button type="button" class="refresh-action" (click)="load(true)" [disabled]="loading"><i class="fa-solid fa-rotate-right" [class.spin]="loading"></i> تحديث</button></div>
     </section>
 
-    <!-- LOADING STATE -->
     @if (loading) {
-      <div class="admin-state-box loading-box">
-        <div class="glass-spinner"></div>
-        <p>جارِ تحميل المكتبة الرقمية...</p>
-      </div>
-    }
-
-    <!-- ERROR STATE -->
-    @else if (error) {
-      <div class="admin-state-box error-box">
-        <div class="error-content">
-          <i class="fa-solid fa-circle-exclamation"></i>
-          <span>{{ error }}</span>
-        </div>
-        <button class="retry-btn" type="button" (click)="load(true)">
-          <i class="fa-solid fa-rotate-right"></i>
-          <span>إعادة المحاولة</span>
-        </button>
-      </div>
-    }
-
-    <!-- EMPTY STATE -->
-    @else if (!filteredBooks.length) {
-      <div class="admin-state-box empty-box">
-        <i class="fa-solid fa-box-open empty-icon"></i>
-        <h2>لم نجد ما تبحث عنه</h2>
-        <p>{{ query ? 'لا توجد نتائج مطابقة لخصائص بحثك الحالية.' : 'لا توجد كتب متاحة في المكتبة حالياً.' }}</p>
-      </div>
-    }
-
-    <!-- BOOKS GRID -->
-    @else {
-      <div class="books-grid-container">
+      <section class="state-card"><div class="spinner"></div><h3>نجهز المكتبة...</h3><p>لحظات ونظهر لك الكتب المتاحة.</p></section>
+    } @else if (error) {
+      <section class="state-card error"><i class="fa-solid fa-triangle-exclamation"></i><h3>تعذر تحميل الكتب</h3><p>{{ error }}</p><button class="primary-action" (click)="load(true)">إعادة المحاولة</button></section>
+    } @else if (!filteredBooks.length) {
+      <section class="state-card"><i class="fa-solid fa-book-open-reader"></i><h3>{{ query ? 'لا توجد نتائج' : 'لا توجد كتب بعد' }}</h3><p>{{ query ? 'جرّب كلمات بحث مختلفة.' : 'ستظهر الكتب هنا عند إضافتها إلى المكتبة.' }}</p></section>
+    } @else {
+      <section class="book-grid">
         @for (book of filteredBooks; track getBookId(book)) {
-          <div class="glass-book-card" [routerLink]="['/books', getBookId(book)]">
-            
-            <!-- صورة الغلاف وزر المفضلة العلوي -->
-            <div class="card-media-header">
-              <div class="book-cover-wrapper">
-                @if (getBookCover(book)) {
-                  <img [src]="getBookCover(book)" [alt]="book.title" class="book-cover-img">
-                } @else {
-                  <span class="cover-fallback">{{ book.title ? book.title.slice(0, 1) : 'ك' }}</span>
-                }
-              </div>
-
-              <!-- زر المفضلة العُلوي العائم -->
-              <button 
-                type="button" 
-                class="top-favorite-btn" 
-                [class.active]="isFavorite(book)"
-                (click)="toggleFavorite(book); $event.stopPropagation()" 
-                [disabled]="isFavoriteBusy(book)"
-                [title]="isFavorite(book) ? 'إزالة من المفضلة' : 'إضافة للمفضلة'"
-              >
-                <i class="fa-solid fa-heart"></i>
-              </button>
-
-              <span class="category-floating-badge">
-                {{ categoryName(book) }}
-              </span>
+          <article class="book-card" [routerLink]="['/books', getBookId(book)]">
+            <div class="cover-area">
+              @if (getBookCover(book)) { <img [src]="getBookCover(book)" [alt]="book.title || 'غلاف كتاب'"> } @else { <div class="cover-fallback"><i class="fa-solid fa-book"></i><span>{{ book.title?.slice(0,1) || 'م' }}</span></div> }
+              <button type="button" class="favorite-button" [class.active]="isFavorite(book)" [disabled]="isFavoriteBusy(book)" (click)="toggleFavorite(book); $event.stopPropagation()" [title]="isFavorite(book) ? 'إزالة من المفضلة' : 'إضافة للمفضلة'"><i class="fa-solid fa-heart"></i></button>
+              <span class="category-chip">{{ categoryName(book) }}</span>
             </div>
-
-            <!-- تفاصيل الكتاب والنصوص -->
-            <div class="card-body-content">
-              <h3 class="book-title-text" [title]="book.title">{{ book.title || 'بدون عنوان' }}</h3>
-              
-              <div class="author-row">
-                <i class="fa-solid fa-pen-nib"></i>
-                <span>{{ authorName(book) }}</span>
-              </div>
-
-              <p class="book-desc-text">{{ book.description || 'لا يوجد وصف مختصر متوفر لهذا الكتاب حالياً...' }}</p>
-            </div>
-
-            <!-- إحصائيات الكتاب (تم تصحيح المشاهدات لتطابق viewsCount) -->
-            <div class="card-stats-footer">
-              <span class="stat-item"><i class="fa-solid fa-eye"></i> {{ book.viewsCount || book.views || 0 }} مشاهدة</span>
-              <span class="stat-item"><i class="fa-solid fa-download"></i> {{ book.downloads || 0 }} تحميل</span>
-            </div>
-
-          </div>
+            <div class="book-card-body"><span class="author"><i class="fa-solid fa-pen-nib"></i> {{ authorName(book) }}</span><h2>{{ book.title || 'بدون عنوان' }}</h2><p>{{ book.description || 'كتاب متاح للقراءة ضمن المجموعة الرقمية.' }}</p></div>
+            <footer><span><i class="fa-solid fa-eye"></i> {{ book.viewsCount || book.views || 0 }}</span><span><i class="fa-solid fa-download"></i> {{ book.downloads || 0 }}</span><b>التفاصيل <i class="fa-solid fa-arrow-left"></i></b></footer>
+          </article>
         }
-      </div>
+      </section>
     }
-
   </div>
 </main>
