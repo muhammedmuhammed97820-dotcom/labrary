@@ -46,6 +46,7 @@ export class QuotesComponent implements OnInit {
   }
 
   startEdit(q: Quote): void {
+    if (!this.isOwner(q)) return this.notify.error('لا يمكنك تعديل اقتباس مستخدم آخر.');
     this.editingId = q._id;
     this.quoteText = q.text;
     this.showComposer = true;
@@ -64,14 +65,15 @@ export class QuotesComponent implements OnInit {
     if (!text) return this.notify.warning('اكتب نص الاقتباس.');
     if (text.length < 3) return this.notify.warning('نص الاقتباس قصير جدًا.');
     this.saving = true;
-    const request = this.editingId ? this.service.updateQuote(this.editingId, text) : this.service.addQuote(text);
+    const editing = this.editingId;
+    const request = editing ? this.service.updateQuote(editing, text) : this.service.addQuote(text);
     request.subscribe({
       next: quote => {
-        if (this.editingId) this.quotes = this.quotes.map(q => q._id === quote._id ? quote : q);
+        if (editing) this.quotes = this.quotes.map(q => q._id === quote._id ? quote : q);
         else this.quotes = [quote, ...this.quotes];
         this.applyFilters();
         this.saving = false;
-        this.notify.success(this.editingId ? 'تم تعديل الاقتباس.' : 'تم نشر الاقتباس.');
+        this.notify.success(editing ? 'تم تعديل الاقتباس.' : 'تم نشر الاقتباس.');
         this.cancelComposer();
       },
       error: e => { this.saving = false; this.notify.error(e?.error?.message || 'تعذر حفظ الاقتباس.'); }
@@ -79,7 +81,8 @@ export class QuotesComponent implements OnInit {
   }
 
   deleteQuote(q: Quote): void {
-    if (!this.auth.isLoggedIn || !confirm('هل تريد حذف هذا الاقتباس نهائيًا؟')) return;
+    if (!this.isOwner(q)) return this.notify.error('لا يمكنك حذف اقتباس مستخدم آخر.');
+    if (!confirm('هل تريد حذف هذا الاقتباس نهائيًا؟')) return;
     this.service.deleteQuote(q._id).subscribe({
       next: r => { this.quotes = this.quotes.filter(item => item._id !== q._id); this.applyFilters(); this.notify.success(r.message); },
       error: e => this.notify.error(e?.error?.message || 'تعذر حذف الاقتباس.')
@@ -87,8 +90,9 @@ export class QuotesComponent implements OnInit {
   }
 
   isOwner(q: Quote): boolean {
-    const current = this.auth.user;
-    return !!current && String(current._id) === String(q.user?._id);
+    const current = this.auth.user();
+    const currentId = current?._id || current?.id;
+    return !!currentId && String(currentId) === String(q.user?._id);
   }
 
   applyFilters(): void {
