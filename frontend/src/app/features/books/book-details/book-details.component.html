@@ -1,49 +1,18 @@
-<main class="admin-dashboard-wrapper book-details-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
-  <div class="admin-container">
-    <div class="details-top-bar">
-      <a routerLink="/books" class="back-nav-btn"><i class="fa-solid fa-arrow-right"></i><span>العودة إلى المكتبة</span></a>
-      @if (book) { <span class="book-id-badge"><i class="fa-solid fa-barcode"></i> BOOK ID / {{ bookId }}</span> }
-    </div>
-
-    @if (loading) {
-      <div class="admin-state-box loading-box"><div class="glass-spinner"></div><p>جارِ تحميل تفاصيل الكتاب...</p></div>
-    } @else if (error) {
-      <div class="admin-state-box error-box"><div class="error-content"><i class="fa-solid fa-circle-exclamation error-icon"></i><span>{{ error }}</span></div><a routerLink="/books" class="retry-btn text-decoration-none"><i class="fa-solid fa-rotate-right"></i><span>العودة إلى المكتبة</span></a></div>
-    } @else if (book; as b) {
-      <div class="book-details-grid">
-        <div class="book-info-section">
-          <div class="panel-glass-card h-100">
-            <div class="panel-header mb-3"><span class="panel-tag">{{ category() }}</span><h1 class="panel-title display-title">{{ b.title || 'بدون عنوان' }}</h1></div>
-            <div class="details-author-row mb-4"><div class="quick-icon-box-sm"><i class="fa-solid fa-pen-nib"></i></div><span>بقلم: <strong class="text-primary-custom">{{ author() }}</strong></span></div>
-            <p class="details-desc">{{ b.description || 'لا يوجد وصف تفصيلي متوفر لهذا الكتاب حتى الآن.' }}</p>
-
-            <div class="stats-grid-sm mb-4">
-              <div class="stat-glass-card-sm"><div class="stat-icon-wrapper blue"><i class="fa-solid fa-eye"></i></div><div class="stat-details"><span class="stat-label">المشاهدات</span><strong class="stat-value">{{ b.viewsCount || 0 }}</strong></div></div>
-              <div class="stat-glass-card-sm"><div class="stat-icon-wrapper orange"><i class="fa-solid fa-download"></i></div><div class="stat-details"><span class="stat-label">التحميلات</span><strong class="stat-value">{{ b.downloads || 0 }}</strong></div></div>
-              <div class="stat-glass-card-sm"><div class="stat-icon-wrapper gold"><i class="fa-solid fa-star"></i></div><div class="stat-details"><span class="stat-label">التقييم</span><strong class="stat-value">{{ b.rating || '0.0' }}</strong></div></div>
-              <div class="stat-glass-card-sm"><div class="stat-icon-wrapper purple"><i class="fa-solid fa-calendar-days"></i></div><div class="stat-details"><span class="stat-label">سنة النشر</span><strong class="stat-value">{{ b.publishedYear || '—' }}</strong></div></div>
-            </div>
-
-            <div class="actions-button-group mt-auto">
-              @if (fileUrl()) {
-                <a [routerLink]="['/books', bookId, 'read']" class="add-book-btn text-decoration-none"><i class="fa-solid fa-book-open"></i><span>فتح القارئ</span></a>
-                <button type="button" class="retry-btn-outline" (click)="download()"><i class="fa-solid fa-download"></i><span>تحميل PDF</span></button>
-              }
-              <a [routerLink]="['/books', bookId, 'community']" class="retry-btn-outline text-decoration-none"><i class="fa-solid fa-comments"></i><span>التعليقات والاقتباسات</span></a>
-              <button type="button" class="favorite-toggle-btn" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><i class="fa-solid fa-heart"></i><span>{{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}</span></button>
-            </div>
-          </div>
+<main class="details-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="details-shell">
+    <header class="details-nav"><a routerLink="/books"><i class="fa-solid fa-arrow-right"></i> العودة للمكتبة</a>@if(book){<span><i class="fa-solid fa-hashtag"></i>{{ bookId }}</span>}</header>
+    @if(loading){<section class="details-state"><div class="spinner"></div><p>جارِ تحميل الكتاب...</p></section>}
+    @else if(error){<section class="details-state error"><i class="fa-solid fa-triangle-exclamation"></i><h2>تعذر تحميل الكتاب</h2><p>{{ error }}</p><a routerLink="/books">العودة للمكتبة</a></section>}
+    @else if(book;as b){
+      <section class="details-hero">
+        <div class="details-cover"><img [src]="cover()" [alt]="b.title"><span>{{ category() }}</span></div>
+        <div class="details-main">
+          <span class="category-label">{{ category() }}</span><h1>{{ b.title || 'بدون عنوان' }}</h1><div class="author-line"><i class="fa-solid fa-pen-nib"></i> بقلم <strong>{{ author() }}</strong></div><p class="details-description">{{ b.description || 'لا يوجد وصف تفصيلي متوفر لهذا الكتاب حتى الآن.' }}</p>
+          <div class="detail-stats"><div><i class="fa-solid fa-eye"></i><b>{{ b.viewsCount || 0 }}</b><small>مشاهدة</small></div><div><i class="fa-solid fa-download"></i><b>{{ b.downloads || 0 }}</b><small>تحميل</small></div><div><i class="fa-solid fa-star"></i><b>{{ b.rating || '0.0' }}</b><small>تقييم</small></div><div><i class="fa-solid fa-calendar"></i><b>{{ b.publishedYear || '—' }}</b><small>النشر</small></div></div>
+          <div class="details-actions">@if(fileUrl()){<a [routerLink]="['/books',bookId,'read']" class="primary-action"><i class="fa-solid fa-book-open"></i> فتح القارئ</a><button type="button" class="secondary-action" (click)="download()"><i class="fa-solid fa-download"></i> تحميل PDF</button>}<a [routerLink]="['/books',bookId,'community']" class="secondary-action"><i class="fa-solid fa-comments"></i> المجتمع</a><button type="button" class="favorite-action" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><i class="fa-solid fa-heart"></i> {{isFavorite()?'في المفضلة':'إضافة للمفضلة'}}</button></div>
         </div>
-
-        <div class="book-cover-section">
-          <div class="panel-glass-card text-center p-3"><div class="cover-image-container"><img [src]="cover()" [alt]="b.title" class="details-cover-img"></div><div class="cover-card-footer mt-3"><span class="panel-tag">DIGITAL LIBRARY COVER</span></div></div>
-        </div>
-      </div>
-
-      <div class="panels-grid mt-4">
-        <div class="panel-glass-card"><div class="panel-header"><span class="panel-tag">SPECIFICATIONS</span><h2 class="panel-title"><i class="fa-solid fa-circle-info me-2 text-warning"></i> معلومات الكتاب</h2></div><ul class="info-list-specs"><li><span>المؤلف:</span> <strong>{{ author() }}</strong></li><li><span>التصنيف:</span> <strong>{{ category() }}</strong></li><li><span>سنة النشر:</span> <strong>{{ b.publishedYear || 'غير محددة' }}</strong></li><li><span>حالة التوفر:</span> <span class="status-badge" [class.available]="b.isAvailable !== false" [class.unavailable]="b.isAvailable === false">{{ b.isAvailable === false ? 'غير متاح حالياً' : 'متاح للقراءة والتحميل' }}</span></li></ul></div>
-        <div class="panel-glass-card"><div class="panel-header"><span class="panel-tag">OVERVIEW</span><h2 class="panel-title"><i class="fa-solid fa-quote-right me-2 text-warning"></i> نبذة عن الكتاب</h2></div><p class="about-long-text">{{ b.description || 'لا توجد تفاصيل إضافية مسجلة لهذا الكتاب في الوقت الحالي.' }}</p></div>
-      </div>
+      </section>
+      <section class="details-lower"><article><span class="section-kicker">SPECIFICATIONS</span><h2>معلومات الكتاب</h2><dl><div><dt>المؤلف</dt><dd>{{ author() }}</dd></div><div><dt>التصنيف</dt><dd>{{ category() }}</dd></div><div><dt>سنة النشر</dt><dd>{{ b.publishedYear || 'غير محددة' }}</dd></div><div><dt>التوفر</dt><dd>{{ b.isAvailable === false ? 'غير متاح حالياً' : 'متاح للقراءة والتحميل' }}</dd></div></dl></article><article><span class="section-kicker">OVERVIEW</span><h2>نبذة عن الكتاب</h2><p>{{ b.description || 'لا توجد تفاصيل إضافية مسجلة لهذا الكتاب في الوقت الحالي.' }}</p></article></section>
     }
   </div>
 </main>
