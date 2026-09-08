@@ -1,1 +1,51 @@
-/* Navbar styling is centralized in frontend/src/styles.scss. */
+/* Local responsive hooks only; the visual system remains centralized in styles.scss. */
+@media (max-width: 991px) {
+  .navbar-glass-wrapper .navbar-glass-container {
+    flex-wrap: wrap;
+  }
+
+  .navbar-glass-wrapper .nav-links-desktop {
+    order: 3;
+    flex: 1 0 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 4px;
+  }
+
+  .navbar-glass-wrapper .nav-links-desktop::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navbar-glass-wrapper .nav-item-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar-glass-wrapper {
+    width: calc(100% - 16px);
+    margin-top: 8px;
+  }
+
+  .navbar-glass-wrapper .navbar-glass-container {
+    gap: 8px;
+  }
+
+  .navbar-glass-wrapper .nav-links-desktop {
+    margin-top: 2px;
+  }
+
+  .navbar-glass-wrapper .nav-actions {
+    margin-right: auto;
+  }
+
+  .navbar-glass-wrapper .auth-btns-group {
+    display: none;
+  }
+
+  .navbar-glass-wrapper .user-name-text {
+    display: none;
+  }
+}
