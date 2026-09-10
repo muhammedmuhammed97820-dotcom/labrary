@@ -24,6 +24,29 @@
     </div>
 
     <div class="nav-actions">
+      <div class="theme-picker-wrap">
+        <button class="action-btn theme-picker-trigger" type="button" (click)="toggleThemePicker()" aria-label="تغيير المظهر" title="تغيير المظهر">
+          <i class="fa-solid fa-palette"></i>
+        </button>
+        @if (themePickerOpen) {
+          <div class="theme-picker glass" dir="rtl">
+            <div class="theme-picker-header">
+              <div><strong>مظهر المكتبة</strong><small>اختر ألوان واجهة الموقع</small></div>
+              <button type="button" class="theme-close" (click)="toggleThemePicker()">×</button>
+            </div>
+            <div class="theme-options">
+              @for (item of themeService.themes; track item.id) {
+                <button type="button" class="theme-option" [class.selected]="themeService.isSelected(item.id)" (click)="selectTheme(item.id)" [title]="item.name">
+                  <span class="theme-preview" [style.background]="item.colors"><i [class]="item.icon"></i></span>
+                  <span class="theme-option-copy"><b>{{ item.name }}</b><small>{{ item.id === 'light' ? 'فاتح' : item.id === 'dark' ? 'داكن' : 'تدرج' }}</small></span>
+                  @if (themeService.isSelected(item.id)) { <i class="fa-solid fa-circle-check theme-selected-icon"></i> }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
       <div class="notification-center">
         <button class="action-btn notification-trigger" (click)="toggleNotifications()" aria-label="الإشعارات" title="الإشعارات">
           <i class="fa-regular fa-bell"></i>
@@ -57,10 +80,6 @@
           </div>
         }
       </div>
-
-      <button class="action-btn theme-toggle-btn" (click)="toggleTheme()" [title]="themeService.isDarkMode() ? 'الوضع النهاري' : 'الوضع الليلي'">
-        @if (themeService.isDarkMode()) { <i class="fa-solid fa-sun icon-sun"></i> } @else { <i class="fa-solid fa-moon icon-moon"></i> }
-      </button>
 
       @if (isLoggedIn) {
         <div class="user-pill-wrapper">
