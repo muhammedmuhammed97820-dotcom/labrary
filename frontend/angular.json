@@ -26,9 +26,9 @@
               {"glob": "**/*", "input": "node_modules/pdfjs-dist/wasm", "output": "assets/pdfjs/wasm"}
             ],
             "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.scss",
-              "src/features-glass-overrides.scss",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "src/features-glass-overrides.scss"
             ],
             "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"]
           },
