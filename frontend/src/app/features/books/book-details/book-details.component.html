@@ -1,18 +1,92 @@
 <main class="details-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="details-shell">
-    <header class="details-nav"><a routerLink="/books"><i class="fa-solid fa-arrow-right"></i> العودة للمكتبة</a>@if(book){<span><i class="fa-solid fa-hashtag"></i>{{ bookId }}</span>}</header>
-    @if(loading){<section class="details-state"><div class="spinner"></div><p>جارِ تحميل الكتاب...</p></section>}
-    @else if(error){<section class="details-state error"><i class="fa-solid fa-triangle-exclamation"></i><h2>تعذر تحميل الكتاب</h2><p>{{ error }}</p><a routerLink="/books">العودة للمكتبة</a></section>}
-    @else if(book;as b){
+    <header class="details-nav">
+      <a routerLink="/books"><i class="fa-solid fa-arrow-right"></i><span>العودة إلى المكتبة</span></a>
+      @if (book) { <span class="book-id"><i class="fa-solid fa-fingerprint"></i><span>{{ bookId }}</span></span> }
+    </header>
+
+    @if (loading) {
+      <section class="details-state loading-state">
+        <div class="state-orb"><div class="spinner"></div></div>
+        <div><strong>نحضّر صفحة الكتاب</strong><p>جاري تحميل التفاصيل والمعلومات...</p></div>
+      </section>
+    } @else if (error) {
+      <section class="details-state error">
+        <div class="state-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h2>تعذر تحميل الكتاب</h2>
+        <p>{{ error }}</p>
+        <a routerLink="/books" class="state-action"><i class="fa-solid fa-arrow-right"></i> العودة للمكتبة</a>
+      </section>
+    } @else if (book; as b) {
       <section class="details-hero">
-        <div class="details-cover"><img [src]="cover()" [alt]="b.title"><span>{{ category() }}</span></div>
+        <div class="hero-glow hero-glow-one"></div>
+        <div class="hero-glow hero-glow-two"></div>
+
+        <aside class="details-cover-column">
+          <div class="details-cover">
+            <div class="cover-frame">
+              <img [src]="cover()" [alt]="b.title || 'غلاف الكتاب'">
+              <div class="cover-shine"></div>
+            </div>
+            <div class="cover-badge"><i class="fa-solid fa-book-open"></i> متاح رقمياً</div>
+            <div class="cover-shadow"></div>
+          </div>
+          <div class="cover-caption"><i class="fa-solid fa-sparkles"></i><span>رحلة جديدة تبدأ من صفحة</span></div>
+        </aside>
+
         <div class="details-main">
-          <span class="category-label">{{ category() }}</span><h1>{{ b.title || 'بدون عنوان' }}</h1><div class="author-line"><i class="fa-solid fa-pen-nib"></i> بقلم <strong>{{ author() }}</strong></div><p class="details-description">{{ b.description || 'لا يوجد وصف تفصيلي متوفر لهذا الكتاب حتى الآن.' }}</p>
-          <div class="detail-stats"><div><i class="fa-solid fa-eye"></i><b>{{ b.viewsCount || 0 }}</b><small>مشاهدة</small></div><div><i class="fa-solid fa-download"></i><b>{{ b.downloads || 0 }}</b><small>تحميل</small></div><div><i class="fa-solid fa-star"></i><b>{{ b.rating || '0.0' }}</b><small>تقييم</small></div><div><i class="fa-solid fa-calendar"></i><b>{{ b.publishedYear || '—' }}</b><small>النشر</small></div></div>
-          <div class="details-actions">@if(fileUrl()){<a [routerLink]="['/books',bookId,'read']" class="primary-action"><i class="fa-solid fa-book-open"></i> فتح القارئ</a><button type="button" class="secondary-action" (click)="download()"><i class="fa-solid fa-download"></i> تحميل PDF</button>}<a [routerLink]="['/books',bookId,'community']" class="secondary-action"><i class="fa-solid fa-comments"></i> المجتمع</a><button type="button" class="favorite-action" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><i class="fa-solid fa-heart"></i> {{isFavorite()?'في المفضلة':'إضافة للمفضلة'}}</button></div>
+          <div class="title-meta">
+            <span class="category-label"><i class="fa-solid fa-layer-group"></i>{{ category() }}</span>
+            <span class="availability"><i class="fa-solid fa-circle"></i> متاح الآن</span>
+          </div>
+
+          <h1>{{ b.title || 'بدون عنوان' }}</h1>
+
+          <div class="author-line">
+            <span class="author-avatar"><i class="fa-solid fa-pen-nib"></i></span>
+            <span>بقلم</span>
+            <strong>{{ author() }}</strong>
+          </div>
+
+          <p class="details-description">{{ b.description || 'لا يوجد وصف تفصيلي متوفر لهذا الكتاب حتى الآن.' }}</p>
+
+          <div class="detail-stats">
+            <div class="stat-item"><span class="stat-icon"><i class="fa-solid fa-eye"></i></span><b>{{ b.viewsCount || 0 }}</b><small>مشاهدة</small></div>
+            <div class="stat-item"><span class="stat-icon"><i class="fa-solid fa-download"></i></span><b>{{ b.downloads || 0 }}</b><small>تحميل</small></div>
+            <div class="stat-item"><span class="stat-icon"><i class="fa-solid fa-star"></i></span><b>{{ b.rating || '0.0' }}</b><small>التقييم</small></div>
+            <div class="stat-item"><span class="stat-icon"><i class="fa-solid fa-calendar-days"></i></span><b>{{ b.publishedYear || '—' }}</b><small>سنة النشر</small></div>
+          </div>
+
+          <div class="details-actions">
+            @if (fileUrl()) {
+              <a [routerLink]="['/books', bookId, 'read']" class="primary-action"><i class="fa-solid fa-book-open-reader"></i><span>فتح القارئ</span></a>
+              <button type="button" class="secondary-action" (click)="download()"><i class="fa-solid fa-cloud-arrow-down"></i><span>تحميل PDF</span></button>
+            }
+            <a [routerLink]="['/books', bookId, 'community']" class="secondary-action"><i class="fa-solid fa-comments"></i><span>المجتمع</span></a>
+            <button type="button" class="favorite-action" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><i class="fa-solid fa-heart"></i><span>{{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}</span></button>
+          </div>
+
+          <div class="trust-line"><i class="fa-solid fa-shield-halved"></i><span>تجربة قراءة رقمية آمنة ومريحة</span><i class="fa-solid fa-wand-magic-sparkles"></i><span>مكتبتك دائماً معك</span></div>
         </div>
       </section>
-      <section class="details-lower"><article><span class="section-kicker">SPECIFICATIONS</span><h2>معلومات الكتاب</h2><dl><div><dt>المؤلف</dt><dd>{{ author() }}</dd></div><div><dt>التصنيف</dt><dd>{{ category() }}</dd></div><div><dt>سنة النشر</dt><dd>{{ b.publishedYear || 'غير محددة' }}</dd></div><div><dt>التوفر</dt><dd>{{ b.isAvailable === false ? 'غير متاح حالياً' : 'متاح للقراءة والتحميل' }}</dd></div></dl></article><article><span class="section-kicker">OVERVIEW</span><h2>نبذة عن الكتاب</h2><p>{{ b.description || 'لا توجد تفاصيل إضافية مسجلة لهذا الكتاب في الوقت الحالي.' }}</p></article></section>
+
+      <section class="details-lower">
+        <article class="info-panel specifications-panel">
+          <div class="panel-heading"><span class="panel-icon"><i class="fa-solid fa-sliders"></i></span><div><span class="section-kicker">SPECIFICATIONS</span><h2>معلومات الكتاب</h2></div></div>
+          <dl>
+            <div><dt><i class="fa-solid fa-pen-nib"></i> المؤلف</dt><dd>{{ author() }}</dd></div>
+            <div><dt><i class="fa-solid fa-layer-group"></i> التصنيف</dt><dd>{{ category() }}</dd></div>
+            <div><dt><i class="fa-solid fa-calendar"></i> سنة النشر</dt><dd>{{ b.publishedYear || 'غير محددة' }}</dd></div>
+            <div><dt><i class="fa-solid fa-circle-check"></i> التوفر</dt><dd>{{ b.isAvailable === false ? 'غير متاح حالياً' : 'متاح للقراءة والتحميل' }}</dd></div>
+          </dl>
+        </article>
+
+        <article class="info-panel overview-panel">
+          <div class="panel-heading"><span class="panel-icon"><i class="fa-solid fa-feather-pointed"></i></span><div><span class="section-kicker">OVERVIEW</span><h2>نبذة عن الكتاب</h2></div></div>
+          <p>{{ b.description || 'لا توجد تفاصيل إضافية مسجلة لهذا الكتاب في الوقت الحالي.' }}</p>
+          <div class="overview-footer"><span><i class="fa-solid fa-quote-right"></i> المعرفة تبدأ بخطوة</span><span><i class="fa-solid fa-bookmark"></i> مكتبتك الرقمية</span></div>
+        </article>
+      </section>
     }
   </div>
 </main>
