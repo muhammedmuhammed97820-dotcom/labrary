@@ -2,55 +2,86 @@
   <div class="home-shell">
     <section class="hero-section">
       <div class="hero-content">
-        <span class="eyebrow"><i class="fa-solid fa-sparkles"></i> مكتبة رقمية عربية</span>
+        <div class="hero-badge"><span class="badge-dot"></span><i class="fa-solid fa-sparkles"></i> مكتبة رقمية عربية • تجربة قراءة حديثة</div>
         <h1>المعرفة أقرب<br><span>مما تتخيل.</span></h1>
-        <p>اكتشف مكتبة متجددة من الكتب، المؤلفين والمجالات. اقرأ، احفظ، واصنع مساحتك الخاصة للمعرفة.</p>
+        <p>اكتشف عالماً من الكتب والمؤلفين والتصنيفات في مساحة رقمية صُممت لتجعل البحث والقراءة وحفظ مكتبتك الشخصية أكثر متعة.</p>
         <div class="hero-actions">
-          <a routerLink="/books" class="hero-primary"><i class="fa-solid fa-book-open"></i> استكشف الكتب</a>
-          <a routerLink="/categories" class="hero-secondary"><i class="fa-solid fa-layer-group"></i> تصفح التصنيفات</a>
+          <a routerLink="/books" class="hero-primary"><i class="fa-solid fa-book-open"></i><span>استكشف الكتب</span><i class="fa-solid fa-arrow-left action-arrow"></i></a>
+          <a routerLink="/categories" class="hero-secondary"><i class="fa-solid fa-layer-group"></i><span>تصفح التصنيفات</span></a>
         </div>
-        <div class="hero-trust"><span><i class="fa-solid fa-shield-halved"></i> وصول آمن</span><span><i class="fa-solid fa-cloud"></i> مكتبتك متاحة دائماً</span><span><i class="fa-solid fa-mobile-screen"></i> تجربة متجاوبة</span></div>
+        <div class="hero-trust">
+          <span><i class="fa-solid fa-shield-halved"></i> وصول آمن</span>
+          <span><i class="fa-solid fa-cloud"></i> مكتبتك متاحة دائماً</span>
+          <span><i class="fa-solid fa-mobile-screen"></i> متجاوبة مع كل الأجهزة</span>
+        </div>
       </div>
+
       <div class="hero-visual" aria-hidden="true">
+        <div class="visual-grid"></div>
         <div class="orb orb-one"></div><div class="orb orb-two"></div>
-        <div class="floating-book main-book"><div class="book-spine">مَكتبة</div><div class="book-face"><i class="fa-solid fa-book-open"></i><strong>رحلة<br>المعرفة</strong><small>DIGITAL EDITION</small></div></div>
-        <div class="floating-card card-top"><i class="fa-solid fa-star"></i><div><b>تجربة قراءة</b><small>مصممة لك</small></div></div>
-        <div class="floating-card card-bottom"><i class="fa-solid fa-bookmark"></i><div><b>احفظ كتبك</b><small>في مكان واحد</small></div></div>
+        <div class="visual-ring ring-one"></div><div class="visual-ring ring-two"></div>
+        <div class="floating-book main-book">
+          <div class="book-glow"></div>
+          <div class="book-spine">مَكتبة</div>
+          <div class="book-face">
+            <span class="book-edition">DIGITAL LIBRARY</span>
+            <i class="fa-solid fa-book-open"></i>
+            <strong>رحلة<br>المعرفة</strong>
+            <small>READ • DISCOVER • SAVE</small>
+          </div>
+        </div>
+        <div class="floating-card card-top"><i class="fa-solid fa-star"></i><div><b>تجربة قراءة</b><small>مصممة لك</small></div><span>✦</span></div>
+        <div class="floating-card card-bottom"><i class="fa-solid fa-bookmark"></i><div><b>احفظ كتبك</b><small>في مكان واحد</small></div><span>✓</span></div>
       </div>
     </section>
 
-    <section class="quick-stats">
-      <div><strong>+1000</strong><span>عنوان قابل للاكتشاف</span></div>
-      <div><strong>24/7</strong><span>وصول إلى مكتبتك</span></div>
-      <div><strong>∞</strong><span>مساحة للقراءة</span></div>
-      <div><strong>1</strong><span>تجربة موحدة</span></div>
+    <section class="quick-stats" aria-label="إحصائيات المكتبة">
+      <div><span class="stat-icon"><i class="fa-solid fa-book"></i></span><strong>+1000</strong><small>عنوان قابل للاكتشاف</small></div>
+      <div><span class="stat-icon"><i class="fa-solid fa-clock"></i></span><strong>24/7</strong><small>وصول إلى مكتبتك</small></div>
+      <div><span class="stat-icon"><i class="fa-solid fa-infinity"></i></span><strong>∞</strong><small>مساحة للقراءة</small></div>
+      <div><span class="stat-icon"><i class="fa-solid fa-sparkles"></i></span><strong>1</strong><small>تجربة موحدة</small></div>
     </section>
 
     <section class="section-block">
-      <div class="section-heading"><div><span class="section-kicker">مختارات المكتبة</span><h2>ابدأ من هنا</h2><p>مجموعة من أحدث الكتب المتاحة في مكتبتك.</p></div><a routerLink="/books" class="text-link">عرض الكل <i class="fa-solid fa-arrow-left"></i></a></div>
+      <div class="section-heading">
+        <div class="heading-copy"><span class="section-kicker"><i class="fa-solid fa-wand-magic-sparkles"></i> مختارات المكتبة</span><h2>ابدأ من هنا</h2><p>أحدث الكتب المتاحة، جاهزة لتكون جزءاً من رحلتك.</p></div>
+        <a routerLink="/books" class="text-link">عرض كل الكتب <i class="fa-solid fa-arrow-left"></i></a>
+      </div>
+
       @if (loadingBooks) {
-        <div class="loading-panel"><div class="glass-spinner"></div><span>نجهز لك أحدث الكتب...</span></div>
+        <div class="loading-panel"><div class="loading-orbit"><span></span></div><strong>نجهز لك أحدث الكتب...</strong><small>لحظات ونكون جاهزين</small></div>
       } @else if (realBooks.length) {
         <div class="featured-books">
           @for (book of realBooks; track getBookId(book); let i = $index) {
             <a class="featured-book" [routerLink]="['/books', getBookId(book)]">
               <div class="featured-cover">
                 @if (getBookCover(book)) { <img [src]="getBookCover(book)" [alt]="book.title"> }
-                @else { <span>{{ book.title?.slice(0,1) || 'م' }}</span> }
+                @else { <span class="cover-placeholder"><i class="fa-solid fa-book-open"></i>{{ book.title?.slice(0,1) || 'م' }}</span> }
                 <b>{{ (i + 1).toString().padStart(2,'0') }}</b>
+                <span class="cover-shine"></span>
+                <span class="cover-open"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
               </div>
-              <div class="featured-info"><span>{{ getAuthorName(book) }}</span><h3>{{ book.title || 'بدون عنوان' }}</h3><p>{{ book.description || 'كتاب متاح الآن ضمن المجموعة الرقمية.' }}</p><small>فتح التفاصيل <i class="fa-solid fa-arrow-left"></i></small></div>
+              <div class="featured-info">
+                <span class="book-author"><i class="fa-solid fa-pen-nib"></i> {{ getAuthorName(book) }}</span>
+                <h3>{{ book.title || 'بدون عنوان' }}</h3>
+                <p>{{ book.description || 'كتاب متاح الآن ضمن المجموعة الرقمية.' }}</p>
+                <small>فتح التفاصيل <i class="fa-solid fa-arrow-left"></i></small>
+              </div>
             </a>
           }
         </div>
       } @else {
-        <div class="empty-panel"><i class="fa-solid fa-book-open"></i><h3>المكتبة بانتظار أول كتاب</h3><p>ستظهر الكتب هنا تلقائياً عند إضافتها.</p></div>
+        <div class="empty-panel"><span><i class="fa-solid fa-book-open"></i></span><h3>المكتبة بانتظار أول كتاب</h3><p>ستظهر الكتب هنا تلقائياً عند إضافتها.</p><a routerLink="/books">اذهب إلى المكتبة <i class="fa-solid fa-arrow-left"></i></a></div>
       }
     </section>
 
     <section class="discover-banner">
-      <div><span class="section-kicker">مساحتك الخاصة</span><h2>لا تقرأ فقط…<br><span>ابنِ مكتبتك.</span></h2><p>أضف الكتب إلى المفضلة، تابع قراءتك، وشارك ما يستحق المشاركة.</p></div>
-      <div class="discover-actions"><a routerLink="/favorites"><i class="fa-solid fa-heart"></i> المفضلة</a><a routerLink="/quotes"><i class="fa-solid fa-quote-right"></i> الاقتباسات</a><a routerLink="/authors"><i class="fa-solid fa-user-pen"></i> المؤلفون</a></div>
+      <div class="discover-copy"><span class="section-kicker"><i class="fa-solid fa-compass"></i> مساحتك الخاصة</span><h2>لا تقرأ فقط…<br><span>ابنِ مكتبتك.</span></h2><p>أضف الكتب إلى المفضلة، تابع ما تحب، واستكشف المؤلفين والاقتباسات التي تلهمك.</p></div>
+      <div class="discover-actions">
+        <a routerLink="/favorites"><i class="fa-solid fa-heart"></i><span>المفضلة</span><i class="fa-solid fa-arrow-left"></i></a>
+        <a routerLink="/quotes"><i class="fa-solid fa-quote-right"></i><span>الاقتباسات</span><i class="fa-solid fa-arrow-left"></i></a>
+        <a routerLink="/authors"><i class="fa-solid fa-user-pen"></i><span>المؤلفون</span><i class="fa-solid fa-arrow-left"></i></a>
+      </div>
     </section>
   </div>
 </main>
