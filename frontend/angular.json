@@ -28,7 +28,8 @@
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.scss",
-              "src/features-glass-overrides.scss"
+              "src/features-glass-overrides.scss",
+              "src/theme-day-fix.scss"
             ],
             "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"]
           },
