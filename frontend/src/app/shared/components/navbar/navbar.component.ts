@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { ThemeService } from '../../../core/services/theme.service';
+import { LibraryTheme, ThemeService } from '../../../core/services/theme.service';
 import { NotificationService, Toast } from '../../../core/services/notification.service';
 
 @Component({
@@ -22,6 +22,7 @@ export class NavbarComponent {
 
   menuOpen = false;
   notificationsOpen = false;
+  themePickerOpen = false;
 
   get isAdmin(): boolean { return this.auth.isAdmin; }
   get isLoggedIn(): boolean { return this.auth.isLoggedIn; }
@@ -38,9 +39,25 @@ export class NavbarComponent {
 
   toggleTheme(): void { this.themeService.toggleTheme(); }
 
+  toggleThemePicker(): void {
+    this.themePickerOpen = !this.themePickerOpen;
+    if (this.themePickerOpen) {
+      this.notificationsOpen = false;
+      this.menuOpen = false;
+    }
+  }
+
+  selectTheme(theme: LibraryTheme): void {
+    this.themeService.selectTheme(theme);
+    this.themePickerOpen = false;
+  }
+
   toggleNotifications(): void {
     this.notificationsOpen = !this.notificationsOpen;
-    if (this.notificationsOpen) this.menuOpen = false;
+    if (this.notificationsOpen) {
+      this.menuOpen = false;
+      this.themePickerOpen = false;
+    }
   }
 
   dismissNotification(toast: Toast): void { this.notificationService.remove(toast.id); }
@@ -58,6 +75,9 @@ export class NavbarComponent {
   closeMenu(): void { this.menuOpen = false; }
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
-    if (this.menuOpen) this.notificationsOpen = false;
+    if (this.menuOpen) {
+      this.notificationsOpen = false;
+      this.themePickerOpen = false;
+    }
   }
 }
