@@ -1,32 +1,73 @@
 <main class="library-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="library-shell">
     <header class="library-header">
-      <div><span class="eyebrow"><i class="fa-solid fa-book-open"></i> COLLECTION</span><h1>مكتبتك، <span>بلا حدود.</span></h1><p>ابحث عن الكتاب الذي يناسبك واستكشف مجموعة المعرفة المتاحة في مكتبتك الرقمية.</p></div>
-      <div class="header-actions"><a routerLink="/categories" class="soft-action"><i class="fa-solid fa-layer-group"></i> التصنيفات</a><a routerLink="/favorites" class="soft-action"><i class="fa-solid fa-heart"></i> المفضلة</a></div>
+      <div class="library-title-block">
+        <span class="eyebrow"><i class="fa-solid fa-sparkles"></i> DIGITAL COLLECTION</span>
+        <h1>اكتشف <span>عالم الكتب.</span></h1>
+        <p>مجموعة رقمية صُممت لتخليك توصل للمعرفة بسرعة، وتكتشف كتب جديدة تستحق وقتك.</p>
+      </div>
+      <div class="header-actions">
+        <a routerLink="/categories" class="soft-action"><i class="fa-solid fa-layer-group"></i><span>التصنيفات</span></a>
+        <a routerLink="/favorites" class="soft-action"><i class="fa-solid fa-heart"></i><span>المفضلة</span></a>
+      </div>
     </header>
 
     <section class="library-toolbar">
-      <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input type="text" [(ngModel)]="query" placeholder="ابحث بالعنوان، المؤلف، التصنيف أو الوصف..."><button *ngIf="query" type="button" (click)="query=''" aria-label="مسح"><i class="fa-solid fa-xmark"></i></button></div>
-      <div class="toolbar-meta"><span class="result-count"><strong>{{ filteredBooks.length }}</strong> كتاب</span><button type="button" class="refresh-action" (click)="load(true)" [disabled]="loading"><i class="fa-solid fa-rotate-right" [class.spin]="loading"></i> تحديث</button></div>
+      <div class="search-wrap">
+        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input type="text" [(ngModel)]="query" placeholder="ابحث عن عنوان، مؤلف، تصنيف أو وصف...">
+        <button *ngIf="query" type="button" (click)="query=''" aria-label="مسح البحث"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="toolbar-meta">
+        <span class="result-count"><b>{{ filteredBooks.length }}</b><span>كتاب متاح</span></span>
+        <button type="button" class="refresh-action" (click)="load(true)" [disabled]="loading">
+          <i class="fa-solid fa-rotate-right" [class.spin]="loading"></i><span>تحديث</span>
+        </button>
+      </div>
     </section>
 
     @if (loading) {
-      <section class="state-card"><div class="spinner"></div><h3>نجهز المكتبة...</h3><p>لحظات ونظهر لك الكتب المتاحة.</p></section>
+      <section class="state-card loading-state">
+        <div class="state-icon"><div class="spinner"></div></div>
+        <h3>نرتب لك المكتبة</h3><p>ثواني ونجهز الكتب المتاحة...</p>
+      </section>
     } @else if (error) {
-      <section class="state-card error"><i class="fa-solid fa-triangle-exclamation"></i><h3>تعذر تحميل الكتب</h3><p>{{ error }}</p><button class="primary-action" (click)="load(true)">إعادة المحاولة</button></section>
+      <section class="state-card error">
+        <div class="state-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3>تعذر تحميل الكتب</h3><p>{{ error }}</p>
+        <button class="primary-action" (click)="load(true)"><i class="fa-solid fa-rotate-right"></i> إعادة المحاولة</button>
+      </section>
     } @else if (!filteredBooks.length) {
-      <section class="state-card"><i class="fa-solid fa-book-open-reader"></i><h3>{{ query ? 'لا توجد نتائج' : 'لا توجد كتب بعد' }}</h3><p>{{ query ? 'جرّب كلمات بحث مختلفة.' : 'ستظهر الكتب هنا عند إضافتها إلى المكتبة.' }}</p></section>
+      <section class="state-card">
+        <div class="state-icon"><i class="fa-solid fa-book-open-reader"></i></div>
+        <h3>{{ query ? 'ما لقينا نتائج' : 'المكتبة بانتظار الكتب' }}</h3>
+        <p>{{ query ? 'غيّر كلمات البحث وجرب مرة ثانية.' : 'ستظهر الكتب هنا عند إضافتها إلى المكتبة.' }}</p>
+      </section>
     } @else {
+      <section class="library-section-head">
+        <div><span>المجموعة الرقمية</span><h2>كتب تستحق الاكتشاف</h2></div>
+        <div class="section-line"></div>
+      </section>
       <section class="book-grid">
         @for (book of filteredBooks; track getBookId(book)) {
           <article class="book-card" [routerLink]="['/books', getBookId(book)]">
             <div class="cover-area">
-              @if (getBookCover(book)) { <img [src]="getBookCover(book)" [alt]="book.title || 'غلاف كتاب'"> } @else { <div class="cover-fallback"><i class="fa-solid fa-book"></i><span>{{ book.title?.slice(0,1) || 'م' }}</span></div> }
+              @if (getBookCover(book)) { <img [src]="getBookCover(book)" [alt]="book.title || 'غلاف كتاب'"> }
+              @else { <div class="cover-fallback"><i class="fa-solid fa-book"></i><span>{{ book.title?.slice(0,1) || 'م' }}</span><small>DIGITAL BOOK</small></div> }
+              <div class="cover-shine"></div>
               <button type="button" class="favorite-button" [class.active]="isFavorite(book)" [disabled]="isFavoriteBusy(book)" (click)="toggleFavorite(book); $event.stopPropagation()" [title]="isFavorite(book) ? 'إزالة من المفضلة' : 'إضافة للمفضلة'"><i class="fa-solid fa-heart"></i></button>
               <span class="category-chip">{{ categoryName(book) }}</span>
             </div>
-            <div class="book-card-body"><span class="author"><i class="fa-solid fa-pen-nib"></i> {{ authorName(book) }}</span><h2>{{ book.title || 'بدون عنوان' }}</h2><p>{{ book.description || 'كتاب متاح للقراءة ضمن المجموعة الرقمية.' }}</p></div>
-            <footer><span><i class="fa-solid fa-eye"></i> {{ book.viewsCount || book.views || 0 }}</span><span><i class="fa-solid fa-download"></i> {{ book.downloads || 0 }}</span><b>التفاصيل <i class="fa-solid fa-arrow-left"></i></b></footer>
+            <div class="book-card-body">
+              <span class="author"><i class="fa-solid fa-pen-nib"></i> {{ authorName(book) }}</span>
+              <h2>{{ book.title || 'بدون عنوان' }}</h2>
+              <p>{{ book.description || 'كتاب متاح للقراءة ضمن المجموعة الرقمية.' }}</p>
+            </div>
+            <footer>
+              <span><i class="fa-solid fa-eye"></i> {{ book.viewsCount || book.views || 0 }}</span>
+              <span><i class="fa-solid fa-download"></i> {{ book.downloads || 0 }}</span>
+              <b>فتح الكتاب <i class="fa-solid fa-arrow-left"></i></b>
+            </footer>
           </article>
         }
       </section>
