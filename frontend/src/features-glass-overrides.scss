@@ -1,11 +1,22 @@
 /* Central visual contract for every feature page. Keep feature SCSS for layout-only rules. */
 :root{--feature-radius:24px;--feature-gap:18px}
 
+/* Eight visual identities. ThemeService writes data-theme on html/body. */
+html[data-theme='light'],body[data-theme='light']{--bg:#eef3f9;--bg2:#f8faff;--surface:rgba(255,255,255,.68);--surface-strong:rgba(255,255,255,.86);--surface-soft:rgba(67,82,110,.055);--border:rgba(73,91,122,.14);--border-strong:rgba(73,91,122,.24);--text:#172033;--muted:#667085;--accent:#6366f1;--accent2:#06b6d4;--shadow:0 24px 65px rgba(70,90,120,.15)}
+html[data-theme='dark'],body[data-theme='dark']{--bg:#080d1b;--bg2:#10182b;--surface:rgba(17,29,49,.62);--surface-strong:rgba(20,35,58,.86);--surface-soft:rgba(255,255,255,.055);--border:rgba(255,255,255,.12);--border-strong:rgba(255,255,255,.22);--text:#f4f7ff;--muted:#9ca8bd;--accent:#818cf8;--accent2:#22d3ee;--shadow:0 24px 70px rgba(0,0,0,.32)}
+html[data-theme='purple'],body[data-theme='purple']{--bg:#130d21;--bg2:#24102f;--surface:rgba(45,24,65,.58);--surface-strong:rgba(55,27,76,.84);--surface-soft:rgba(255,255,255,.055);--border:rgba(216,180,254,.15);--border-strong:rgba(236,72,153,.3);--text:#fbf7ff;--muted:#c6b5d4;--accent:#a855f7;--accent2:#ec4899;--shadow:0 28px 80px rgba(18,6,31,.4)}
+html[data-theme='ocean'],body[data-theme='ocean']{--bg:#061522;--bg2:#072a3a;--surface:rgba(7,45,63,.58);--surface-strong:rgba(8,57,77,.84);--surface-soft:rgba(255,255,255,.055);--border:rgba(103,232,249,.14);--border-strong:rgba(34,211,238,.3);--text:#effcff;--muted:#9bc7d3;--accent:#0ea5e9;--accent2:#06b6d4;--shadow:0 28px 80px rgba(2,25,38,.45)}
+html[data-theme='emerald'],body[data-theme='emerald']{--bg:#061812;--bg2:#09261d;--surface:rgba(12,48,37,.58);--surface-strong:rgba(14,61,46,.84);--surface-soft:rgba(255,255,255,.055);--border:rgba(110,231,183,.14);--border-strong:rgba(20,184,166,.3);--text:#effff8;--muted:#9bc7b5;--accent:#10b981;--accent2:#14b8a6;--shadow:0 28px 80px rgba(2,25,17,.45)}
+html[data-theme='sunset'],body[data-theme='sunset']{--bg:#21100c;--bg2:#35151b;--surface:rgba(61,29,27,.58);--surface-strong:rgba(73,32,32,.84);--surface-soft:rgba(255,255,255,.055);--border:rgba(253,186,116,.14);--border-strong:rgba(236,72,153,.3);--text:#fff8f3;--muted:#d8b8a7;--accent:#f97316;--accent2:#ec4899;--shadow:0 28px 80px rgba(38,10,8,.45)}
+html[data-theme='midnight'],body[data-theme='midnight']{--bg:#05060b;--bg2:#10101c;--surface:rgba(22,20,38,.66);--surface-strong:rgba(28,25,49,.88);--surface-soft:rgba(255,255,255,.05);--border:rgba(196,181,253,.13);--border-strong:rgba(139,92,246,.32);--text:#f7f5ff;--muted:#a8a3bb;--accent:#8b5cf6;--accent2:#c4b5fd;--shadow:0 30px 90px rgba(0,0,0,.55)}
+html[data-theme='neon'],body[data-theme='neon']{--bg:#050817;--bg2:#11112a;--surface:rgba(17,20,55,.62);--surface-strong:rgba(22,24,69,.88);--surface-soft:rgba(255,255,255,.05);--border:rgba(96,165,250,.16);--border-strong:rgba(217,70,239,.32);--text:#f5f7ff;--muted:#a7afd0;--accent:#3b82f6;--accent2:#d946ef;--shadow:0 28px 90px rgba(2,4,25,.55)}
+
+/* Theme-aware ambient background. */
+html[data-theme='purple'] body,body[data-theme='purple'],html[data-theme='ocean'] body,body[data-theme='ocean'],html[data-theme='emerald'] body,body[data-theme='emerald'],html[data-theme='sunset'] body,body[data-theme='sunset'],html[data-theme='midnight'] body,body[data-theme='midnight'],html[data-theme='neon'] body,body[data-theme='neon']{background-image:radial-gradient(circle at 8% 8%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 30%),radial-gradient(circle at 92% 16%,color-mix(in srgb,var(--accent2) 16%,transparent),transparent 28%),linear-gradient(145deg,var(--bg),var(--bg2))!important}
+
 /* Shared feature shells */
 .authors-archive-page,.categories-page,.profile-page,.books-page,.home-page,.admin-dashboard-wrapper,.page-container,.community-page,.reports-page,.auth-page{color:var(--text)!important;background:transparent!important;font-family:'Cairo',system-ui,sans-serif!important}
-
-/* Legacy feature variables now inherit the global glass system. */
-.authors-archive-page,.auth-wrapper,.auth-page,.categories-page,.profile-page,.books-page,.admin-dashboard-wrapper,.page-container{--admin-bg:var(--bg);--glass-bg:var(--surface);--glass-border:var(--border);--glass-shadow:var(--shadow);--text-primary:var(--text);--text-secondary:var(--muted);--accent-gold:var(--accent);--accent-gold-hover:var(--accent2);--card-inner-bg:var(--surface-soft);--glow-color:rgba(124,92,255,.16)}
+.authors-archive-page,.auth-wrapper,.auth-page,.categories-page,.profile-page,.books-page,.admin-dashboard-wrapper,.page-container{--admin-bg:var(--bg);--glass-bg:var(--surface);--glass-border:var(--border);--glass-shadow:var(--shadow);--text-primary:var(--text);--text-secondary:var(--muted);--accent-gold:var(--accent);--accent-gold-hover:var(--accent2);--card-inner-bg:var(--surface-soft);--glow-color:color-mix(in srgb,var(--accent) 16%,transparent)}
 
 /* Cards / panels */
 .author-glass-card,.category-card,.profile-card,.details-card,.admin-card,.feature-card,.stat-card,.table-card,.search-panel,.filters-card,.auth-card,.auth-form-card,.auth-hero-card,.panel-glass-card,.composer-card,.community-card,.empty-authors-state,.state-container,.loading-panel,.empty-panel{background:var(--surface)!important;border-color:var(--border)!important;box-shadow:var(--shadow)!important;backdrop-filter:blur(var(--blur)) saturate(145%)!important;-webkit-backdrop-filter:blur(var(--blur)) saturate(145%)!important;color:var(--text)!important;border-radius:var(--feature-radius)}
@@ -16,32 +27,23 @@
 
 /* Glass controls */
 .authors-archive-page input,.authors-archive-page select,.authors-archive-page textarea,.categories-page input,.categories-page select,.categories-page textarea,.profile-page input,.profile-page select,.profile-page textarea,.books-page input,.books-page select,.books-page textarea,.admin-dashboard-wrapper input,.admin-dashboard-wrapper select,.admin-dashboard-wrapper textarea,.page-container input,.page-container select,.page-container textarea,.auth-page input,.auth-page select,.auth-page textarea{color:var(--text)!important;background:var(--surface-soft)!important;border:1px solid var(--border)!important;border-radius:14px!important;outline:none!important}
-.authors-archive-page input:focus,.authors-archive-page select:focus,.authors-archive-page textarea:focus,.categories-page input:focus,.categories-page select:focus,.categories-page textarea:focus,.profile-page input:focus,.profile-page select:focus,.profile-page textarea:focus,.books-page input:focus,.books-page select:focus,.books-page textarea:focus,.admin-dashboard-wrapper input:focus,.admin-dashboard-wrapper select:focus,.admin-dashboard-wrapper textarea:focus,.page-container input:focus,.page-container select:focus,.page-container textarea:focus,.auth-page input:focus{border-color:rgba(124,92,255,.7)!important;box-shadow:0 0 0 4px rgba(124,92,255,.1)!important}
+.authors-archive-page input:focus,.authors-archive-page select:focus,.authors-archive-page textarea:focus,.categories-page input:focus,.categories-page select:focus,.categories-page textarea:focus,.profile-page input:focus,.profile-page select:focus,.profile-page textarea:focus,.books-page input:focus,.books-page select:focus,.books-page textarea:focus,.admin-dashboard-wrapper input:focus,.admin-dashboard-wrapper select:focus,.admin-dashboard-wrapper textarea:focus,.page-container input:focus,.page-container select:focus,.page-container textarea:focus,.auth-page input:focus{border-color:color-mix(in srgb,var(--accent) 70%,transparent)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 12%,transparent)!important}
 
 /* Buttons */
 .authors-archive-page button,.categories-page button,.profile-page button,.books-page button,.admin-dashboard-wrapper button,.page-container button{font-family:inherit;transition:.2s}
 .authors-archive-page button:hover:not(:disabled),.categories-page button:hover:not(:disabled),.profile-page button:hover:not(:disabled),.books-page button:hover:not(:disabled),.admin-dashboard-wrapper button:hover:not(:disabled),.page-container button:hover:not(:disabled){transform:translateY(-1px)}
 
-/* Author archive: replace old gold-only identity with the approved violet/cyan glass identity. */
-.eyebrow-badge,.toolbar-hint,.meta-tag,.card-index-badge{border-color:var(--border)!important;background:var(--surface-soft)!important;color:var(--accent)!important}
-.hero-signature-stamp{background:var(--surface)!important;border-color:var(--accent)!important;box-shadow:var(--shadow)!important}
-.hero-signature-stamp strong,.hero-signature-stamp span,.hero-main-title em,.portrait-fallback,.toolbar-counter strong,.toolbar-hint i,.meta-tag i,.meta-tag.books{color:var(--accent)!important}
-.author-glass-card:hover{border-color:var(--accent)!important}
+/* Author archive */
+.eyebrow-badge,.toolbar-hint,.meta-tag,.card-index-badge{border-color:var(--border)!important;background:var(--surface-soft)!important;color:var(--accent)!important}.hero-signature-stamp{background:var(--surface)!important;border-color:var(--accent)!important;box-shadow:var(--shadow)!important}.hero-signature-stamp strong,.hero-signature-stamp span,.hero-main-title em,.portrait-fallback,.toolbar-counter strong,.toolbar-hint i,.meta-tag i,.meta-tag.books{color:var(--accent)!important}.author-glass-card:hover{border-color:var(--accent)!important}
 
 /* Category cards */
-.category-main{color:var(--text)!important;text-decoration:none}
-.category-icon{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;color:#fff!important}
-.category-card:hover{border-color:var(--accent)!important;transform:translateY(-5px)}
-.category-modal{background:rgba(3,8,20,.62)!important;backdrop-filter:blur(8px)!important}
-.modal-card{background:var(--surface-strong)!important;border:1px solid var(--border)!important;box-shadow:var(--shadow)!important;color:var(--text)!important}
+.category-main{color:var(--text)!important;text-decoration:none}.category-icon{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;color:#fff!important}.category-card:hover{border-color:var(--accent)!important;transform:translateY(-5px)}.category-modal{background:rgba(3,8,20,.62)!important;backdrop-filter:blur(8px)!important}.modal-card{background:var(--surface-strong)!important;border:1px solid var(--border)!important;box-shadow:var(--shadow)!important;color:var(--text)!important}
 
 /* Feature grids */
 .books-grid,.book-grid,.authors-grid-showcase,.category-grid,.cards-grid,.features-grid{gap:var(--feature-gap)!important}
 
 /* Tables */
-.admin-dashboard-wrapper table,.page-container table,.profile-page table{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
-.admin-dashboard-wrapper th,.admin-dashboard-wrapper td,.page-container th,.page-container td,.profile-page th,.profile-page td{border-color:var(--border)!important;color:var(--text)!important}
-.admin-dashboard-wrapper th,.page-container th,.profile-page th{background:var(--surface-soft)!important;color:var(--muted)!important}
+.admin-dashboard-wrapper table,.page-container table,.profile-page table{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}.admin-dashboard-wrapper th,.admin-dashboard-wrapper td,.page-container th,.page-container td,.profile-page th,.profile-page td{border-color:var(--border)!important;color:var(--text)!important}.admin-dashboard-wrapper th,.page-container th,.profile-page th{background:var(--surface-soft)!important;color:var(--muted)!important}
 
 /* Modals and overlays */
 .modal-backdrop,.overlay{background:rgba(3,8,20,.62)!important;backdrop-filter:blur(8px)}
