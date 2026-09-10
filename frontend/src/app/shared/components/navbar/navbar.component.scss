@@ -1,51 +1,107 @@
-/* Local responsive hooks only; the visual system remains centralized in styles.scss. */
+/* Local responsive hooks + multi-theme visual system. */
+
+html[data-theme='light'], body[data-theme='light'] {
+  --bg:#eef3f9; --bg2:#f8fbff; --surface:rgba(255,255,255,.64); --surface-strong:rgba(255,255,255,.86);
+  --surface-soft:rgba(99,102,241,.055); --border:rgba(80,95,130,.14); --border-strong:rgba(99,102,241,.28);
+  --text:#172033; --muted:#667085; --accent:#6366f1; --accent2:#06b6d4; --shadow:0 24px 70px rgba(70,90,120,.16);
+}
+html[data-theme='dark'], body[data-theme='dark'] {
+  --bg:#080d1b; --bg2:#10182b; --surface:rgba(17,29,49,.58); --surface-strong:rgba(20,35,58,.84);
+  --surface-soft:rgba(129,140,248,.07); --border:rgba(255,255,255,.12); --border-strong:rgba(129,140,248,.34);
+  --text:#f4f7ff; --muted:#9ca8bd; --accent:#818cf8; --accent2:#22d3ee; --shadow:0 26px 80px rgba(0,0,0,.36);
+}
+html[data-theme='purple'], body[data-theme='purple'] {
+  --bg:#160d27; --bg2:#24113b; --surface:rgba(45,25,72,.55); --surface-strong:rgba(52,28,83,.82);
+  --surface-soft:rgba(236,72,153,.075); --border:rgba(255,255,255,.13); --border-strong:rgba(216,180,254,.34);
+  --text:#fbf7ff; --muted:#c2aecf; --accent:#a855f7; --accent2:#ec4899; --shadow:0 28px 80px rgba(20,5,35,.42);
+}
+html[data-theme='ocean'], body[data-theme='ocean'] {
+  --bg:#061827; --bg2:#082d3c; --surface:rgba(7,48,65,.54); --surface-strong:rgba(8,57,76,.82);
+  --surface-soft:rgba(34,211,238,.075); --border:rgba(125,211,252,.15); --border-strong:rgba(34,211,238,.38);
+  --text:#effcff; --muted:#9ec1ca; --accent:#0ea5e9; --accent2:#22d3ee; --shadow:0 28px 80px rgba(0,15,30,.45);
+}
+html[data-theme='emerald'], body[data-theme='emerald'] {
+  --bg:#061a16; --bg2:#0a2921; --surface:rgba(11,55,43,.54); --surface-strong:rgba(12,66,51,.82);
+  --surface-soft:rgba(16,185,129,.075); --border:rgba(110,231,183,.14); --border-strong:rgba(52,211,153,.36);
+  --text:#effff9; --muted:#9dc8b8; --accent:#10b981; --accent2:#14b8a6; --shadow:0 28px 80px rgba(0,20,14,.45);
+}
+html[data-theme='sunset'], body[data-theme='sunset'] {
+  --bg:#24100d; --bg2:#351426; --surface:rgba(65,29,32,.53); --surface-strong:rgba(78,32,39,.82);
+  --surface-soft:rgba(249,115,22,.075); --border:rgba(255,210,180,.14); --border-strong:rgba(251,146,60,.38);
+  --text:#fff8f5; --muted:#d7b5ab; --accent:#f97316; --accent2:#ec4899; --shadow:0 28px 80px rgba(35,7,4,.45);
+}
+html[data-theme='midnight'], body[data-theme='midnight'] {
+  --bg:#03050b; --bg2:#111326; --surface:rgba(16,18,38,.62); --surface-strong:rgba(22,24,48,.86);
+  --surface-soft:rgba(139,92,246,.075); --border:rgba(255,255,255,.11); --border-strong:rgba(139,92,246,.38);
+  --text:#f7f4ff; --muted:#a5a3ba; --accent:#8b5cf6; --accent2:#6366f1; --shadow:0 30px 90px rgba(0,0,0,.55);
+}
+html[data-theme='neon'], body[data-theme='neon'] {
+  --bg:#040612; --bg2:#0c1025; --surface:rgba(12,17,42,.58); --surface-strong:rgba(16,22,53,.86);
+  --surface-soft:rgba(217,70,239,.075); --border:rgba(125,211,252,.13); --border-strong:rgba(217,70,239,.38);
+  --text:#f5f7ff; --muted:#9da8c7; --accent:#3b82f6; --accent2:#d946ef; --shadow:0 28px 90px rgba(0,0,0,.5);
+}
+
+body[data-theme] {
+  background:
+    radial-gradient(circle at 7% 10%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 29%),
+    radial-gradient(circle at 94% 16%, color-mix(in srgb, var(--accent2) 18%, transparent), transparent 28%),
+    radial-gradient(circle at 50% 105%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 36%),
+    linear-gradient(145deg,var(--bg),var(--bg2));
+}
+
+body[data-theme]::after {
+  content:'';
+  position:fixed;
+  width:420px;
+  height:420px;
+  left:-150px;
+  top:35%;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:-1;
+  background:radial-gradient(circle, color-mix(in srgb, var(--accent) 22%, transparent), transparent 68%);
+  filter:blur(20px);
+  animation:libraryFloat 14s ease-in-out infinite alternate;
+}
+
+@keyframes libraryFloat {
+  from { transform:translate3d(0,0,0) scale(1); }
+  to { transform:translate3d(70px,-45px,0) scale(1.16); }
+}
+
+.theme-picker-wrap{position:relative}
+.theme-picker-trigger{position:relative;overflow:hidden}
+.theme-picker-trigger::after{content:'';position:absolute;inset:5px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));opacity:.12;pointer-events:none}
+.theme-picker{position:absolute;top:54px;right:0;width:min(360px,calc(100vw - 28px));padding:0;overflow:hidden;border-radius:22px;z-index:1200;box-shadow:0 30px 90px rgba(0,0,0,.3);animation:themePickerIn .18s ease-out}
+@keyframes themePickerIn{from{opacity:0;transform:translateY(-7px) scale(.98)}to{opacity:1;transform:none}}
+.theme-picker-header{display:flex;align-items:center;justify-content:space-between;padding:17px;border-bottom:1px solid var(--border)}
+.theme-picker-header>div{display:grid;gap:2px}.theme-picker-header strong{font-size:.95rem}.theme-picker-header small{font-size:.68rem;color:var(--muted)}
+.theme-close{width:30px;height:30px;border:1px solid var(--border);border-radius:9px;background:var(--surface-soft);color:var(--muted);cursor:pointer;font-size:19px;line-height:1}
+.theme-options{padding:11px;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:430px;overflow:auto}
+.theme-option{position:relative;display:flex;align-items:center;gap:9px;text-align:right;padding:9px;border:1px solid transparent;border-radius:15px;background:var(--surface-soft);color:var(--text);cursor:pointer;transition:.2s}
+.theme-option:hover{transform:translateY(-2px);border-color:var(--border-strong);background:var(--surface-strong)}
+.theme-option.selected{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 14%,transparent)}
+.theme-preview{flex:0 0 38px;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2),0 7px 16px rgba(0,0,0,.14)}
+.theme-preview i{font-size:14px}.theme-option-copy{min-width:0;display:grid;gap:1px}.theme-option-copy b{font-size:.71rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.theme-option-copy small{font-size:.59rem;color:var(--muted)}
+.theme-selected-icon{margin-right:auto;color:var(--accent2);font-size:13px}
+
 @media (max-width: 991px) {
-  .navbar-glass-wrapper .navbar-glass-container {
-    flex-wrap: wrap;
-  }
-
-  .navbar-glass-wrapper .nav-links-desktop {
-    order: 3;
-    flex: 1 0 100%;
-    justify-content: flex-start;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding: 4px;
-  }
-
-  .navbar-glass-wrapper .nav-links-desktop::-webkit-scrollbar {
-    display: none;
-  }
-
-  .navbar-glass-wrapper .nav-item-link {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
+  .navbar-glass-wrapper .navbar-glass-container { flex-wrap: wrap; }
+  .navbar-glass-wrapper .nav-links-desktop { order: 3; flex: 1 0 100%; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; padding: 4px; }
+  .navbar-glass-wrapper .nav-links-desktop::-webkit-scrollbar { display: none; }
+  .navbar-glass-wrapper .nav-item-link { flex: 0 0 auto; white-space: nowrap; }
 }
 
 @media (max-width: 600px) {
-  .navbar-glass-wrapper {
-    width: calc(100% - 16px);
-    margin-top: 8px;
-  }
+  .navbar-glass-wrapper { width: calc(100% - 16px); margin-top: 8px; }
+  .navbar-glass-wrapper .navbar-glass-container { gap: 8px; }
+  .navbar-glass-wrapper .nav-links-desktop { margin-top: 2px; }
+  .navbar-glass-wrapper .nav-actions { margin-right: auto; }
+  .navbar-glass-wrapper .auth-btns-group { display: none; }
+  .navbar-glass-wrapper .user-name-text { display: none; }
+  .theme-picker{position:fixed;top:78px;right:8px;width:calc(100vw - 16px);max-width:390px}
+}
 
-  .navbar-glass-wrapper .navbar-glass-container {
-    gap: 8px;
-  }
-
-  .navbar-glass-wrapper .nav-links-desktop {
-    margin-top: 2px;
-  }
-
-  .navbar-glass-wrapper .nav-actions {
-    margin-right: auto;
-  }
-
-  .navbar-glass-wrapper .auth-btns-group {
-    display: none;
-  }
-
-  .navbar-glass-wrapper .user-name-text {
-    display: none;
-  }
+@media (prefers-reduced-motion: reduce) {
+  body[data-theme]::after,.theme-picker{animation:none}
 }
