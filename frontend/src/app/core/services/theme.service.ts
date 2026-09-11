@@ -25,9 +25,9 @@ export class ThemeService {
   readonly isDarkMode = signal(false);
 
   readonly palette = signal<ColorPalette>({
-    dayC1: '#ff9a9e',
-    dayC2: '#fecfef',
-    dayC3: '#a1c4fd',
+    dayC1: '#667eea',
+    dayC2: '#764ba2',
+    dayC3: '#f093fb',
     nightC1: '#0f0c29',
     nightC2: '#302b63',
     nightC3: '#24243e'
@@ -35,39 +35,40 @@ export class ThemeService {
 
   readonly presets: ThemePreset[] = [
     {
-      name: 'وردي سماوي',
-      day: ['#ff9a9e', '#fecfef', '#a1c4fd'],
+      name: 'بنفسجي فاخر',
+      day: ['#667eea', '#764ba2', '#f093fb'],
       night: ['#0f0c29', '#302b63', '#24243e']
     },
     {
-      name: 'بنفسجي ملكي',
-      day: ['#c471f5', '#fa71cd', '#fbc2eb'],
+      name: 'وردي سماوي',
+      day: ['#ff6b9d', '#c471f5', '#6dd5ed'],
       night: ['#141e30', '#243b55', '#6a11cb']
     },
     {
       name: 'محيط أزرق',
-      day: ['#89f7fe', '#66a6ff', '#d4fc79'],
+      day: ['#2193b0', '#6dd5ed', '#00c6ff'],
       night: ['#0f2027', '#203a43', '#2c5364']
     },
     {
       name: 'غروب دافئ',
-      day: ['#f6d365', '#fda085', '#fbc2eb'],
+      day: ['#f7971e', '#ffd200', '#f5576c'],
       night: ['#42275a', '#734b6d', '#c31432']
     },
     {
       name: 'زمردي',
-      day: ['#84fab0', '#8fd3f4', '#43e97b'],
+      day: ['#11998e', '#38ef7d', '#84fab0'],
       night: ['#0f3443', '#34e89e', '#0f9b8e']
     },
     {
       name: 'نيون ليلي',
-      day: ['#a18cd1', '#fbc2eb', '#84fab0'],
+      day: ['#7f00ff', '#e100ff', '#00c6ff'],
       night: ['#000428', '#004e92', '#7f00ff']
     }
   ];
 
   constructor() {
     this.restore();
+    this.applyThemeToDocument(this.isDarkMode());
 
     effect(() => {
       const palette = this.palette();
@@ -79,26 +80,13 @@ export class ThemeService {
       root.style.setProperty('--night-c1', palette.nightC1);
       root.style.setProperty('--night-c2', palette.nightC2);
       root.style.setProperty('--night-c3', palette.nightC3);
-
       root.style.setProperty('--library-gradient-day', `linear-gradient(135deg, ${palette.dayC1}, ${palette.dayC2}, ${palette.dayC3})`);
       root.style.setProperty('--library-gradient-night', `linear-gradient(135deg, ${palette.nightC1}, ${palette.nightC2}, ${palette.nightC3})`);
-
       this.persistPalette(palette);
     });
 
     effect(() => {
-      const dark = this.isDarkMode();
-      const root = this.document.documentElement;
-      const body = this.document.body;
-
-      root.classList.toggle('theme-night', dark);
-      root.classList.toggle('theme-day', !dark);
-      body.classList.toggle('theme-night', dark);
-      body.classList.toggle('theme-day', !dark);
-      root.dataset['theme'] = dark ? 'night' : 'day';
-      body.dataset['theme'] = dark ? 'night' : 'day';
-
-      this.persistTheme(dark);
+      this.applyThemeToDocument(this.isDarkMode());
     });
   }
 
@@ -128,6 +116,25 @@ export class ThemeService {
   reset(): void {
     this.setTheme('day');
     this.applyPreset(this.presets[0]);
+  }
+
+  private applyThemeToDocument(isDark: boolean): void {
+    const root = this.document.documentElement;
+    const body = this.document.body;
+    const theme = isDark ? 'night' : 'day';
+
+    root.classList.toggle('theme-night', isDark);
+    root.classList.toggle('theme-day', !isDark);
+    body.classList.toggle('theme-night', isDark);
+    body.classList.toggle('theme-day', !isDark);
+    root.classList.toggle('dark-mode', isDark);
+    root.classList.toggle('light-mode', !isDark);
+    body.classList.toggle('dark-mode', isDark);
+    body.classList.toggle('light-mode', !isDark);
+    root.dataset['theme'] = theme;
+    body.dataset['theme'] = theme;
+
+    this.persistTheme(isDark);
   }
 
   private restore(): void {
