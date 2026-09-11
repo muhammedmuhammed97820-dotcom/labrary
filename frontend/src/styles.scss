@@ -1,112 +1,93 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 
-/* ==========================================
-   1. المتغيرات العالمية (Global CSS Variables)
-   ========================================== */
 :root {
   --main-font: 'Tajawal', sans-serif;
-
-  /* تدريجات الوضع النهاري */
   --day-c1: #ff9a9e;
   --day-c2: #fecfef;
   --day-c3: #a1c4fd;
-
-  /* تدريجات الوضع الليلي */
   --night-c1: #0f0c29;
   --night-c2: #302b63;
   --night-c3: #24243e;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* ==========================================
-   2. تطبيق الخلفية المتدرجة على html و body
-   ========================================== */
-html, body {
-  min-height: 100vh !important;
+*, *::before, *::after { box-sizing: border-box; }
+html { min-height: 100%; }
+html, body { margin: 0; min-height: 100vh; }
+body {
   font-family: var(--main-font);
   direction: rtl;
   overflow-x: hidden;
-  position: relative;
-  
-  /* تطبيق التدريج النهاري إجبارياً */
-  background: linear-gradient(135deg, var(--day-c1) 0%, var(--day-c2) 50%, var(--day-c3) 100%) !important;
-  background-attachment: fixed !important;
-  color: #1e293b;
+  color: var(--text-main);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  transition: background .5s ease, color .5s ease;
+}
 
-  --card-bg: rgba(255, 255, 255, 0.65);
-  --card-border: rgba(255, 255, 255, 0.8);
-  --text-main: #1e293b;
+body.theme-day, html.theme-day {
+  --bg-gradient: linear-gradient(135deg, var(--day-c1) 0%, var(--day-c2) 50%, var(--day-c3) 100%);
+  --card-bg: rgba(255,255,255,.68);
+  --card-border: rgba(255,255,255,.82);
+  --text-main: #172033;
   --text-sub: #475569;
-  --btn-gradient: linear-gradient(135deg, var(--day-c1) 0%, var(--day-c3) 100%);
-  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  --btn-gradient: linear-gradient(135deg, var(--day-c1), var(--day-c3));
+  --stat-bg: rgba(255,255,255,.42);
+  --panel-bg: rgba(255,255,255,.88);
+  --card-shadow: 0 25px 50px -18px rgba(0,0,0,.22);
 }
 
-/* تطبيق التدريج الليلي عند تفعيل dark-mode */
-html.dark-mode, body.dark-mode {
-  background: linear-gradient(135deg, var(--night-c1) 0%, var(--night-c2) 50%, var(--night-c3) 100%) !important;
-  background-attachment: fixed !important;
-  color: #ffffff;
-
-  --card-bg: rgba(23, 23, 43, 0.65);
-  --card-border: rgba(255, 255, 255, 0.12);
-  --text-main: #ffffff;
-  --text-sub: #94a3b8;
-  --btn-gradient: linear-gradient(135deg, #e94057 0%, #8a2387 100%);
-  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+body.theme-night, html.theme-night {
+  --bg-gradient: linear-gradient(135deg, var(--night-c1) 0%, var(--night-c2) 50%, var(--night-c3) 100%);
+  --card-bg: rgba(18,18,38,.68);
+  --card-border: rgba(255,255,255,.13);
+  --text-main: #fff;
+  --text-sub: #a9b4c7;
+  --btn-gradient: linear-gradient(135deg, #e94057, #8a2387);
+  --stat-bg: rgba(255,255,255,.055);
+  --panel-bg: rgba(18,18,38,.92);
+  --card-shadow: 0 25px 50px -12px rgba(0,0,0,.72);
 }
 
-/* ==========================================
-   3. الكرات الخلفية العائمة المضيئة (Background Orbs)
-   ========================================== */
+html, body { background: var(--bg-gradient) !important; }
+button, input, textarea, select { font-family: inherit; }
+a, button { -webkit-tap-highlight-color: transparent; }
+
 .background-orb {
   position: fixed;
+  width: 420px;
+  height: 420px;
   border-radius: 50%;
-  filter: blur(80px);
-  z-index: 0;
+  filter: blur(85px);
   pointer-events: none;
-  animation: floatOrb 8s infinite alternate ease-in-out;
+  z-index: 0;
+  opacity: .8;
+  animation: floatOrb 9s infinite alternate ease-in-out;
 }
+.orb-1 { top: -100px; right: -80px; background: radial-gradient(circle, var(--day-c1), transparent 70%); }
+.orb-2 { bottom: -120px; left: -100px; background: radial-gradient(circle, var(--day-c3), transparent 70%); animation-delay: -4s; }
+.theme-night .orb-1 { background: radial-gradient(circle, var(--night-c2), transparent 70%); }
+.theme-night .orb-2 { background: radial-gradient(circle, #8a2387, transparent 70%); }
+@keyframes floatOrb { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(35px,-35px,0) scale(1.12); } }
 
-.orb-1 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, var(--day-c1) 0%, transparent 70%);
-  top: -50px;
-  right: -50px;
-}
-
-.orb-2 {
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, var(--day-c3) 0%, transparent 70%);
-  bottom: -50px;
-  left: -50px;
-  animation-delay: -4s;
-}
-
-html.dark-mode .orb-1, body.dark-mode .orb-1 { background: radial-gradient(circle, #e94057 0%, transparent 70%); }
-html.dark-mode .orb-2, body.dark-mode .orb-2 { background: radial-gradient(circle, #8a2387 0%, transparent 70%); }
-
-@keyframes floatOrb {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(40px, -40px) scale(1.15); }
-}
-
-/* ==========================================
-   4. ضبط المحتوى الرئيسي فوق الخلفية
-   ========================================== */
-app-navbar, .main-content {
-  position: relative;
-  z-index: 10;
-}
-
+app-root, app-navbar, .main-content { position: relative; z-index: 2; }
 .main-content {
-  max-width: 1100px;
-  margin: 20px auto;
-  padding: 0 20px;
+  width: min(1180px, calc(100% - 28px));
+  margin: 14px auto 40px;
+  padding: 8px 0 30px;
+}
+
+/* Shared glass surface for all library pages */
+.glass-card, .page-card, .section-card, .book-card, .category-card, .author-card,
+form, .table-wrapper, .dashboard-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--card-shadow);
+}
+
+::selection { background: rgba(217,70,239,.28); }
+
+@media (max-width: 700px) {
+  .main-content { width: min(100% - 18px, 1180px); margin-top: 8px; }
+  .background-orb { width: 280px; height: 280px; filter: blur(65px); }
 }
