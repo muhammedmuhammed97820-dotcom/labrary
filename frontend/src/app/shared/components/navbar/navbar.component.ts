@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { ThemeService, ColorPalette } from '../../../core/services/theme.service';
+import { ThemeService, ColorPalette, ThemePreset } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -32,6 +32,14 @@ export class NavbarComponent {
   onColorChange(event: Event, key: keyof ColorPalette): void {
     const value = (event.target as HTMLInputElement).value;
     this.themeService.updatePalette({ [key]: value });
+  }
+
+  applyPreset(preset: ThemePreset): void {
+    this.themeService.applyPreset(preset);
+  }
+
+  resetTheme(): void {
+    this.themeService.reset();
   }
 
   logout(): void {
