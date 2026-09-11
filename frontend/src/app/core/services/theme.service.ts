@@ -39,18 +39,33 @@ export class ThemeService {
 
     effect(() => {
       const p = this.palette();
-      const root = this.document.documentElement.style;
-      root.setProperty('--day-c1', p.dayC1);
-      root.setProperty('--day-c2', p.dayC2);
-      root.setProperty('--day-c3', p.dayC3);
-      root.setProperty('--night-c1', p.nightC1);
-      root.setProperty('--night-c2', p.nightC2);
-      root.setProperty('--night-c3', p.nightC3);
+      const root = this.document.documentElement;
+      const style = root.style;
+
+      style.setProperty('--day-c1', p.dayC1);
+      style.setProperty('--day-c2', p.dayC2);
+      style.setProperty('--day-c3', p.dayC3);
+      style.setProperty('--night-c1', p.nightC1);
+      style.setProperty('--night-c2', p.nightC2);
+      style.setProperty('--night-c3', p.nightC3);
       this.persistPalette(p);
     });
 
     effect(() => {
-      this.persistTheme(this.isDarkMode());
+      const dark = this.isDarkMode();
+      const root = this.document.documentElement;
+      const body = this.document.body;
+
+      // The CSS theme variables are scoped to these classes.
+      // Keep both html and body synchronized so every page follows the switch.
+      root.classList.toggle('theme-night', dark);
+      root.classList.toggle('theme-day', !dark);
+      body.classList.toggle('theme-night', dark);
+      body.classList.toggle('theme-day', !dark);
+      root.setAttribute('data-theme', dark ? 'night' : 'day');
+      body.setAttribute('data-theme', dark ? 'night' : 'day');
+
+      this.persistTheme(dark);
     });
   }
 
@@ -79,7 +94,8 @@ export class ThemeService {
       const storedTheme = this.document.defaultView?.localStorage.getItem(this.storageKey);
       const storedPalette = this.document.defaultView?.localStorage.getItem(this.paletteKey);
 
-      if (storedTheme === 'night') this.isDarkMode.set(true);
+      this.isDarkMode.set(storedTheme === 'night');
+
       if (storedPalette) {
         const parsed = JSON.parse(storedPalette) as Partial<ColorPalette>;
         this.palette.update(current => ({ ...current, ...parsed }));
