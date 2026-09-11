@@ -1,1 +1,9 @@
-<router-outlet></router-outlet>
+<div class="app-shell">
+  <app-navbar></app-navbar>
+
+  <main class="app-main" aria-label="محتوى المكتبة">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-notification-toast></app-notification-toast>
+</div>
