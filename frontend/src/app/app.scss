@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  position: relative;
+  isolation: isolate;
+}
+
+.app-main {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100dvh - 88px);
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .app-main {
+    min-height: calc(100dvh - 72px);
+  }
+}
