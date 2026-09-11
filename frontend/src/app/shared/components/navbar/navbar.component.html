@@ -1,0 +1,134 @@
+<header class="library-navbar" dir="rtl">
+  <div class="navbar-shell">
+    <a class="brand" routerLink="/" (click)="closeMenu()" aria-label="المكتبة الإلكترونية">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
+          <path d="M8 6h8"></path><path d="M8 10h6"></path>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <strong>المكتبة الإلكترونية</strong>
+        <small>معرفتك في مكان واحد</small>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="التنقل الرئيسي">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">الرئيسية</a>
+      <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">الكتب</a>
+      <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
+      <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
+      @if (isLoggedIn) {
+        <a routerLink="/my-submissions" routerLinkActive="active" (click)="closeMenu()">طلباتي</a>
+      }
+      @if (isAdmin) {
+        <a class="admin-link" routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
+          </span>
+          لوحة الإدارة
+        </a>
+      }
+    </nav>
+
+    <div class="navbar-actions">
+      @if (isLoggedIn) {
+        <a class="icon-button notification-button" routerLink="/notifications" aria-label="الإشعارات" title="الإشعارات" (click)="closeMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span class="notification-dot"></span>
+        </a>
+        <a class="icon-button" routerLink="/profile" aria-label="الملف الشخصي" title="الملف الشخصي" (click)="closeMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+        </a>
+      }
+
+      <button class="icon-button theme-button" type="button" (click)="toggleTheme()" [attr.aria-label]="themeService.isDarkMode() ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'" [title]="themeService.isDarkMode() ? 'الوضع النهاري' : 'الوضع الليلي'">
+        @if (themeService.isDarkMode()) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg>
+        }
+      </button>
+
+      <button class="palette-trigger" type="button" (click)="togglePanel()" [attr.aria-expanded]="showPanel()" aria-label="تخصيص المظهر">
+        <span class="palette-swatch" aria-hidden="true"></span>
+        <span>المظهر</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      </button>
+
+      @if (!isLoggedIn) {
+        <a class="login-link" routerLink="/login" (click)="closeMenu()">تسجيل الدخول</a>
+        <a class="primary-action" routerLink="/register" (click)="closeMenu()">إنشاء حساب</a>
+      } @else {
+        <button class="logout-button" type="button" (click)="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+          خروج
+        </button>
+      }
+
+      <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="فتح قائمة التنقل">
+        @if (menuOpen()) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
+        }
+      </button>
+    </div>
+
+    @if (showPanel()) {
+      <section class="theme-panel" aria-label="تخصيص المظهر">
+        <div class="panel-heading">
+          <div>
+            <span class="eyebrow">هوية المكتبة</span>
+            <h3>تخصيص المظهر</h3>
+          </div>
+          <button class="close-panel" type="button" (click)="togglePanel()" aria-label="إغلاق لوحة المظهر">×</button>
+        </div>
+
+        <div class="mode-switch" role="group" aria-label="وضع العرض">
+          <button type="button" [class.active]="!themeService.isDarkMode()" (click)="themeService.setTheme('day')">نهاري</button>
+          <button type="button" [class.active]="themeService.isDarkMode()" (click)="themeService.setTheme('night')">ليلي</button>
+        </div>
+
+        <div class="preset-list">
+          <span class="section-label">التدرجات الجاهزة</span>
+          <div class="preset-grid">
+            @for (preset of themeService.presets; track preset.name) {
+              <button class="preset" type="button" (click)="applyPreset(preset)" [title]="'تطبيق تدرج ' + preset.name">
+                <span class="preset-gradient" [style.background]="'linear-gradient(135deg,' + preset.day[0] + ',' + preset.day[1] + ',' + preset.day[2] + ')'" aria-hidden="true"></span>
+                <span>{{ preset.name }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="custom-colors">
+          <span class="section-label">ألوان مخصصة</span>
+          <label>النهاري <input type="color" [value]="themeService.palette().dayC1" (input)="onColorChange($event, 'dayC1')"></label>
+          <label>الليلي <input type="color" [value]="themeService.palette().nightC1" (input)="onColorChange($event, 'nightC1')"></label>
+        </div>
+
+        <button class="reset-theme" type="button" (click)="resetTheme()">إعادة المظهر الافتراضي</button>
+      </section>
+    }
+
+    @if (menuOpen()) {
+      <nav class="mobile-nav" aria-label="قائمة التنقل للجوال">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">الرئيسية</a>
+        <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">الكتب</a>
+        <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
+        <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
+        @if (isLoggedIn) { <a routerLink="/my-submissions" routerLinkActive="active" (click)="closeMenu()">طلباتي</a> }
+        @if (isAdmin) { <a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">لوحة الإدارة</a> }
+        @if (!isLoggedIn) {
+          <a routerLink="/login" routerLinkActive="active" (click)="closeMenu()">تسجيل الدخول</a>
+          <a class="mobile-register" routerLink="/register" (click)="closeMenu()">إنشاء حساب</a>
+        } @else {
+          <a routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">الملف الشخصي</a>
+          <button type="button" class="mobile-logout" (click)="logout()">تسجيل الخروج</button>
+        }
+      </nav>
+    }
+  </div>
+</header>
