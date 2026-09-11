@@ -1,5 +1,5 @@
 <div class="toast-wrapper" dir="rtl" aria-live="polite" aria-atomic="true">
-  @for (toast of notifyService.toasts$ | async; track toast.id) {
+  @for (toast of notifyService.notifications(); track toast.id) {
     <article class="glass-toast" [ngClass]="toast.type" role="status">
       <div class="toast-icon-wrap">
         <i class="fa-solid icon" [ngClass]="{
