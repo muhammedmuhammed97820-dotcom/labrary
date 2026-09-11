@@ -1,22 +1,109 @@
-<nav class="navbar-glass-wrapper" dir="rtl">
+<div class="navbar-glass-wrapper" [class.dark-mode]="themeService.isDarkMode()" dir="rtl">
   <div class="navbar-glass-container">
-    <a class="brand-link" routerLink="/" (click)="closeMenu()"><div class="brand-icon-box"><span>م</span></div><div class="brand-text"><span class="brand-title">مكتبتي</span><span class="brand-sub">DIGITAL LIBRARY</span></div></a>
-    <button class="mobile-menu-btn" type="button" (click)="toggleMenu()" aria-label="القائمة"><i class="fa-solid" [class.fa-bars]="!menuOpen" [class.fa-xmark]="menuOpen"></i></button>
-    <div class="nav-links-desktop" [class.mobile-open]="menuOpen">
-      <a class="nav-item-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()"><i class="fa-solid fa-house"></i><span>الرئيسية</span></a>
-      <a class="nav-item-link" routerLink="/books" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-book-open"></i><span>المكتبة</span></a>
-      <a class="nav-item-link" routerLink="/categories" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-layer-group"></i><span>التصنيفات</span></a>
-      <a class="nav-item-link" routerLink="/authors" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-feather-pointed"></i><span>المؤلفون</span></a>
-      @if (isLoggedIn && !isAdmin) { <a class="nav-item-link" routerLink="/favorites" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-heart"></i><span>المفضلة</span></a><a class="nav-item-link" routerLink="/submit-book" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-cloud-arrow-up"></i><span>إضافة كتاب</span></a><a class="nav-item-link" routerLink="/my-submissions" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-clock-rotate-left"></i><span>طلباتي</span></a> }
-      @if (isAdmin) { <a class="nav-item-link admin-link" routerLink="/admin" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-shield-halved"></i><span>الإدارة</span></a> }
-    </div>
-    <div class="nav-actions">
-      <div class="theme-picker-wrap"><button class="action-btn theme-picker-trigger" type="button" (click)="toggleThemePicker()" aria-label="تغيير المظهر" title="تغيير المظهر"><i class="fa-solid fa-palette"></i></button>
-        @if (themePickerOpen) { <div class="theme-picker glass" dir="rtl"><div class="theme-picker-header"><div><strong>مظهر المكتبة</strong><small>اختر التدرج الذي يناسبك</small></div><button type="button" class="theme-close" (click)="toggleThemePicker()">×</button></div><div class="theme-options">@for (theme of themeService.themes; track theme.id) { <button type="button" class="theme-option" [class.selected]="themeService.isSelected(theme.id)" (click)="selectTheme(theme.id)"><span class="theme-preview" [style.background]="theme.colors"><i [class]="theme.icon"></i></span><span class="theme-option-copy"><b>{{ theme.name }}</b><small>تدرج زجاجي</small></span>@if (themeService.isSelected(theme.id)) { <i class="fa-solid fa-check theme-selected-icon"></i> }</button> }</div></div> }
+    
+    <!-- الشعار -->
+    <a class="brand-link" routerLink="/" (click)="closeMenu()">
+      <div class="brand-icon-box">م</div>
+      <div class="brand-text">
+        <span class="brand-title">مكتبتي</span>
+        <span class="brand-sub">التصميم التفاعلي</span>
       </div>
-      <div class="notification-center"><button class="action-btn notification-trigger" (click)="toggleNotifications()" aria-label="الإشعارات" title="الإشعارات"><i class="fa-regular fa-bell"></i>@if ((notificationService.toasts$ | async)?.length) { <span class="notification-count">{{ (notificationService.toasts$ | async)?.length }}</span> }</button>@if (notificationsOpen) { <div class="notification-panel glass" dir="rtl"><div class="notification-panel-head"><div><strong>مركز الإشعارات</strong><small>تنبيهات النظام الحالية</small></div>@if ((notificationService.toasts$ | async); as toasts) {@if (toasts.length) {<button type="button" (click)="clearNotifications(toasts)">مسح الكل</button>}}</div><div class="notification-list">@if ((notificationService.toasts$ | async); as toasts) {@if (toasts.length) {@for (toast of toasts; track toast.id) {<article class="notification-item" [class]="'type-' + toast.type"><div class="notification-icon"><i class="fa-solid" [class.fa-circle-check]="toast.type === 'success'" [class.fa-circle-xmark]="toast.type === 'error'" [class.fa-triangle-exclamation]="toast.type === 'warning'" [class.fa-circle-info]="toast.type === 'info'"></i></div><div class="notification-copy"><strong>{{ toast.type === 'success' ? 'نجاح' : toast.type === 'error' ? 'خطأ' : toast.type === 'warning' ? 'تنبيه' : 'معلومة' }}</strong><p>{{ toast.message }}</p></div><button type="button" class="notification-dismiss" (click)="dismissNotification(toast)">×</button></article>}} @else {<div class="notification-empty"><i class="fa-regular fa-bell-slash"></i><span>لا توجد إشعارات حالياً</span></div>}}</div></div> }</div>
-      <button class="action-btn theme-toggle-btn" type="button" (click)="toggleTheme()" [title]="themeService.isDarkMode() ? 'الوضع النهاري' : 'الوضع الليلي'"><i class="fa-solid" [class.fa-sun]="themeService.isDarkMode()" [class.fa-moon]="!themeService.isDarkMode()"></i></button>
-      @if (isLoggedIn) { <div class="user-pill-wrapper"><a class="user-profile-btn" routerLink="/profile" (click)="closeMenu()">@if (avatar) {<img [src]="avatar" [alt]="userName" class="user-avatar-img">} @else {<div class="user-avatar-placeholder">{{ userInitial }}</div>}<span class="user-name-text">{{ userName }}</span></a><button class="logout-btn" (click)="logout()" title="تسجيل الخروج"><i class="fa-solid fa-right-from-bracket"></i></button></div> } @else { <div class="auth-btns-group"><a class="btn-register btn-login" routerLink="/login">تسجيل الدخول</a><a class="btn-register" routerLink="/register">إنشاء حساب</a></div> }
+    </a>
+
+    <!-- الروابط الرئيسية للشاشات الكبيرة -->
+    <div class="nav-links-desktop">
+      <a class="nav-item-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">الرئيسية</a>
+      <a class="nav-item-link" routerLink="/books" routerLinkActive="active">المكتبة</a>
+      <a class="nav-item-link" routerLink="/categories" routerLinkActive="active">التصنيفات</a>
+      <a class="nav-item-link" routerLink="/authors" routerLinkActive="active">المؤلفون</a>
+
+      @if (isLoggedIn && !isAdmin) {
+        <a class="nav-item-link" routerLink="/favorites" routerLinkActive="active">المفضلة</a>
+        <a class="nav-item-link" routerLink="/submit-book" routerLinkActive="active">إضافة كتاب</a>
+      }
+
+      @if (isAdmin) {
+        <a class="nav-item-link" routerLink="/admin" routerLinkActive="active">لوحة الإدارة</a>
+      }
+    </div>
+
+    <!-- أزرار التحكم -->
+    <div class="nav-actions">
+      <!-- زر فتح لوحة الألوان -->
+      <button class="customizer-toggle-btn" (click)="togglePanel()">
+        🎨 تخصيص التدريج
+      </button>
+
+      <!-- زر التبديل بين النهار والليل -->
+      <button class="theme-toggle-btn" (click)="toggleTheme()">
+        {{ themeService.isDarkMode() ? '🌙 الوضع الليلي' : '☀️ الوضع النهاري' }}
+      </button>
+
+      @if (isLoggedIn) {
+        <button class="btn-action-primary" (click)="logout()">تسجيل الخروج</button>
+      } @else {
+        <a class="btn-action-primary" routerLink="/login" (click)="closeMenu()">تسجيل الدخول</a>
+      }
+
+      <button class="mobile-toggle-btn" (click)="toggleMenu()" aria-label="القائمة">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
-</nav>
+
+  <!-- لوحة تخصيص الألوان التفاعلية -->
+  @if (showPanel()) {
+    <div class="customizer-panel">
+      <div class="panel-title">
+        <span>تخصيص التدريج</span>
+        <button class="close-panel" (click)="togglePanel()">✕</button>
+      </div>
+
+      <div class="palette-section">
+        <h4>تدريج الوضع النهاري ☀️</h4>
+        <div class="color-inputs">
+          <input type="color" [value]="themeService.palette().dayC1" (input)="onColorChange($event, 'dayC1')">
+          <input type="color" [value]="themeService.palette().dayC2" (input)="onColorChange($event, 'dayC2')">
+          <input type="color" [value]="themeService.palette().dayC3" (input)="onColorChange($event, 'dayC3')">
+        </div>
+      </div>
+
+      <div class="palette-section">
+        <h4>تدريج الوضع الليلي 🌙</h4>
+        <div class="color-inputs">
+          <input type="color" [value]="themeService.palette().nightC1" (input)="onColorChange($event, 'nightC1')">
+          <input type="color" [value]="themeService.palette().nightC2" (input)="onColorChange($event, 'nightC2')">
+          <input type="color" [value]="themeService.palette().nightC3" (input)="onColorChange($event, 'nightC3')">
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- القائمة الجانبية للهواتف -->
+  <div class="mobile-glass-drawer" [class.show]="menuOpen()">
+    <div class="drawer-header">
+      <span>القائمة الرئيسية</span>
+      <button class="drawer-close" (click)="closeMenu()">✕</button>
+    </div>
+
+    <div class="drawer-links">
+      <a class="drawer-link" routerLink="/" routerLinkActive="active" (click)="closeMenu()">الرئيسية</a>
+      <a class="drawer-link" routerLink="/books" routerLinkActive="active" (click)="closeMenu()">المكتبة</a>
+      <a class="drawer-link" routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
+      <a class="drawer-link" routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
+
+      @if (isLoggedIn && !isAdmin) {
+        <a class="drawer-link" routerLink="/favorites" routerLinkActive="active" (click)="closeMenu()">المفضلة</a>
+        <a class="drawer-link" routerLink="/submit-book" routerLinkActive="active" (click)="closeMenu()">إضافة كتاب</a>
+      }
+
+      @if (isAdmin) {
+        <a class="drawer-link" routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">لوحة الإدارة</a>
+      }
+    </div>
+  </div>
+
+  @if (menuOpen()) {
+    <div class="mobile-overlay" (click)="closeMenu()"></div>
+  }
+</div>

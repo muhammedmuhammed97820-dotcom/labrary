@@ -1,7 +1,11 @@
+<!-- إضاءات متدرجة خلفية عائمة -->
+<div class="background-orb orb-1"></div>
+<div class="background-orb orb-2"></div>
 
-<div class="app-main-container" [class.dark-mode]="themeService.isDarkMode()" >
-  <app-navbar></app-navbar>
+<!-- شريط الملاحة -->
+<app-navbar></app-navbar>
 
+<!-- محتوى الصفحات -->
+<main class="main-content">
   <router-outlet></router-outlet>
-  <app-notification-toast></app-notification-toast>
-</div>
+</main>

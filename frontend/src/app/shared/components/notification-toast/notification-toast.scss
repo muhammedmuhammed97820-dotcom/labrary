@@ -27,11 +27,14 @@
   padding: 14px 15px 14px 13px;
   border-radius: 18px;
   overflow: hidden;
-  background: rgba(15, 23, 42, 0.94);
+  
+  /* الاستفادة من متغيّرات الثيم المخصصة للشفافية والحدود */
+  background: var(--toast-bg, rgba(15, 23, 42, 0.94));
   backdrop-filter: blur(22px) saturate(140%);
   -webkit-backdrop-filter: blur(22px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.12));
+  color: var(--text-main, #fff);
+  
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28), 0 5px 18px rgba(0, 0, 0, 0.16);
   font-family: 'Cairo', sans-serif;
   animation: toastEnter 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -45,10 +48,11 @@
   border-radius: 4px;
 }
 
+/* ربط لون التنبيه بالتدريج المخصص عند اختيار info */
 .glass-toast.success::before { background: #22c55e; }
-.glass-toast.error::before { background: #ef4444; }
+.glass-toast.error::before   { background: #ef4444; }
 .glass-toast.warning::before { background: #f59e0b; }
-.glass-toast.info::before { background: #3b82f6; }
+.glass-toast.info::before    { background: var(--day-c1, #3b82f6); }
 
 .toast-icon-wrap {
   width: 42px;
@@ -63,9 +67,9 @@
 
 .icon { font-size: 1.15rem; }
 .success .icon { color: #4ade80; }
-.error .icon { color: #f87171; }
+.error .icon   { color: #f87171; }
 .warning .icon { color: #fbbf24; }
-.info .icon { color: #60a5fa; }
+.info .icon    { color: var(--day-c1, #60a5fa); }
 
 .toast-content {
   flex: 1;

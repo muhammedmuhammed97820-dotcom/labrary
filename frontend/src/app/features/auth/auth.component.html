@@ -1,1 +1,112 @@
-<main class="auth-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl"><div class="auth-shell"><section class="auth-brand-panel"><a routerLink="/" class="brand-mark"><span>م</span><b>مَكتبة</b></a><div class="brand-copy"><span class="eyebrow">DIGITAL LIBRARY</span><h1>المعرفة<br><span>تبدأ بخطوة.</span></h1><p>ادخل إلى مكتبتك الرقمية، احتفظ بكتبك المفضلة، وتابع رحلة القراءة من أي مكان.</p></div><div class="brand-features"><span><i class="fa-solid fa-book-open"></i> قراءة مريحة</span><span><i class="fa-solid fa-heart"></i> مكتبتك الشخصية</span><span><i class="fa-solid fa-cloud"></i> وصول مستمر</span></div></section><section class="auth-card"><div class="auth-card-head"><span class="eyebrow">{{mode==='login'?'WELCOME BACK':'GET STARTED'}}</span><h2>{{mode==='login'?'تسجيل الدخول':'إنشاء حساب جديد'}}</h2><p>{{mode==='login'?'أدخل بياناتك للعودة إلى مكتبتك.':'أنشئ حسابك وابدأ ببناء مكتبتك الخاصة.'}}</p></div>@if(error){<div class="auth-alert error"><i class="fa-solid fa-circle-exclamation"></i><span>{{error}}</span></div>}@if(success){<div class="auth-alert success"><i class="fa-solid fa-circle-check"></i><span>{{success}}</span></div>}<form (ngSubmit)="submit()">@if(mode==='register'){<label>الاسم الكامل<div class="field"><i class="fa-solid fa-user"></i><input name="name" [(ngModel)]="name" placeholder="اسمك الكريم"></div></label>}<label>البريد الإلكتروني<div class="field"><i class="fa-solid fa-envelope"></i><input name="email" [(ngModel)]="email" type="email" placeholder="name@example.com" required></div></label><label>كلمة المرور<div class="field"><i class="fa-solid fa-lock"></i><input name="password" [(ngModel)]="password" [type]="showPassword?'text':'password'" placeholder="••••••••" required><button type="button" (click)="showPassword=!showPassword"><i class="fa-solid" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i></button></div></label><button class="auth-submit" type="submit" [disabled]="loading">@if(loading){<i class="fa-solid fa-spinner spin"></i> جاري المعالجة...}@else{<span>{{mode==='login'?'دخول إلى المكتبة':'إنشاء الحساب'}}</span>}</button></form><div class="auth-switch">{{mode==='login'?'ليس لديك حساب؟':'لديك حساب بالفعل؟'}} <button type="button" (click)="switchMode()">{{mode==='login'?'إنشاء حساب':'تسجيل الدخول'}}</button></div></section></div></main>
+<main class="auth-wrapper" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="container py-4 min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="row justify-content-center align-items-stretch g-4 w-100">
+      
+      <!-- HERO SIDE -->
+      <div class="col-lg-6 d-none d-lg-flex">
+        <section class="auth-hero-card h-100 w-100">
+          <div class="card-body p-5 d-flex flex-column justify-content-between">
+            <div>
+              <span class="admin-badge mb-3">
+                <i class="fa-solid fa-book-bookmark"></i>
+                DIGITAL LIBRARY · 2026
+              </span>
+              <h1 class="display-4 fw-bold">عالم كامل من<br><span class="text-highlight">المعرفة</span> بانتظارك.</h1>
+              <p class="lead mt-3 text-secondary">اكتشف الكتب، احفظ ما تحب، وواصل القراءة من المكان الذي توقفت عنده بكل سلاسة وفخامة.</p>
+            </div>
+            
+            <div class="quote-box">
+              <i class="fa-solid fa-quote-right quote-icon"></i>
+              <p class="mb-0">« الكتاب الجيد يفتح لك أبوابًا لم تكن تعرف أنها موجودة »</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- FORM SIDE -->
+      <div class="col-12 col-md-9 col-lg-6 col-xl-5">
+        <section class="auth-form-card h-100">
+          <div class="card-body p-4 p-lg-5">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <a routerLink="/" class="text-decoration-none d-inline-flex align-items-center gap-2 logo-brand">
+                <span class="logo-badge">م</span>
+                <strong>مَكتبة</strong>
+              </a>
+            </div>
+
+            <div class="mb-4">
+              <span class="text-secondary small fw-bold">{{ mode === 'login' ? 'مرحباً بعودتك' : 'ابدأ رحلتك معنا' }}</span>
+              <h2 class="display-6 fw-bold mb-2">{{ mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد' }}</h2>
+              <p class="text-secondary mb-0">{{ mode === 'login' ? 'أدخل بياناتك للوصول إلى مكتبتك الرقمية.' : 'أنشئ حسابك وابدأ ببناء مكتبتك الشخصية.' }}</p>
+            </div>
+
+            @if (error) {
+              <div class="alert alert-custom error mb-4">
+                <i class="fa-solid fa-circle-exclamation me-2"></i>
+                <span>{{ error }}</span>
+              </div>
+            }
+            @if (success) {
+              <div class="alert alert-custom success mb-4">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                <span>{{ success }}</span>
+              </div>
+            }
+
+            <form (ngSubmit)="submit()">
+              @if (mode === 'register') {
+                <div class="mb-3">
+                  <label class="form-label">الاسم الكامل</label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input class="glass-control" name="name" [(ngModel)]="name" placeholder="اسمك الكريم">
+                  </div>
+                </div>
+              }
+
+              <div class="mb-3">
+                <label class="form-label">البريد الإلكتروني</label>
+                <div class="input-with-icon">
+                  <i class="fa-solid fa-envelope input-icon"></i>
+                  <input class="glass-control" name="email" [(ngModel)]="email" type="email" placeholder="name@example.com" required>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label">كلمة المرور</label>
+                <div class="input-with-icon">
+                  <i class="fa-solid fa-lock input-icon"></i>
+                  <input class="glass-control" name="password" [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" placeholder="••••••••" required>
+                  <button class="password-toggle-btn" type="button" (click)="showPassword=!showPassword">
+                    <i class="fa-solid" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+                  </button>
+                </div>
+              </div>
+
+              <button class="submit-btn w-100" type="submit" [disabled]="loading">
+                @if (loading) {
+                  <i class="fa-solid fa-spinner spin me-2"></i>
+                  <span>جاري المعالجة...</span>
+                } @else {
+                  <span>{{ mode === 'login' ? 'دخول إلى المكتبة' : 'إنشاء الحساب' }}</span>
+                }
+              </button>
+            </form>
+
+            <hr class="my-4 separator">
+
+            <p class="text-center mb-0 text-secondary">
+              {{ mode === 'login' ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟' }} 
+              <button class="switch-mode-btn" type="button" (click)="switchMode()">
+                {{ mode === 'login' ? 'إنشاء حساب جديد' : 'تسجيل الدخول' }}
+              </button>
+            </p>
+
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </div>
+</main>

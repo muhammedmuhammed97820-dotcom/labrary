@@ -1,92 +1,49 @@
-<main class="details-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
-  <div class="details-shell">
-    <header class="details-nav">
-      <a routerLink="/books"><i class="fa-solid fa-arrow-right"></i><span>العودة إلى المكتبة</span></a>
-      @if (book) { <span class="book-id"><i class="fa-solid fa-fingerprint"></i><span>{{ bookId }}</span></span> }
-    </header>
+<main class="admin-dashboard-wrapper book-details-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
+    <div class="details-top-bar">
+      <a routerLink="/books" class="back-nav-btn"><i class="fa-solid fa-arrow-right"></i><span>العودة إلى المكتبة</span></a>
+      @if (book) { <span class="book-id-badge"><i class="fa-solid fa-barcode"></i> BOOK ID / {{ bookId }}</span> }
+    </div>
 
     @if (loading) {
-      <section class="details-state loading-state">
-        <div class="state-orb"><div class="spinner"></div></div>
-        <div><strong>نحضّر صفحة الكتاب</strong><p>جاري تحميل التفاصيل والمعلومات...</p></div>
-      </section>
+      <div class="admin-state-box loading-box"><div class="glass-spinner"></div><p>جارِ تحميل تفاصيل الكتاب...</p></div>
     } @else if (error) {
-      <section class="details-state error">
-        <div class="state-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h2>تعذر تحميل الكتاب</h2>
-        <p>{{ error }}</p>
-        <a routerLink="/books" class="state-action"><i class="fa-solid fa-arrow-right"></i> العودة للمكتبة</a>
-      </section>
+      <div class="admin-state-box error-box"><div class="error-content"><i class="fa-solid fa-circle-exclamation error-icon"></i><span>{{ error }}</span></div><a routerLink="/books" class="retry-btn text-decoration-none"><i class="fa-solid fa-rotate-right"></i><span>العودة إلى المكتبة</span></a></div>
     } @else if (book; as b) {
-      <section class="details-hero">
-        <div class="hero-glow hero-glow-one"></div>
-        <div class="hero-glow hero-glow-two"></div>
+      <div class="book-details-grid">
+        <div class="book-info-section">
+          <div class="panel-glass-card h-100">
+            <div class="panel-header mb-3"><span class="panel-tag">{{ category() }}</span><h1 class="panel-title display-title">{{ b.title || 'بدون عنوان' }}</h1></div>
+            <div class="details-author-row mb-4"><div class="quick-icon-box-sm"><i class="fa-solid fa-pen-nib"></i></div><span>بقلم: <strong class="text-primary-custom">{{ author() }}</strong></span></div>
+            <p class="details-desc">{{ b.description || 'لا يوجد وصف تفصيلي متوفر لهذا الكتاب حتى الآن.' }}</p>
 
-        <aside class="details-cover-column">
-          <div class="details-cover">
-            <div class="cover-frame">
-              <img [src]="cover()" [alt]="b.title || 'غلاف الكتاب'">
-              <div class="cover-shine"></div>
+            <div class="stats-grid-sm mb-4">
+              <div class="stat-glass-card-sm"><div class="stat-icon-wrapper blue"><i class="fa-solid fa-eye"></i></div><div class="stat-details"><span class="stat-label">المشاهدات</span><strong class="stat-value">{{ b.viewsCount || 0 }}</strong></div></div>
+              <div class="stat-glass-card-sm"><div class="stat-icon-wrapper orange"><i class="fa-solid fa-download"></i></div><div class="stat-details"><span class="stat-label">التحميلات</span><strong class="stat-value">{{ b.downloads || 0 }}</strong></div></div>
+              <div class="stat-glass-card-sm"><div class="stat-icon-wrapper gold"><i class="fa-solid fa-star"></i></div><div class="stat-details"><span class="stat-label">التقييم</span><strong class="stat-value">{{ b.rating || '0.0' }}</strong></div></div>
+              <div class="stat-glass-card-sm"><div class="stat-icon-wrapper purple"><i class="fa-solid fa-calendar-days"></i></div><div class="stat-details"><span class="stat-label">سنة النشر</span><strong class="stat-value">{{ b.publishedYear || '—' }}</strong></div></div>
             </div>
-            <div class="cover-badge"><i class="fa-solid fa-book-open"></i> متاح رقمياً</div>
-            <div class="cover-shadow"></div>
+
+            <div class="actions-button-group mt-auto">
+              @if (fileUrl()) {
+                <a [routerLink]="['/books', bookId, 'read']" class="add-book-btn text-decoration-none"><i class="fa-solid fa-book-open"></i><span>فتح القارئ</span></a>
+                <button type="button" class="retry-btn-outline" (click)="download()"><i class="fa-solid fa-download"></i><span>تحميل PDF</span></button>
+              }
+              <a [routerLink]="['/books', bookId, 'community']" class="retry-btn-outline text-decoration-none"><i class="fa-solid fa-comments"></i><span>التعليقات والاقتباسات</span></a>
+              <button type="button" class="favorite-toggle-btn" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><i class="fa-solid fa-heart"></i><span>{{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}</span></button>
+            </div>
           </div>
-          <div class="cover-caption"><i class="fa-solid fa-sparkles"></i><span>رحلة جديدة تبدأ من صفحة</span></div>
-        </aside>
-
-        <div class="details-main">
-          <div class="title-meta">
-            <span class="category-label"><i class="fa-solid fa-layer-group"></i>{{ category() }}</span>
-            <span class="availability"><i class="fa-solid fa-circle"></i> متاح الآن</span>
-          </div>
-
-          <h1>{{ b.title || 'بدون عنوان' }}</h1>
-
-          <div class="author-line">
-            <span class="author-avatar"><i class="fa-solid fa-pen-nib"></i></span>
-            <span>بقلم</span>
-            <strong>{{ author() }}</strong>
-          </div>
-
-          <p class="details-description">{{ b.description || 'لا يوجد وصف تفصيلي متوفر لهذا الكتاب حتى الآن.' }}</p>
-
-          <div class="detail-stats">
-            <div class="stat-item"><span class="stat-icon"><i class="fa-solid fa-eye"></i></span><b>{{ b.viewsCount || 0 }}</b><small>مشاهدة</small></div>
-            <div class="stat-item"><span class="stat-icon"><i class="fa-solid fa-download"></i></span><b>{{ b.downloads || 0 }}</b><small>تحميل</small></div>
-            <div class="stat-item"><span class="stat-icon"><i class="fa-solid fa-star"></i></span><b>{{ b.rating || '0.0' }}</b><small>التقييم</small></div>
-            <div class="stat-item"><span class="stat-icon"><i class="fa-solid fa-calendar-days"></i></span><b>{{ b.publishedYear || '—' }}</b><small>سنة النشر</small></div>
-          </div>
-
-          <div class="details-actions">
-            @if (fileUrl()) {
-              <a [routerLink]="['/books', bookId, 'read']" class="primary-action"><i class="fa-solid fa-book-open-reader"></i><span>فتح القارئ</span></a>
-              <button type="button" class="secondary-action" (click)="download()"><i class="fa-solid fa-cloud-arrow-down"></i><span>تحميل PDF</span></button>
-            }
-            <a [routerLink]="['/books', bookId, 'community']" class="secondary-action"><i class="fa-solid fa-comments"></i><span>المجتمع</span></a>
-            <button type="button" class="favorite-action" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><i class="fa-solid fa-heart"></i><span>{{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}</span></button>
-          </div>
-
-          <div class="trust-line"><i class="fa-solid fa-shield-halved"></i><span>تجربة قراءة رقمية آمنة ومريحة</span><i class="fa-solid fa-wand-magic-sparkles"></i><span>مكتبتك دائماً معك</span></div>
         </div>
-      </section>
 
-      <section class="details-lower">
-        <article class="info-panel specifications-panel">
-          <div class="panel-heading"><span class="panel-icon"><i class="fa-solid fa-sliders"></i></span><div><span class="section-kicker">SPECIFICATIONS</span><h2>معلومات الكتاب</h2></div></div>
-          <dl>
-            <div><dt><i class="fa-solid fa-pen-nib"></i> المؤلف</dt><dd>{{ author() }}</dd></div>
-            <div><dt><i class="fa-solid fa-layer-group"></i> التصنيف</dt><dd>{{ category() }}</dd></div>
-            <div><dt><i class="fa-solid fa-calendar"></i> سنة النشر</dt><dd>{{ b.publishedYear || 'غير محددة' }}</dd></div>
-            <div><dt><i class="fa-solid fa-circle-check"></i> التوفر</dt><dd>{{ b.isAvailable === false ? 'غير متاح حالياً' : 'متاح للقراءة والتحميل' }}</dd></div>
-          </dl>
-        </article>
+        <div class="book-cover-section">
+          <div class="panel-glass-card text-center p-3"><div class="cover-image-container"><img [src]="cover()" [alt]="b.title" class="details-cover-img"></div><div class="cover-card-footer mt-3"><span class="panel-tag">DIGITAL LIBRARY COVER</span></div></div>
+        </div>
+      </div>
 
-        <article class="info-panel overview-panel">
-          <div class="panel-heading"><span class="panel-icon"><i class="fa-solid fa-feather-pointed"></i></span><div><span class="section-kicker">OVERVIEW</span><h2>نبذة عن الكتاب</h2></div></div>
-          <p>{{ b.description || 'لا توجد تفاصيل إضافية مسجلة لهذا الكتاب في الوقت الحالي.' }}</p>
-          <div class="overview-footer"><span><i class="fa-solid fa-quote-right"></i> المعرفة تبدأ بخطوة</span><span><i class="fa-solid fa-bookmark"></i> مكتبتك الرقمية</span></div>
-        </article>
-      </section>
+      <div class="panels-grid mt-4">
+        <div class="panel-glass-card"><div class="panel-header"><span class="panel-tag">SPECIFICATIONS</span><h2 class="panel-title"><i class="fa-solid fa-circle-info me-2 text-warning"></i> معلومات الكتاب</h2></div><ul class="info-list-specs"><li><span>المؤلف:</span> <strong>{{ author() }}</strong></li><li><span>التصنيف:</span> <strong>{{ category() }}</strong></li><li><span>سنة النشر:</span> <strong>{{ b.publishedYear || 'غير محددة' }}</strong></li><li><span>حالة التوفر:</span> <span class="status-badge" [class.available]="b.isAvailable !== false" [class.unavailable]="b.isAvailable === false">{{ b.isAvailable === false ? 'غير متاح حالياً' : 'متاح للقراءة والتحميل' }}</span></li></ul></div>
+        <div class="panel-glass-card"><div class="panel-header"><span class="panel-tag">OVERVIEW</span><h2 class="panel-title"><i class="fa-solid fa-quote-right me-2 text-warning"></i> نبذة عن الكتاب</h2></div><p class="about-long-text">{{ b.description || 'لا توجد تفاصيل إضافية مسجلة لهذا الكتاب في الوقت الحالي.' }}</p></div>
+      </div>
     }
   </div>
 </main>

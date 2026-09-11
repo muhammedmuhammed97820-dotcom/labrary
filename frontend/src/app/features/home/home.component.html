@@ -1,87 +1,132 @@
-<main class="home-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
-  <div class="home-shell">
-    <section class="hero-section">
-      <div class="hero-content">
-        <div class="hero-badge"><span class="badge-dot"></span><i class="fa-solid fa-sparkles"></i> مكتبة رقمية عربية • تجربة قراءة حديثة</div>
-        <h1>المعرفة أقرب<br><span>مما تتخيل.</span></h1>
-        <p>اكتشف عالماً من الكتب والمؤلفين والتصنيفات في مساحة رقمية صُممت لتجعل البحث والقراءة وحفظ مكتبتك الشخصية أكثر متعة.</p>
-        <div class="hero-actions">
-          <a routerLink="/books" class="hero-primary"><i class="fa-solid fa-book-open"></i><span>استكشف الكتب</span><i class="fa-solid fa-arrow-left action-arrow"></i></a>
-          <a routerLink="/categories" class="hero-secondary"><i class="fa-solid fa-layer-group"></i><span>تصفح التصنيفات</span></a>
-        </div>
-        <div class="hero-trust">
-          <span><i class="fa-solid fa-shield-halved"></i> وصول آمن</span>
-          <span><i class="fa-solid fa-cloud"></i> مكتبتك متاحة دائماً</span>
-          <span><i class="fa-solid fa-mobile-screen"></i> متجاوبة مع كل الأجهزة</span>
-        </div>
-      </div>
+<main class="admin-dashboard-wrapper home-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
+  <div class="admin-container">
 
-      <div class="hero-visual" aria-hidden="true">
-        <div class="visual-grid"></div>
-        <div class="orb orb-one"></div><div class="orb orb-two"></div>
-        <div class="visual-ring ring-one"></div><div class="visual-ring ring-two"></div>
-        <div class="floating-book main-book">
-          <div class="book-glow"></div>
-          <div class="book-spine">مَكتبة</div>
-          <div class="book-face">
-            <span class="book-edition">DIGITAL LIBRARY</span>
-            <i class="fa-solid fa-book-open"></i>
-            <strong>رحلة<br>المعرفة</strong>
-            <small>READ • DISCOVER • SAVE</small>
+    <!-- القسم الرئيسي (الهيرو) مع عارضة الكتب الحقيقية المتحركة والتفاعلية -->
+    <section class="hero-glass-section">
+      <div class="hero-grid">
+        
+        <div class="hero-content">
+          <span class="admin-badge">
+            <i class="fa-solid fa-feather-pointed"></i>
+            منصة المكتبة الرقمية · واحة القراءة والمعرفة
+          </span>
+          <h1 class="hero-title">اقرأ أكثر.<br><span class="highlight-text">اكتشف أبعد.</span></h1>
+          <p class="hero-subtitle">بوابتك الذكية لاستكشاف آلاف الكتب الحقيقية، قراءة المراجع، وإدارة مكتبتك الشخصية بكل سلاسة وأناقة.</p>
+          
+          <div class="hero-actions">
+            <a routerLink="/books" class="add-book-btn text-decoration-none">
+              <i class="fa-solid fa-book-open-reader"></i>
+              <span>استكشف الكتب الآن</span>
+            </a>
+            <a routerLink="/categories" class="retry-btn-outline text-decoration-none">
+              <i class="fa-solid fa-layer-group"></i>
+              <span>تصفح التصنيفات</span>
+            </a>
+          </div>
+
+          <div class="hero-steps-grid">
+            <div class="step-card">
+              <span class="step-num">01</span>
+              <span class="step-label">أرشيف ضخم</span>
+            </div>
+            <div class="step-card">
+              <span class="step-num">02</span>
+              <span class="step-label">قراءة فورية</span>
+            </div>
+            <div class="step-card">
+              <span class="step-num">03</span>
+              <span class="step-label">مفضلة خاصة</span>
+            </div>
           </div>
         </div>
-        <div class="floating-card card-top"><i class="fa-solid fa-star"></i><div><b>تجربة قراءة</b><small>مصممة لك</small></div><span>✦</span></div>
-        <div class="floating-card card-bottom"><i class="fa-solid fa-bookmark"></i><div><b>احفظ كتبك</b><small>في مكان واحد</small></div><span>✓</span></div>
-      </div>
-    </section>
 
-    <section class="quick-stats" aria-label="إحصائيات المكتبة">
-      <div><span class="stat-icon"><i class="fa-solid fa-book"></i></span><strong>+1000</strong><small>عنوان قابل للاكتشاف</small></div>
-      <div><span class="stat-icon"><i class="fa-solid fa-clock"></i></span><strong>24/7</strong><small>وصول إلى مكتبتك</small></div>
-      <div><span class="stat-icon"><i class="fa-solid fa-infinity"></i></span><strong>∞</strong><small>مساحة للقراءة</small></div>
-      <div><span class="stat-icon"><i class="fa-solid fa-sparkles"></i></span><strong>1</strong><small>تجربة موحدة</small></div>
-    </section>
-
-    <section class="section-block">
-      <div class="section-heading">
-        <div class="heading-copy"><span class="section-kicker"><i class="fa-solid fa-wand-magic-sparkles"></i> مختارات المكتبة</span><h2>ابدأ من هنا</h2><p>أحدث الكتب المتاحة، جاهزة لتكون جزءاً من رحلتك.</p></div>
-        <a routerLink="/books" class="text-link">عرض كل الكتب <i class="fa-solid fa-arrow-left"></i></a>
-      </div>
-
-      @if (loadingBooks) {
-        <div class="loading-panel"><div class="loading-orbit"><span></span></div><strong>نجهز لك أحدث الكتب...</strong><small>لحظات ونكون جاهزين</small></div>
-      } @else if (realBooks.length) {
-        <div class="featured-books">
-          @for (book of realBooks; track getBookId(book); let i = $index) {
-            <a class="featured-book" [routerLink]="['/books', getBookId(book)]">
-              <div class="featured-cover">
-                @if (getBookCover(book)) { <img [src]="getBookCover(book)" [alt]="book.title"> }
-                @else { <span class="cover-placeholder"><i class="fa-solid fa-book-open"></i>{{ book.title?.slice(0,1) || 'م' }}</span> }
-                <b>{{ (i + 1).toString().padStart(2,'0') }}</b>
-                <span class="cover-shine"></span>
-                <span class="cover-open"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+        <!-- عارضة الكتب الحقيقية القادمة من قاعدة البيانات -->
+        <div class="hero-visual">
+          <div class="floating-books-container">
+            
+            @if (loadingBooks) {
+              <div class="loading-mini-state">
+                <div class="glass-spinner"></div>
+                <span>جاري تحميل أحدث كتب القاعدة...</span>
               </div>
-              <div class="featured-info">
-                <span class="book-author"><i class="fa-solid fa-pen-nib"></i> {{ getAuthorName(book) }}</span>
-                <h3>{{ book.title || 'بدون عنوان' }}</h3>
-                <p>{{ book.description || 'كتاب متاح الآن ضمن المجموعة الرقمية.' }}</p>
-                <small>فتح التفاصيل <i class="fa-solid fa-arrow-left"></i></small>
+            } @else if (realBooks.length > 0) {
+              @for (book of realBooks; track getBookId(book); let i = $index) {
+                <a [routerLink]="['/books', getBookId(book)]" class="floating-book-card text-decoration-none" [class]="'book-' + (i + 1)">
+                  
+                  <!-- صورة الكتاب الحقيقية أو الحرف البديل بنفس تنسيق صفحة الكتب -->
+                  <div class="book-cover-thumb">
+                    @if (getBookCover(book)) {
+                      <img [src]="getBookCover(book)" [alt]="book.title" class="book-cover-img">
+                    } @else {
+                      <span class="cover-fallback">{{ book.title ? book.title.slice(0, 1) : 'ك' }}</span>
+                    }
+                  </div>
+
+                  <div class="book-info">
+                    <h4>{{ book.title || 'بدون عنوان' }}</h4>
+                    <div class="b-footer">
+                      <i class="fa-solid fa-pen-nib"></i>
+                      <span>{{ getAuthorName(book) }}</span>
+                    </div>
+                  </div>
+                </a>
+              }
+            } @else {
+              <div class="floating-book-card book-1">
+                <div class="book-cover-thumb">
+                  <span class="cover-fallback">!</span>
+                </div>
+                <div class="book-info">
+                  <h4>لا توجد كتب مضافة بعد</h4>
+                  <div class="b-footer"><span>أضف كتباً لقاعدة البيانات</span></div>
+                </div>
               </div>
-            </a>
-          }
+            }
+
+          </div>
         </div>
-      } @else {
-        <div class="empty-panel"><span><i class="fa-solid fa-book-open"></i></span><h3>المكتبة بانتظار أول كتاب</h3><p>ستظهر الكتب هنا تلقائياً عند إضافتها.</p><a routerLink="/books">اذهب إلى المكتبة <i class="fa-solid fa-arrow-left"></i></a></div>
-      }
-    </section>
 
-    <section class="discover-banner">
-      <div class="discover-copy"><span class="section-kicker"><i class="fa-solid fa-compass"></i> مساحتك الخاصة</span><h2>لا تقرأ فقط…<br><span>ابنِ مكتبتك.</span></h2><p>أضف الكتب إلى المفضلة، تابع ما تحب، واستكشف المؤلفين والاقتباسات التي تلهمك.</p></div>
-      <div class="discover-actions">
-        <a routerLink="/favorites"><i class="fa-solid fa-heart"></i><span>المفضلة</span><i class="fa-solid fa-arrow-left"></i></a>
-        <a routerLink="/quotes"><i class="fa-solid fa-quote-right"></i><span>الاقتباسات</span><i class="fa-solid fa-arrow-left"></i></a>
-        <a routerLink="/authors"><i class="fa-solid fa-user-pen"></i><span>المؤلفون</span><i class="fa-solid fa-arrow-left"></i></a>
       </div>
     </section>
+
+    <!-- قسم التجربة والخدمات -->
+    <section class="experience-section py-4">
+      <div class="section-header-row mb-4">
+        <div>
+          <span class="sub-tag">لماذا منصتنا؟</span>
+          <h2 class="section-title">صُممت لتلهم شغفك بالقراءة</h2>
+        </div>
+      </div>
+
+      <div class="features-grid">
+        <div class="panel-glass-card feature-card">
+          <span class="feature-badge blue">01 / سرعة وسلاسة</span>
+          <h3 class="feature-title">تصفح بلا حدود</h3>
+          <p class="feature-desc">واجهة سريعة ومتجاوبة تتيح لك الوصول إلى أي كتاب أو مؤلف ببضع نقرات فقط وبدون تعقيد.</p>
+        </div>
+
+        <div class="panel-glass-card feature-card">
+          <span class="feature-badge green">02 / قراءة مباشرة</span>
+          <h3 class="feature-title">مكتبتك أينما كنت</h3>
+          <p class="feature-desc">استعرض ملفات الكتب والبحوث مباشرة من المتصفح أو احفظها لمراجعتها في أي وقت تناسبك.</p>
+        </div>
+
+        <div class="panel-glass-card feature-card">
+          <span class="feature-badge orange">03 / تنظيم ذكي</span>
+          <h3 class="feature-title">مفضلة ومتابعة دقيقة</h3>
+          <p class="feature-desc">احتفظ بعناوينك المفضلة في حسابك الشخصي ونظّم مرجعيتك القرائية بكل راحة وأمان.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم المانيفستو (نبذة عن المنصة) -->
+    <section class="manifesto-section my-5">
+      <div class="panel-glass-card text-center p-5">
+        <span class="sub-tag">رؤيتنا</span>
+        <h2 class="manifesto-title mt-2">الكتاب الجيد يترك أثرًا لا يزول في العقول.</h2>
+        <p class="manifesto-desc mt-3">نؤمن بأن المعرفة يجب أن تكون متاحة للجميع بأسلوب بصري مريح، يجمع بين عراقة الفكر العربي وتصاميم الـ Glassmorphism المعاصرة.</p>
+      </div>
+    </section>
+
   </div>
 </main>
