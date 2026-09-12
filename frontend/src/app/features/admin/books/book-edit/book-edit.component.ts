@@ -23,7 +23,7 @@ export class BookEditComponent implements OnInit {
   id = '';
   loading = true;
   saving = false;
-  
+
   book: Book = {
     title: '',
     author: '',
@@ -59,8 +59,7 @@ export class BookEditComponent implements OnInit {
       },
       error: e => {
         console.error('Book edit load error:', e);
-        const msg = e?.error?.message || 'تعذر تحميل بيانات الكتاب.';
-        this.notify.show(msg, 'error');
+        this.notify.show(e?.error?.message || 'تعذر تحميل بيانات الكتاب.', 'error');
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -91,29 +90,14 @@ export class BookEditComponent implements OnInit {
     const author = this.authorName.trim();
     const category = this.categoryName.trim();
 
-    if (!title) {
-      this.notify.show('عنوان الكتاب مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
-      return;
-    }
-
-    if (!author) {
-      this.notify.show('اسم المؤلف مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
-      return;
-    }
-
-    if (!category) {
-      this.notify.show('التصنيف مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
-      return;
-    }
-
+    if (!title) return void this.notify.show('عنوان الكتاب مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
+    if (!author) return void this.notify.show('اسم المؤلف مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
+    if (!category) return void this.notify.show('التصنيف مطلوب ولا يمكن حفظ التعديلات بدونه.', 'error');
     if (this.book.publishedYear != null && (!Number.isInteger(Number(this.book.publishedYear)) || Number(this.book.publishedYear) < 0)) {
-      this.notify.show('سنة النشر يجب أن تكون سنة صحيحة.', 'error');
-      return;
+      return void this.notify.show('سنة النشر يجب أن تكون سنة صحيحة.', 'error');
     }
-
     if (this.book.rating != null && (Number(this.book.rating) < 0 || Number(this.book.rating) > 5)) {
-      this.notify.show('التقييم يجب أن يكون بين 0 و5.', 'error');
-      return;
+      return void this.notify.show('التقييم يجب أن يكون بين 0 و5.', 'error');
     }
 
     const fd = new FormData();
@@ -121,13 +105,13 @@ export class BookEditComponent implements OnInit {
     fd.append('author', author);
     fd.append('category', category);
     fd.append('description', this.book.description?.trim() || '');
-    
     if (this.book.publishedYear != null) fd.append('publishedYear', String(this.book.publishedYear));
     if (this.book.rating != null) fd.append('rating', String(this.book.rating));
     fd.append('isAvailable', String(this.book.isAvailable !== false));
-    
-    if (this.pdf) fd.append('file', this.pdf);
-    if (this.cover) fd.append('cover', this.cover);
+
+    // Backend upload middleware expects these exact field names.
+    if (this.pdf) fd.append('bookFile', this.pdf);
+    if (this.cover) fd.append('coverImage', this.cover);
 
     this.saving = true;
     this.cdr.detectChanges();
@@ -139,8 +123,7 @@ export class BookEditComponent implements OnInit {
         setTimeout(() => this.router.navigate(['/admin/books']), 600);
       },
       error: e => {
-        const msg = e?.error?.message || 'فشل حفظ التعديلات على الكتاب.';
-        this.notify.show(msg, 'error');
+        this.notify.show(e?.error?.message || 'فشل حفظ التعديلات على الكتاب.', 'error');
         this.saving = false;
         this.cdr.detectChanges();
       }
@@ -151,15 +134,11 @@ export class BookEditComponent implements OnInit {
     return typeof this.book.author === 'string' ? this.book.author : this.book.author?.name || '';
   }
 
-  set authorName(val: string) {
-    this.book.author = val;
-  }
+  set authorName(val: string) { this.book.author = val; }
 
   get categoryName(): string {
     return typeof this.book.category === 'string' ? this.book.category : this.book.category?.name || '';
   }
 
-  set categoryName(val: string) {
-    this.book.category = val;
-  }
+  set categoryName(val: string) { this.book.category = val; }
 }
