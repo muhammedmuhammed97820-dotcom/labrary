@@ -1,0 +1,42 @@
+<section class="categories-page" dir="rtl">
+  <div class="hero glass">
+    <div class="hero-copy">
+      <span class="eyebrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg>تنظيم المكتبة</span>
+      <h1>التصنيفات</h1>
+      <p>استكشف الكتب حسب المجال والتخصص، واختر التصنيف الذي يناسب اهتمامك.</p>
+    </div>
+    <div class="hero-stat"><strong>{{ categories.length }}</strong><span>تصنيف متاح</span></div>
+  </div>
+
+  <div class="state glass" *ngIf="loading"><div class="spinner"></div><span>جاري تحميل التصنيفات...</span></div>
+
+  <div class="state error glass" *ngIf="!loading && error">
+    <svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><path d="M10.3 4.7 2.9 17.5A2 2 0 0 0 4.6 20h14.8a2 2 0 0 0 1.7-2.5L13.7 4.7a2 2 0 0 0-3.4 0Z"/></svg>
+    <div><strong>تعذر تحميل التصنيفات</strong><p>{{ error }}</p></div>
+    <button class="retry" (click)="loadCategories()">إعادة المحاولة</button>
+  </div>
+
+  <div class="empty glass" *ngIf="!loading && !error && !categories.length">
+    <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg></div>
+    <h2>لا توجد تصنيفات حالياً</h2><p>ستظهر التصنيفات هنا عند إضافتها إلى المكتبة.</p>
+  </div>
+
+  <div class="category-grid" *ngIf="!loading && !error && categories.length">
+    <article class="category-card glass" *ngFor="let category of categories">
+      <div class="card-top"><div class="category-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6M8 17h4"/></svg></div><span class="index">{{ categories.indexOf(category) + 1 | number:'2.0' }}</span></div>
+      <h2>{{ category.name }}</h2>
+      <p class="description">{{ category.description || 'لا يوجد وصف لهذا التصنيف حالياً.' }}</p>
+      <div class="card-footer"><span class="books-count"><svg viewBox="0 0 24 24"><path d="M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4Z"/><path d="M7 20a2 2 0 0 1 2-2h10M9 8h6M9 12h6"/></svg>{{ category.booksCount || 0 }} كتاب</span><button class="details" (click)="openDescriptionModal(category)">التفاصيل<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button></div>
+    </article>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="selectedCategory" (click)="closeDescriptionModal()">
+    <div class="modal glass" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" aria-label="إغلاق" (click)="closeDescriptionModal()">×</button>
+      <div class="modal-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg></div>
+      <span class="modal-label">تفاصيل التصنيف</span><h2>{{ selectedCategory.name }}</h2>
+      <p>{{ selectedCategory.description || 'لا يوجد وصف لهذا التصنيف حالياً.' }}</p>
+      <div class="modal-meta"><span><strong>{{ selectedCategory.booksCount || 0 }}</strong> كتاب</span><a [routerLink]="['/books']">استعراض الكتب<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></a></div>
+    </div>
+  </div>
+</section>
