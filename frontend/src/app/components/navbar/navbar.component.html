@@ -5,20 +5,64 @@
       <span class="brand-text"><strong>المكتبة</strong><small>الإلكترونية</small></span>
     </a>
 
-    <button class="menu-toggle" type="button" aria-label="فتح القائمة" (click)="toggleMenu()">
-      <span></span><span></span><span></span>
-    </button>
-
     <nav class="nav-links" [class.open]="menuOpen()" aria-label="التنقل الرئيسي">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">الرئيسية</a>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">الرئيسية</a>
       <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">الكتب</a>
       <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
       <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
     </nav>
 
     <div class="nav-actions">
-      <button type="button" class="icon-btn" aria-label="الوضع الليلي" title="الوضع الليلي" (click)="onThemeToggle()">☾</button>
+      <button class="glass-btn" type="button" (click)="toggleTheme()">
+        {{ isNight() ? '☀️ النهاري' : '🌙 الليلي' }}
+      </button>
+      <button class="glass-btn palette-btn" type="button" (click)="toggleCustomizer()">🎨 الألوان</button>
       <a routerLink="/login" class="login-btn" (click)="closeMenu()">تسجيل الدخول</a>
+      <button class="menu-toggle" type="button" aria-label="فتح القائمة" (click)="toggleMenu()">☰</button>
     </div>
   </div>
+
+  @if (customizerOpen()) {
+    <section class="customizer-panel">
+      <div class="panel-title">
+        <span>تخصيص التدريج</span>
+        <button type="button" class="close-panel" (click)="toggleCustomizer()">✕</button>
+      </div>
+
+      <div class="palette-section">
+        <h4>تدريج الوضع النهاري ☀️</h4>
+        <div class="color-inputs">
+          @for (color of day; track $index) {
+            <label class="color-picker-wrapper">
+              <input type="color" [value]="color" (input)="setColor('day', $index, $event)">
+              <span>اللون {{ $index + 1 }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="palette-section">
+        <h4>تدريج الوضع الليلي 🌙</h4>
+        <div class="color-inputs">
+          @for (color of night; track $index) {
+            <label class="color-picker-wrapper">
+              <input type="color" [value]="color" (input)="setColor('night', $index, $event)">
+              <span>اللون {{ $index + 1 }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="palette-section">
+        <h4>نماذج سريعة</h4>
+        <div class="presets-grid">
+          @for (preset of presets; track $index) {
+            <button class="preset-btn" type="button"
+              [style.background]="'linear-gradient(135deg,' + preset.day[0] + ',' + preset.day[2] + ')'"
+              (click)="applyPreset(preset)"></button>
+          }
+        </div>
+      </div>
+    </section>
+  }
 </header>
