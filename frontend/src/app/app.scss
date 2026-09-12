@@ -1,8 +1,57 @@
 :host { display:block; min-height:100vh; direction:rtl; }
-.app-content { min-height:calc(100vh - 86px); position:relative; z-index:1; }
-.app-orb { position:fixed; border-radius:50%; filter:blur(70px); pointer-events:none; z-index:0; opacity:.72; animation:floatOrb 8s infinite alternate ease-in-out; }
-.app-orb.one { width:350px; height:350px; top:5%; right:8%; background:radial-gradient(circle,var(--day-c1),transparent 70%); }
-.app-orb.two { width:400px; height:400px; bottom:4%; left:8%; background:radial-gradient(circle,var(--day-c3),transparent 70%); animation-delay:-4s; }
-html[data-mode='dark'] .app-orb.one { background:radial-gradient(circle,var(--night-c2),transparent 70%); }
-html[data-mode='dark'] .app-orb.two { background:radial-gradient(circle,var(--night-c3),transparent 70%); }
-@keyframes floatOrb { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,-40px) scale(1.15)} }
+
+.app-content {
+  min-height:calc(100vh - 86px);
+  position:relative;
+  z-index:1;
+  padding-bottom:32px;
+}
+
+.app-orb {
+  position:fixed;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:0;
+  filter:blur(78px);
+  opacity:.58;
+  mix-blend-mode:normal;
+  animation:floatOrb 11s infinite alternate ease-in-out;
+}
+
+.app-orb.one {
+  width:420px;
+  height:420px;
+  top:2%;
+  right:4%;
+  background:radial-gradient(circle at 35% 35%,var(--day-c1) 0%,var(--day-c2) 38%,transparent 72%);
+}
+
+.app-orb.two {
+  width:480px;
+  height:480px;
+  bottom:-5%;
+  left:2%;
+  background:radial-gradient(circle at 55% 45%,var(--day-c3) 0%,var(--day-c1) 38%,transparent 72%);
+  animation-delay:-5s;
+}
+
+html[data-mode='dark'] .app-orb.one {
+  background:radial-gradient(circle at 35% 35%,var(--night-c1) 0%,var(--night-c2) 42%,transparent 72%);
+  opacity:.48;
+}
+
+html[data-mode='dark'] .app-orb.two {
+  background:radial-gradient(circle at 55% 45%,var(--night-c3) 0%,var(--night-c1) 42%,transparent 72%);
+  opacity:.42;
+}
+
+@keyframes floatOrb {
+  from { transform:translate3d(0,0,0) scale(1); }
+  to { transform:translate3d(34px,-44px,0) scale(1.13); }
+}
+
+@media (max-width: 700px) {
+  .app-content { min-height:calc(100vh - 72px); padding-bottom:20px; }
+  .app-orb.one { width:260px; height:260px; right:-80px; top:8%; filter:blur(60px); }
+  .app-orb.two { width:300px; height:300px; left:-100px; bottom:0; filter:blur(60px); }
+}
