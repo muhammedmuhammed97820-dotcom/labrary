@@ -1,0 +1,26 @@
+<section class="favorites-page" dir="rtl">
+  <header class="favorites-hero glass">
+    <div class="hero-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.5-8.8 10.2-8.8 10.2S3.2 14.3 3.2 8.8A4.6 4.6 0 0 1 12 6.1a4.6 4.6 0 0 1 8.8 2.7Z"/></svg></div>
+    <div><span class="eyebrow">مكتبتك الشخصية</span><h1>المفضلة</h1><p>الكتب التي اخترتها لتعود إليها وتقرأها في أي وقت.</p></div>
+    <div class="hero-count"><strong>{{ books.length }}</strong><span>كتاب محفوظ</span></div>
+  </header>
+
+  <div class="state glass" *ngIf="loading"><span class="spinner"></span><span>جاري تحميل الكتب المحفوظة...</span></div>
+
+  <div class="state error glass" *ngIf="!loading && error">
+    <svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><path d="M10.3 4.7 2.9 17.5A2 2 0 0 0 4.6 20h14.8a2 2 0 0 0 1.7-2.5L13.7 4.7a2 2 0 0 0-3.4 0Z"/></svg>
+    <div><strong>حدث خطأ</strong><p>{{ error }}</p></div><button (click)="load()">إعادة المحاولة</button>
+  </div>
+
+  <div class="empty glass" *ngIf="!loading && !error && !books.length">
+    <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.5-8.8 10.2-8.8 10.2S3.2 14.3 3.2 8.8A4.6 4.6 0 0 1 12 6.1a4.6 4.6 0 0 1 8.8 2.7Z"/></svg></div>
+    <h2>المفضلة فارغة</h2><p>لم تحفظ أي كتاب بعد. تصفح المكتبة وأضف الكتب التي تعجبك هنا.</p><a routerLink="/books" class="primary"><svg viewBox="0 0 24 24"><path d="M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4Z"/><path d="M9 8h6M9 12h6"/></svg>استكشف الكتب</a>
+  </div>
+
+  <div class="favorites-grid" *ngIf="!loading && !error && books.length">
+    <article class="book-card glass" *ngFor="let book of books">
+      <a class="cover-wrap" [routerLink]="['/books', getBookId(book)]"><img [src]="getBookCover(book)" [alt]="book.title || 'غلاف الكتاب'" loading="lazy"><span class="cover-shine"></span></a>
+      <div class="book-info"><div class="book-title-row"><h2>{{ book.title || 'كتاب بدون عنوان' }}</h2><button class="remove" type="button" [disabled]="removing.has(getBookId(book))" (click)="remove(book)" aria-label="إزالة من المفضلة"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.5-8.8 10.2-8.8 10.2S3.2 14.3 3.2 8.8A4.6 4.6 0 0 1 12 6.1a4.6 4.6 0 0 1 8.8 2.7Z"/></svg></button></div><p class="author"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>{{ authorName(book) }}</p><div class="actions"><a [routerLink]="['/books', getBookId(book)]" class="read">عرض الكتاب<svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></a><button class="remove-text" type="button" [disabled]="removing.has(getBookId(book))" (click)="remove(book)">{{ removing.has(getBookId(book)) ? 'جارٍ الإزالة...' : 'إزالة' }}</button></div></div>
+    </article>
+  </div>
+</section>
