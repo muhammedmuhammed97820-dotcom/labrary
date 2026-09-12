@@ -1,0 +1,24 @@
+<header class="navbar">
+  <div class="nav-inner">
+    <a routerLink="/" class="brand" (click)="closeMenu()">
+      <span class="brand-icon">📚</span>
+      <span class="brand-text"><strong>المكتبة</strong><small>الإلكترونية</small></span>
+    </a>
+
+    <button class="menu-toggle" type="button" aria-label="فتح القائمة" (click)="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="nav-links" [class.open]="menuOpen()" aria-label="التنقل الرئيسي">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">الرئيسية</a>
+      <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">الكتب</a>
+      <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
+      <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button type="button" class="icon-btn" aria-label="الوضع الليلي" title="الوضع الليلي" (click)="onThemeToggle()">☾</button>
+      <a routerLink="/login" class="login-btn" (click)="closeMenu()">تسجيل الدخول</a>
+    </div>
+  </div>
+</header>
