@@ -1,0 +1,32 @@
+<section class="book-details-page" dir="rtl">
+  <div *ngIf="loading" class="details-loading glass-panel"><div class="detail-skeleton-cover"></div><div class="detail-skeleton-copy"><span></span><span></span><span></span><span class="short"></span></div></div>
+
+  <div *ngIf="!loading && error" class="details-state glass-panel"><div class="state-icon"><svg viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17.5v.1"/></svg></div><h2>تعذر تحميل الكتاب</h2><p>{{ error }}</p><a routerLink="/books" class="secondary-btn">العودة إلى المكتبة</a></div>
+
+  <ng-container *ngIf="!loading && !error && book">
+    <nav class="breadcrumbs"><a routerLink="/books">المكتبة</a><svg viewBox="0 0 24 24"><path d="m10 7 5 5-5 5"/></svg><span>{{ book.title }}</span></nav>
+    <article class="details-hero glass-panel">
+      <div class="details-cover"><img [src]="cover()" [alt]="book.title || 'غلاف الكتاب'"></div>
+      <div class="details-copy">
+        <div class="detail-tags"><span>{{ category() }}</span><span *ngIf="book.publishedYear">{{ book.publishedYear }}</span></div>
+        <h1>{{ book.title || 'كتاب بدون عنوان' }}</h1>
+        <p class="detail-author"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>{{ author() }}</p>
+        <p class="detail-description">{{ book.description || 'لا يوجد وصف متاح لهذا الكتاب حالياً.' }}</p>
+        <div class="detail-stats">
+          <div><svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg><strong>{{ book.viewsCount ?? book.views ?? 0 }}</strong><span>مشاهدة</span></div>
+          <div><svg viewBox="0 0 24 24"><path d="M6 20h12M8 16V4h8v12M5 8h3M16 8h3"/></svg><strong>{{ book.downloads ?? 0 }}</strong><span>تحميل</span></div>
+        </div>
+        <div class="detail-actions">
+          <a *ngIf="book.filePath" [routerLink]="['/books', bookId, 'read']" class="primary-btn"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H7a2 2 0 0 1-2-2V4Z"/><path d="M8 8h7M8 11h5"/></svg>ابدأ القراءة</a>
+          <button type="button" class="secondary-btn" (click)="download()" [disabled]="downloadBusy || !book.filePath"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg>{{ downloadBusy ? 'جاري التحضير...' : 'تحميل الكتاب' }}</button>
+          <button type="button" class="favorite-action" [class.active]="isFavorite()" (click)="toggleFavorite()" [disabled]="favoriteBusy"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.5-8.8 10.2-8.8 10.2S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 12 6.2a4.8 4.8 0 0 1 8.8 2.6Z"/></svg>{{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}</button>
+        </div>
+      </div>
+    </article>
+    <section class="info-grid">
+      <div class="info-card glass-panel"><span class="info-label">عن الكتاب</span><h2>نبذة عن الكتاب</h2><p>{{ book.description || 'لا توجد نبذة إضافية.' }}</p></div>
+      <div class="info-card glass-panel"><span class="info-label">بيانات الكتاب</span><div class="metadata"><div><span>المؤلف</span><strong>{{ author() }}</strong></div><div><span>التصنيف</span><strong>{{ category() }}</strong></div><div *ngIf="book.publishedYear"><span>سنة النشر</span><strong>{{ book.publishedYear }}</strong></div><div><span>حالة الملف</span><strong>{{ book.filePath ? 'متوفر للقراءة' : 'غير متوفر' }}</strong></div></div></div>
+    </section>
+    <a routerLink="/books" class="back-library"><svg viewBox="0 0 24 24"><path d="m14 7-5 5 5 5"/></svg>العودة إلى جميع الكتب</a>
+  </ng-container>
+</section>
