@@ -44,6 +44,24 @@ export class AdminReportsComponent implements OnInit {
     return typeof book === 'object' && book ? book.title : 'غير معروف';
   }
 
+  reportReason(item: ModerationItem): string {
+    return item.reports?.[0]?.reason || 'other';
+  }
+
+  reportNote(item: ModerationItem): string {
+    return item.reports?.[0]?.note || '';
+  }
+
+  reporterName(item: ModerationItem): string {
+    const reporter = item.reports?.[0]?.reporter;
+    return reporter?.name || reporter?.email || 'مستخدم';
+  }
+
+  content(item: ModerationItem): string {
+    const value = item.item as Quote | CommunityComment;
+    return 'text' in value ? value.text : value.text;
+  }
+
   review(item: ModerationItem, action: 'restore' | 'reject'): void {
     const id = item.item._id;
     if (action === 'reject' && !confirm('هل تريد إخفاء هذا المحتوى نهائياً؟')) return;
