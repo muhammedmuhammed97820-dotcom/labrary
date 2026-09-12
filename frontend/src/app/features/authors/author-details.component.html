@@ -1,0 +1,55 @@
+<section class="author-details-page" dir="rtl">
+  <div class="page-shell">
+    <div class="state-card glass" *ngIf="loading">
+      <span class="spinner"></span><span>جارٍ تحميل معلومات المؤلف...</span>
+    </div>
+
+    <div class="state-card glass error" *ngIf="!loading && error">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+      <div><strong>تعذر تحميل الصفحة</strong><p>{{ error }}</p></div>
+      <a routerLink="/authors" class="back-btn">العودة إلى المؤلفين</a>
+    </div>
+
+    <ng-container *ngIf="!loading && !error && author">
+      <header class="author-hero glass">
+        <div class="hero-image"><img *ngIf="author.image; else authorInitial" [src]="imageUrl(author.image)" [alt]="author.name"><ng-template #authorInitial><span>{{ (author.name || 'م').charAt(0) }}</span></ng-template></div>
+        <div class="hero-info">
+          <a routerLink="/authors" class="back-link">← جميع المؤلفين</a>
+          <span class="eyebrow">سيرة المؤلف</span>
+          <h1>{{ author.name || 'مؤلف غير معروف' }}</h1>
+          <p class="nationality" *ngIf="author.nationality">{{ author.nationality }}</p>
+          <div class="meta-row">
+            <span *ngIf="author.birthDate">الميلاد: {{ author.birthDate | date:'yyyy/MM/dd' }}</span>
+            <span *ngIf="author.deathDate">الوفاة: {{ author.deathDate | date:'yyyy/MM/dd' }}</span>
+            <span *ngIf="author.birthPlace">{{ author.birthPlace }}</span>
+          </div>
+          <div class="stats"><div><strong>{{ author.booksCount || 0 }}</strong><span>كتاب</span></div><div *ngIf="author.occupation"><strong>مؤلف</strong><span>{{ author.occupation }}</span></div></div>
+        </div>
+      </header>
+
+      <div class="content-grid">
+        <article class="bio-card glass" *ngIf="author.bio || author.website">
+          <div class="section-title"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6"/></svg></span><div><span>عن المؤلف</span><h2>نبذة وسيرة</h2></div></div>
+          <p class="bio" *ngIf="author.bio">{{ author.bio }}</p>
+          <a *ngIf="author.website" class="website" [href]="author.website" target="_blank" rel="noopener">زيارة الموقع الشخصي ↗</a>
+        </article>
+
+        <aside class="summary-card glass">
+          <span class="eyebrow">في المكتبة</span><strong>{{ author.booksCount || 0 }}</strong><span>كتابًا متاحًا</span>
+          <a routerLink="/books" [queryParams]="{author: authorId}" class="primary-btn">استعراض كتب المؤلف <span>←</span></a>
+        </aside>
+      </div>
+
+      <section class="books-section">
+        <div class="section-heading"><div><span class="eyebrow">الأعمال</span><h2>كتب {{ author.name }}</h2></div><span class="count-pill">{{ author.books?.length || 0 }} كتاب</span></div>
+        <div class="empty-card glass" *ngIf="!author.books?.length"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H20v16H7.5A2.5 2.5 0 0 0 5 21.5zM5 5.5v16"/><path d="M9 7h7M9 11h6"/></svg><h3>لا توجد كتب منشورة لهذا المؤلف</h3><p>ستظهر الأعمال هنا عند إضافتها واعتمادها.</p></div>
+        <div class="books-grid" *ngIf="author.books?.length">
+          <article class="book-card glass" *ngFor="let book of author.books">
+            <a [routerLink]="['/books', book._id || book.id]" class="cover"><img [src]="bookCoverUrl(book)" [alt]="book.title || 'غلاف الكتاب'"></a>
+            <div class="book-info"><h3>{{ book.title || 'كتاب بدون عنوان' }}</h3><p>{{ book.category?.name || 'مكتبة إلكترونية' }}</p><a [routerLink]="['/books', book._id || book.id]">عرض الكتاب <span>←</span></a></div>
+          </article>
+        </div>
+      </section>
+    </ng-container>
+  </div>
+</section>
