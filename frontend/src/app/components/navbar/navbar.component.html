@@ -1,65 +1,81 @@
 <header class="navbar">
   <div class="nav-inner">
     <a routerLink="/" class="brand" (click)="closeMenu()">
-      <span class="brand-icon">📚</span>
+      <span class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg>
+      </span>
       <span class="brand-text"><strong>المكتبة</strong><small>الإلكترونية</small></span>
     </a>
 
     <nav class="nav-links" [class.open]="menuOpen()" aria-label="التنقل الرئيسي">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">الرئيسية</a>
-      <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">الكتب</a>
-      <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
-      <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg> الرئيسية
+      </a>
+      <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg> الكتب
+      </a>
+      <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21a7 7 0 0 1 14 0"/></svg> المؤلفون
+      </a>
+      <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v5H4zM13 14h7v5h-7z"/></svg> التصنيفات
+      </a>
     </nav>
 
     <div class="nav-actions">
       <button class="glass-btn" type="button" (click)="toggleTheme()">
-        {{ isNight() ? '☀️ النهاري' : '🌙 الليلي' }}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          @if (isNight()) { <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/> }
+          @else { <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8z"/> }
+        </svg>
+        {{ isNight() ? 'النهاري' : 'الليلي' }}
       </button>
-      <button class="glass-btn palette-btn" type="button" (click)="toggleCustomizer()">🎨 الألوان</button>
-      <a routerLink="/login" class="login-btn" (click)="closeMenu()">تسجيل الدخول</a>
-      <button class="menu-toggle" type="button" aria-label="فتح القائمة" (click)="toggleMenu()">☰</button>
+      <button class="glass-btn palette-btn" type="button" (click)="toggleCustomizer()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1.2a1.8 1.8 0 0 0 1.2-3.1 1.8 1.8 0 0 1 1.2-3.1H18a3 3 0 0 0 3-3C21 6.9 17.1 3 12 3z"/><circle cx="7.5" cy="10" r=".8"/><circle cx="10" cy="7" r=".8"/><circle cx="14" cy="7" r=".8"/></svg>
+        الألوان
+      </button>
+      <a routerLink="/login" class="login-btn" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 19V5a2 2 0 0 0-2-2h-5"/></svg>
+        تسجيل الدخول
+      </a>
+      <button class="menu-toggle" type="button" aria-label="فتح القائمة" (click)="toggleMenu()">
+        @if (menuOpen()) { <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg> } @else { <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg> }
+      </button>
     </div>
   </div>
 
   @if (customizerOpen()) {
     <section class="customizer-panel">
       <div class="panel-title">
-        <span>تخصيص التدريج</span>
-        <button type="button" class="close-panel" (click)="toggleCustomizer()">✕</button>
+        <span>تخصيص التدرج</span>
+        <button type="button" class="close-panel" (click)="toggleCustomizer()" aria-label="إغلاق">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
       </div>
 
       <div class="palette-section">
-        <h4>تدريج الوضع النهاري ☀️</h4>
+        <h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/></svg>تدرج الوضع النهاري</h4>
         <div class="color-inputs">
           @for (color of day; track $index) {
-            <label class="color-picker-wrapper">
-              <input type="color" [value]="color" (input)="setColor('day', $index, $event)">
-              <span>اللون {{ $index + 1 }}</span>
-            </label>
+            <label class="color-picker-wrapper"><input type="color" [value]="color" (input)="setColor('day', $index, $event)"><span>اللون {{ $index + 1 }}</span></label>
           }
         </div>
       </div>
 
       <div class="palette-section">
-        <h4>تدريج الوضع الليلي 🌙</h4>
+        <h4><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8z"/></svg>تدرج الوضع الليلي</h4>
         <div class="color-inputs">
           @for (color of night; track $index) {
-            <label class="color-picker-wrapper">
-              <input type="color" [value]="color" (input)="setColor('night', $index, $event)">
-              <span>اللون {{ $index + 1 }}</span>
-            </label>
+            <label class="color-picker-wrapper"><input type="color" [value]="color" (input)="setColor('night', $index, $event)"><span>اللون {{ $index + 1 }}</span></label>
           }
         </div>
       </div>
 
       <div class="palette-section">
-        <h4>نماذج سريعة</h4>
+        <h4><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg>نماذج سريعة</h4>
         <div class="presets-grid">
           @for (preset of presets; track $index) {
-            <button class="preset-btn" type="button"
-              [style.background]="'linear-gradient(135deg,' + preset.day[0] + ',' + preset.day[2] + ')'"
-              (click)="applyPreset(preset)"></button>
+            <button class="preset-btn" type="button" [style.background]="'linear-gradient(135deg,' + preset.day[0] + ',' + preset.day[2] + ')'" (click)="applyPreset(preset)" [attr.aria-label]="'النمط ' + ($index + 1)"></button>
           }
         </div>
       </div>
