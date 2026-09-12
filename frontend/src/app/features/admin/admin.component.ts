@@ -22,25 +22,14 @@ export class AdminComponent implements OnInit {
   loading = true;
   error = '';
 
-  ngOnInit(): void {
-    this.load();
-  }
+  ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading = true;
     this.error = '';
     this.api.getAdminAll().subscribe({
-      next: books => {
-        this.books = books;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: error => {
-        console.error('Admin books load error:', error);
-        this.error = error?.error?.message || 'تعذر تحميل إحصائيات المكتبة.';
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      next: books => { this.books = books; this.loading = false; this.cdr.detectChanges(); },
+      error: error => { console.error('Admin books load error:', error); this.error = error?.error?.message || 'تعذر تحميل إحصائيات المكتبة.'; this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -56,44 +45,19 @@ export class AdminComponent implements OnInit {
     return typeof author === 'string' ? author : author.name || 'مؤلف غير معروف';
   }
 
-  get total(): number {
-    return this.books.length;
-  }
-
-  get available(): number {
-    return this.books.filter(book => book.isAvailable !== false).length;
-  }
-
-  get views(): number {
-    return this.books.reduce((total, book) => total + (Number(book.viewsCount) || 0), 0);
-  }
-
-  get downloads(): number {
-    return this.books.reduce((total, book) => total + (Number(book.downloads) || 0), 0);
-  }
-
-  get authors(): number {
-    return new Set(
-      this.books
-        .map(book => typeof book.author === 'string' ? book.author : book.author?.name)
-        .filter(Boolean)
-    ).size;
-  }
-
-  get categories(): number {
-    return new Set(
-      this.books
-        .map(book => typeof book.category === 'string' ? book.category : book.category?.name)
-        .filter(Boolean)
-    ).size;
-  }
+  get total(): number { return this.books.length; }
+  get available(): number { return this.books.filter(book => book.isAvailable !== false && book.status !== 'rejected').length; }
+  get pending(): number { return this.books.filter(book => book.status === 'pending').length; }
+  get views(): number { return this.books.reduce((total, book) => total + (Number(book.viewsCount) || 0), 0); }
+  get downloads(): number { return this.books.reduce((total, book) => total + (Number(book.downloads) || 0), 0); }
+  get authors(): number { return new Set(this.books.map(book => typeof book.author === 'string' ? book.author : book.author?.name).filter(Boolean)).size; }
+  get categories(): number { return new Set(this.books.map(book => typeof book.category === 'string' ? book.category : book.category?.name).filter(Boolean)).size; }
 
   get recent(): Book[] {
-    return [...this.books]
-      .sort((a, b) =>
-        (b.createdAt ? new Date(b.createdAt).getTime() : 0) -
-        (a.createdAt ? new Date(a.createdAt).getTime() : 0)
-      )
-      .slice(0, 5);
+    return [...this.books].sort((a, b) => (b.createdAt ? new Date(b.createdAt).getTime() : 0) - (a.createdAt ? new Date(a.createdAt).getTime() : 0)).slice(0, 5);
+  }
+
+  get topViewed(): Book[] {
+    return [...this.books].filter(book => book.status === 'approved').sort((a, b) => (Number(b.viewsCount) || 0) - (Number(a.viewsCount) || 0)).slice(0, 5);
   }
 }
