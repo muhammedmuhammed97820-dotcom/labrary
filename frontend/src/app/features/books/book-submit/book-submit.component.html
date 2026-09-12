@@ -1,0 +1,24 @@
+<section class="submit-page" dir="rtl">
+  <div class="submit-header glass-panel"><div><span class="section-kicker"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z"/><path d="M8 8h8M8 11h6"/></svg> مشاركة المعرفة</span><h1>إضافة كتاب للمكتبة</h1><p>أرسل كتابك مع بياناته وملفاته، وسيتم مراجعته من قبل الإدارة قبل نشره.</p></div><a routerLink="/my-submissions" class="header-link">طلباتي السابقة <svg viewBox="0 0 24 24"><path d="m10 7 5 5-5 5"/></svg></a></div>
+  <form class="submit-layout" (ngSubmit)="submit()">
+    <div class="form-card glass-panel">
+      <div class="card-heading"><span class="step">01</span><div><h2>بيانات الكتاب</h2><p>أدخل المعلومات الأساسية للكتاب.</p></div></div>
+      <div class="form-grid">
+        <label class="field full"><span>عنوان الكتاب <b>*</b></span><input name="title" [(ngModel)]="form.title" type="text" placeholder="مثال: مقدمة في علم النفس" required></label>
+        <label class="field"><span>المؤلف <b>*</b></span><input name="author" [(ngModel)]="form.author" type="text" placeholder="اسم المؤلف" required></label>
+        <label class="field"><span>التصنيف <b>*</b></span><input name="category" [(ngModel)]="form.category" type="text" placeholder="مثال: أدب، تاريخ" required></label>
+        <label class="field"><span>سنة النشر</span><input name="publishedYear" [(ngModel)]="form.publishedYear" type="text" inputmode="numeric" placeholder="2026"></label>
+        <label class="field full"><span>وصف الكتاب</span><textarea name="description" [(ngModel)]="form.description" rows="6" placeholder="اكتب نبذة مختصرة عن محتوى الكتاب..."></textarea></label>
+      </div>
+    </div>
+    <div class="form-card glass-panel">
+      <div class="card-heading"><span class="step">02</span><div><h2>ملفات الكتاب</h2><p>PDF للكتاب وصورة واضحة للغلاف.</p></div></div>
+      <div class="upload-grid">
+        <label class="upload-zone"><input type="file" accept="application/pdf,.pdf" (change)="onBookFile($event)"><span class="upload-icon"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M8 13h8M8 16h6"/></svg></span><strong>{{ bookFile?.name || 'اختر ملف PDF' }}</strong><small>{{ bookFile ? 'تم اختيار الملف بنجاح' : 'الحجم المناسب معتمد على الخادم' }}</small></label>
+        <label class="upload-zone cover-zone"><input type="file" accept="image/*" (change)="onCover($event)"><span *ngIf="!coverPreviewUrl" class="upload-icon"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m5 18 5-5 3 3 2-2 4 4"/></svg></span><img *ngIf="coverPreviewUrl" [src]="coverPreviewUrl" alt="معاينة الغلاف"><strong>{{ coverImage?.name || 'اختر صورة الغلاف' }}</strong><small>{{ coverImage ? 'تم اختيار الغلاف' : 'PNG أو JPG أو WEBP' }}</small></label>
+      </div>
+      <div class="notice"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7.5v.1"/></svg><span>سيبقى الكتاب قيد المراجعة حتى تتم الموافقة عليه من الإدارة.</span></div>
+      <div class="submit-actions"><a routerLink="/books" class="cancel-btn">إلغاء</a><button type="submit" class="submit-btn" [disabled]="submitting">{{ submitting ? 'جاري الإرسال...' : 'إرسال للمراجعة' }}<svg *ngIf="!submitting" viewBox="0 0 24 24"><path d="m4 12 16-8-5 16-3-6-8-2Z"/><path d="M12 14 20 4"/></svg><span *ngIf="submitting" class="mini-loader"></span></button></div>
+    </div>
+  </form>
+</section>
