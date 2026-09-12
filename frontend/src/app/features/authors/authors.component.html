@@ -1,0 +1,64 @@
+<section class="authors-page">
+  <div class="authors-container">
+    <header class="page-hero">
+      <div class="hero-copy">
+        <span class="eyebrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 5.5v15M7 20h13"/></svg> مكتبة المؤلفين</span>
+        <h1>اكتشف <span>كتّاب</span> المكتبة</h1>
+        <p>تعرّف على المؤلفين الذين تركوا بصمتهم في عالم المعرفة، واستكشف كتبهم وسيرهم من مكان واحد.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-ring ring-one"></div>
+        <div class="art-ring ring-two"></div>
+        <div class="art-book"><svg viewBox="0 0 64 64"><path d="M13 10h29a8 8 0 0 1 8 8v36H21a8 8 0 0 1-8-8z"/><path d="M21 54a8 8 0 0 1 8-8h21M21 10v36M29 20h13M29 28h16"/></svg></div>
+      </div>
+    </header>
+
+    <div class="section-heading">
+      <div><span class="section-kicker">استكشف</span><h2>جميع المؤلفين</h2></div>
+      <div class="count-pill"><span>{{ authors.length }}</span> مؤلف</div>
+    </div>
+
+    <div class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <h3>جاري تحميل المؤلفين</h3>
+      <p>لحظات ونجهّز لك قائمة الكتّاب...</p>
+    </div>
+
+    <div class="state-card error" *ngIf="!loading && error">
+      <div class="state-icon"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><path d="m10.3 3.8-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.2l-8-14a2 2 0 0 0-3.4 0Z"/></svg></div>
+      <h3>{{ error }}</h3>
+      <button type="button" class="retry-btn" (click)="loadAuthors()">إعادة المحاولة</button>
+    </div>
+
+    <div class="empty-card" *ngIf="!loading && !error && !authors.length">
+      <div class="state-icon"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 5.5v15M8 8h7M8 12h9"/></svg></div>
+      <h3>لا يوجد مؤلفون حالياً</h3>
+      <p>ستظهر المؤلفات هنا عند إضافتها إلى المكتبة.</p>
+    </div>
+
+    <div class="authors-grid" *ngIf="!loading && !error && authors.length">
+      <a class="author-card" *ngFor="let author of authors; let i = index" [routerLink]="['/authors', author._id]" [style.--delay.ms]="i * 55">
+        <div class="card-glow"></div>
+        <div class="author-top">
+          <div class="author-avatar" [class.has-image]="!!author.image">
+            <img *ngIf="author.image" [src]="imageUrl(author.image)" [alt]="author.name" loading="lazy">
+            <span *ngIf="!author.image">{{ initial(author.name) }}</span>
+          </div>
+          <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></span>
+        </div>
+        <div class="author-info">
+          <h3>{{ author.name }}</h3>
+          <div class="meta" *ngIf="author.nationality">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+            <span>{{ author.nationality }}</span>
+          </div>
+          <p *ngIf="author.bio">{{ author.bio }}</p>
+        </div>
+        <div class="author-footer">
+          <span class="books-count"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 5.5v15M8 8h8"/></svg>{{ author.booksCount ?? 0 }} كتاب</span>
+          <span class="discover">عرض المؤلف <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
