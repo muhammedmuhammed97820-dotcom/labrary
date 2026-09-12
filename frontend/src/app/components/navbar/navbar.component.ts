@@ -28,7 +28,9 @@ export class NavbarComponent {
   ];
 
   constructor() { this.notificationService.loadLibraryNotifications(); }
-  get notifications(): LibraryNotification[] { return this.notificationService.libraryNotifications(); }
+  get notifications(): Array<LibraryNotification & { time: string }> {
+    return this.notificationService.libraryNotifications().map(item => ({ ...item, time: this.relativeTime(item.createdAt) }));
+  }
   get unreadCount(): number { return this.notificationService.unreadCount(); }
   get isLoggedIn(): boolean { return this.auth.isLoggedIn; }
   get isAdmin(): boolean { return this.auth.isAdmin; }
@@ -62,4 +64,16 @@ export class NavbarComponent {
     this.themeService.setColors({ day: this.day, night: this.night });
   }
   applyColors(): void { this.themeService.setColors({ day: this.day, night: this.night }); }
+
+  private relativeTime(value?: string): string {
+    if (!value) return 'الآن';
+    const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
+    if (seconds < 60) return 'الآن';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `قبل ${minutes} دقيقة`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `قبل ${hours} ساعة`;
+    const days = Math.floor(hours / 24);
+    return days < 30 ? `قبل ${days} يوم` : new Date(value).toLocaleDateString('ar-IQ');
+  }
 }
