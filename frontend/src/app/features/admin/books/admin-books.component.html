@@ -1,0 +1,14 @@
+<section class="manage-page">
+  <div class="manage-head"><div><span>إدارة المحتوى</span><h1>مكتبة الكتب</h1><p>إدارة الكتب المنشورة وتعديلها أو حذفها بسرعة.</p></div><a routerLink="/admin/books/create" class="primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>إضافة كتاب</a></div>
+  <div class="toolbar glass"><div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input [(ngModel)]="query" placeholder="ابحث عن عنوان أو مؤلف أو تصنيف..."/></div><button class="ghost" (click)="load()"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2 5"/><path d="M20 4v7h-7"/></svg>تحديث</button></div>
+  <div *ngIf="error" class="alert">{{ error }}</div>
+  <div *ngIf="loading" class="loading">جاري تحميل الكتب...</div>
+  <div *ngIf="!loading && !filteredBooks.length" class="empty glass">لا توجد كتب مطابقة للبحث.</div>
+  <div class="books-grid" *ngIf="!loading && filteredBooks.length">
+    <article class="book-card glass" *ngFor="let book of filteredBooks">
+      <div class="cover"><img *ngIf="getBookCover(book) as cover" [src]="cover" [alt]="book.title || 'كتاب'"/><span *ngIf="!getBookCover(book)"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span><b [class.off]="book.isAvailable === false">{{ book.isAvailable === false ? 'غير متاح' : 'منشور' }}</b></div>
+      <div class="book-body"><h3>{{ book.title || 'بدون عنوان' }}</h3><p>{{ authorName(book) }}</p><small>{{ categoryName(book) }}</small><div class="book-meta"><span>{{ book.viewsCount || 0 }} مشاهدة</span><span>{{ book.downloads || 0 }} تحميل</span></div><div class="actions"><a [routerLink]="['/admin/books', book._id, 'edit']" class="edit">تعديل</a><button class="delete" (click)="openDeleteModal(book,$event)">حذف</button></div></div>
+    </article>
+  </div>
+  <div class="delete-backdrop" *ngIf="showDeleteModal"><div class="delete-modal glass"><div class="danger-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg></div><h2>حذف الكتاب؟</h2><p>سيتم حذف «{{ bookToDelete?.title }}» نهائياً.</p><div><button class="ghost" (click)="closeDeleteModal()">إلغاء</button><button class="delete" (click)="executeDelete()" [disabled]="deletingId">{{ deletingId ? 'جارٍ الحذف...' : 'نعم، حذف' }}</button></div></div></div>
+</section>
