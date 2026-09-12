@@ -1,10 +1,6 @@
 <header class="navbar">
   <div class="nav-inner">
-    <a routerLink="/" class="brand" (click)="closeMenu()">
-      <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg></span>
-      <span class="brand-text"><strong>المكتبة</strong><small>الإلكترونية</small></span>
-    </a>
-
+    <a routerLink="/" class="brand" (click)="closeMenu()"><span class="brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg></span><span class="brand-text"><strong>المكتبة</strong><small>الإلكترونية</small></span></a>
     <nav class="nav-links" [class.open]="menuOpen()" aria-label="التنقل الرئيسي">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg> الرئيسية</a>
       <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg> الكتب</a>
@@ -12,52 +8,16 @@
       <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()"><svg viewBox="0 0 24 24"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v5H4zM13 14h7v5h-7z"/></svg> التصنيفات</a>
       @if (isLoggedIn) { <a routerLink="/favorites" routerLinkActive="active" (click)="closeMenu()"><svg viewBox="0 0 24 24"><path d="M20.8 8.8c0 5.5-8.8 10.2-8.8 10.2S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 12 6.2a4.8 4.8 0 0 1 8.8 2.6Z"/></svg> المفضلة</a> }
     </nav>
-
     <div class="nav-actions">
       <div class="notification-wrap">
-        <button class="notification-btn" type="button" (click)="toggleNotifications()" aria-label="الإشعارات" [attr.aria-expanded]="notificationsOpen()">
-          <svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
-          @if (unreadCount > 0) { <span class="notification-count">{{ unreadCount }}</span> }
-        </button>
-        @if (notificationsOpen()) {
-          <section class="notifications-panel" aria-label="قائمة الإشعارات">
-            <div class="notifications-head"><div><span>مركز التنبيهات</span><small>{{ unreadCount }} إشعارات جديدة</small></div>@if (unreadCount > 0) { <button type="button" class="mark-read" (click)="markAllRead()">تحديد كمقروء</button> }</div>
-            @if (notifications.length) {
-              <div class="notification-list">
-                @for (notification of notifications; track notification.id) {
-                  <button type="button" class="notification-item" [class.unread]="notification.unread" (click)="openNotification(notification)">
-                    <span class="notification-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg></span>
-                    <span class="notification-content"><strong>{{ notification.title }}</strong><span>{{ notification.text }}</span><small>{{ notification.time }}</small></span>
-                    @if (notification.unread) { <span class="unread-dot"></span> }
-                  </button>
-                }
-              </div>
-            } @else {
-              <div class="notifications-empty"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><strong>لا توجد إشعارات</strong><span>سنخبرك بكل جديد هنا.</span></div>
-            }
-          </section>
-        }
+        <button class="notification-btn" type="button" (click)="toggleNotifications()" aria-label="الإشعارات" [attr.aria-expanded]="notificationsOpen()"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>@if (unreadCount > 0) { <span class="notification-count">{{ unreadCount }}</span> }</button>
+        @if (notificationsOpen()) { <section class="notifications-panel" aria-label="قائمة الإشعارات"><div class="notifications-head"><div><span>مركز التنبيهات</span><small>{{ unreadCount }} إشعارات جديدة</small></div>@if (unreadCount > 0) { <button type="button" class="mark-read" (click)="markAllRead()">تحديد كمقروء</button> }</div>@if (notifications.length) { <div class="notification-list">@for (notification of notifications; track notification.id) { <button type="button" class="notification-item" [class.unread]="notification.unread" (click)="openNotification(notification)"><span class="notification-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg></span><span class="notification-content"><strong>{{ notification.title }}</strong><span>{{ notification.text }}</span><small>{{ notification.time }}</small></span>@if (notification.unread) { <span class="unread-dot"></span> }</button> }</div> } @else { <div class="notifications-empty"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><strong>لا توجد إشعارات</strong><span>سنخبرك بكل جديد هنا.</span></div> }</section> }
       </div>
-
-      <button class="glass-btn" type="button" (click)="toggleTheme"><svg viewBox="0 0 24 24">@if (isNight()) { <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/> } @else { <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8z"/> }</svg>{{ isNight() ? 'النهاري' : 'الليلي' }}</button>
+      <button class="glass-btn" type="button" (click)="toggleTheme()"><svg viewBox="0 0 24 24">@if (isNight()) { <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/> } @else { <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8z"/> }</svg>{{ isNight() ? 'النهاري' : 'الليلي' }}</button>
       <button class="glass-btn palette-btn" type="button" (click)="toggleCustomizer()"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.2a1.8 1.8 0 0 0 1.2-3.1 1.8 1.8 0 0 1 1.2-3.1H18a3 3 0 0 0 3-3C21 6.9 17.1 3 12 3z"/></svg> الألوان</button>
-
-      @if (isLoggedIn) {
-        <button type="button" class="login-btn account-btn" (click)="goToAccount()"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><span>{{ isAdmin ? 'لوحة الإدارة' : displayName }}</span></button>
-      } @else {
-        <a routerLink="/login" class="login-btn" (click)="closeMenu()"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3M21 19V5a2 2 0 0 0-2-2h-5"/></svg> تسجيل الدخول</a>
-      }
-
+      @if (isLoggedIn) { <button type="button" class="login-btn account-btn" (click)="goToAccount()"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><span>{{ isAdmin ? 'لوحة الإدارة' : displayName }}</span></button> } @else { <a routerLink="/login" class="login-btn" (click)="closeMenu()"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3M21 19V5a2 2 0 0 0-2-2h-5"/></svg> تسجيل الدخول</a> }
       <button class="menu-toggle" type="button" aria-label="فتح القائمة" (click)="toggleMenu()">@if (menuOpen()) { <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg> } @else { <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg> }</button>
     </div>
   </div>
-
-  @if (customizerOpen()) {
-    <section class="customizer-panel">
-      <div class="panel-title"><span>تخصيص التدرج</span><button type="button" class="close-panel" (click)="toggleCustomizer()">×</button></div>
-      <div class="palette-section"><h4>تدرج الوضع النهاري</h4><div class="color-inputs">@for (color of day; track $index) { <label class="color-picker-wrapper"><input type="color" [value]="color" (input)="setColor('day', $index, $event)"><span>اللون {{ $index + 1 }}</span></label> }</div></div>
-      <div class="palette-section"><h4>تدرج الوضع الليلي</h4><div class="color-inputs">@for (color of night; track $index) { <label class="color-picker-wrapper"><input type="color" [value]="color" (input)="setColor('night', $index, $event)"><span>اللون {{ $index + 1 }}</span></label> }</div></div>
-      <div class="palette-section"><h4>نماذج سريعة</h4><div class="presets-grid">@for (preset of presets; track $index) { <button class="preset-btn" type="button" [style.background]="'linear-gradient(135deg,' + preset.day[0] + ',' + preset.day[2] + ')'" (click)="applyPreset(preset)" [attr.aria-label]="'النمط ' + ($index + 1)"></button> }</div></div>
-    </section>
-  }
+  @if (customizerOpen()) { <section class="customizer-panel"><div class="panel-title"><span>تخصيص التدرج</span><button type="button" class="close-panel" (click)="toggleCustomizer()">×</button></div><div class="palette-section"><h4>تدرج الوضع النهاري</h4><div class="color-inputs">@for (color of day; track $index) { <label class="color-picker-wrapper"><input type="color" [value]="color" (input)="setColor('day', $index, $event)"><span>اللون {{ $index + 1 }}</span></label> }</div></div><div class="palette-section"><h4>تدرج الوضع الليلي</h4><div class="color-inputs">@for (color of night; track $index) { <label class="color-picker-wrapper"><input type="color" [value]="color" (input)="setColor('night', $index, $event)"><span>اللون {{ $index + 1 }}</span></label> }</div></div><div class="palette-section"><h4>نماذج سريعة</h4><div class="presets-grid">@for (preset of presets; track $index) { <button class="preset-btn" type="button" [style.background]="'linear-gradient(135deg,' + preset.day[0] + ',' + preset.day[2] + ')'" (click)="applyPreset(preset)" [attr.aria-label]="'النمط ' + ($index + 1)"></button> }</div></div></section> }
 </header>
