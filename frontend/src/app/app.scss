@@ -1,0 +1,8 @@
+:host { display:block; min-height:100vh; direction:rtl; }
+.app-content { min-height:calc(100vh - 86px); position:relative; z-index:1; }
+.app-orb { position:fixed; border-radius:50%; filter:blur(70px); pointer-events:none; z-index:0; opacity:.75; animation:floatOrb 8s infinite alternate ease-in-out; }
+.app-orb.one { width:350px; height:350px; top:5%; right:8%; background:radial-gradient(circle,var(--day-c1),transparent 70%); }
+.app-orb.two { width:400px; height:400px; bottom:4%; left:8%; background:radial-gradient(circle,var(--day-c3),transparent 70%); animation-delay:-4s; }
+@keyframes floatOrb { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,-40px) scale(1.15)} }
+body.theme-night .app-orb.one { background:radial-gradient(circle,var(--night-c2),transparent 70%); }
+body.theme-night .app-orb.two { background:radial-gradient(circle,var(--night-c3),transparent 70%); }
