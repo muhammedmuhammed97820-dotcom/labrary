@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CommunityService, ModerationItem, ReviewResponse, Quote, CommunityComment } from '../../core/services/community.service';
+import { CommunityService, ModerationItem, ReviewResponse } from '../../core/services/community.service';
 import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
@@ -39,9 +39,9 @@ export class AdminReportsComponent implements OnInit {
 
   bookTitle(item: ModerationItem): string {
     if (this.isQuote(item)) return 'اقتباس عام';
-    const comment = item as ModerationItem & { item: CommunityComment };
-    const book = comment.item.book;
-    return typeof book === 'object' && book ? book.title : 'غير معروف';
+    const comment = item.item as { book?: string | { title?: string } };
+    const book = comment.book;
+    return typeof book === 'object' && book ? book.title || 'غير معروف' : 'غير معروف';
   }
 
   reportReason(item: ModerationItem): string {
@@ -58,8 +58,7 @@ export class AdminReportsComponent implements OnInit {
   }
 
   content(item: ModerationItem): string {
-    const value = item.item as Quote | CommunityComment;
-    return 'text' in value ? value.text : value.text;
+    return item.item.text || '';
   }
 
   review(item: ModerationItem, action: 'restore' | 'reject'): void {
