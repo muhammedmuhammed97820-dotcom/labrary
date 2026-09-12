@@ -24,8 +24,8 @@ export class NavbarComponent {
   notificationsOpen = signal(false);
   isNight = signal(this.themeService.mode() === 'dark');
 
-  day = ['#ff9a9e', '#fecfef', '#a1c4fd'];
-  night = ['#0f0c29', '#302b63', '#24243e'];
+  day = [...this.themeService.dayColors()];
+  night = [...this.themeService.nightColors()];
 
   notifications: LibraryNotification[] = [];
 
@@ -87,18 +87,17 @@ export class NavbarComponent {
     const value = (event.target as HTMLInputElement).value;
     const colors = mode === 'day' ? this.day : this.night;
     colors[index] = value;
-    document.documentElement.style.setProperty(`--${mode}-c${index + 1}`, value);
+    this.themeService.setColor(mode, index, value);
   }
 
   applyPreset(preset: { day: string[]; night: string[] }): void {
     this.day = [...preset.day];
     this.night = [...preset.night];
-    this.applyColors();
+    this.themeService.setColors({ day: this.day, night: this.night });
   }
 
   applyColors(): void {
-    this.day.forEach((c, i) => document.documentElement.style.setProperty(`--day-c${i + 1}`, c));
-    this.night.forEach((c, i) => document.documentElement.style.setProperty(`--night-c${i + 1}`, c));
+    this.themeService.setColors({ day: this.day, night: this.night });
   }
 
   presets = [
