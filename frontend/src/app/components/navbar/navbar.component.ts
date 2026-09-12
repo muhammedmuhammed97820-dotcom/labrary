@@ -1,5 +1,5 @@
 import { Component, HostListener, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService, LibraryNotification } from '../../core/services/notification.service';
@@ -15,6 +15,8 @@ export class NavbarComponent {
   readonly themeService = inject(ThemeService);
   readonly notificationService = inject(NotificationService);
   readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
   menuOpen = signal(false);
   customizerOpen = signal(false);
   notificationsOpen = signal(false);
@@ -28,6 +30,7 @@ export class NavbarComponent {
   ];
 
   constructor() { this.notificationService.loadLibraryNotifications(); }
+
   get notifications(): Array<LibraryNotification & { time: string }> {
     return this.notificationService.libraryNotifications().map(item => ({ ...item, time: this.relativeTime(item.createdAt) }));
   }
@@ -40,8 +43,24 @@ export class NavbarComponent {
   closeMenu(): void { this.menuOpen.set(false); }
   toggleTheme(): void { this.themeService.toggleMode(); this.isNight.set(this.themeService.mode() === 'dark'); }
   toggleCustomizer(): void { this.customizerOpen.update(open => !open); this.notificationsOpen.set(false); this.closeMenu(); }
-  toggleNotifications(): void { this.notificationsOpen.update(open => !open); this.customizerOpen.set(false); this.closeMenu(); if (this.notificationsOpen()) this.notificationService.loadLibraryNotifications(); }
+  toggleNotifications(): void {
+    this.notificationsOpen.update(open => !open);
+    this.customizerOpen.set(false);
+    this.closeMenu();
+    if (this.notificationsOpen()) this.notificationService.loadLibraryNotifications();
+  }
   markAllRead(): void { this.notificationService.markAllLibraryRead(); }
+
+  openNotification(notification: LibraryNotification): void {
+    if (notification.unread) this.notificationService.markAllLibraryRead();
+    this.notificationsOpen.set(false);
+    if (notification.link) this.router.navigateByUrl(notification.link);
+  }
+
+  goToAccount(): void {
+    this.closeMenu();
+    this.router.navigateByUrl(this.isAdmin ? '/admin' : '/profile');
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
