@@ -1,0 +1,40 @@
+<header class="navbar-shell">
+  <nav class="navbar" aria-label="التنقل الرئيسي">
+    <a class="brand" routerLink="/" (click)="closeMenu()" aria-label="المكتبة الإلكترونية">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z"/>
+          <path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20M8 7h8M8 10h8"/>
+        </svg>
+      </span>
+      <span>المكتبة الإلكترونية</span>
+    </a>
+
+    <button class="menu-button" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="فتح القائمة">
+      <svg *ngIf="!menuOpen()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg *ngIf="menuOpen()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+
+    <div class="nav-content" [class.open]="menuOpen()">
+      <div class="nav-links">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">الرئيسية</a>
+        <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">الكتب</a>
+        <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
+        <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
+        <a routerLink="/favorites" routerLinkActive="active" (click)="closeMenu()">المفضلة</a>
+        <a routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">حسابي</a>
+      </div>
+
+      <div class="nav-actions">
+        <button class="icon-button" type="button" (click)="onThemeToggle()" aria-label="تبديل الوضع الليلي والنهاري" title="تبديل المظهر">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
+        </button>
+        <button class="customize-button" type="button" (click)="onCustomize()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18"/></svg>
+          تخصيص
+        </button>
+        <a class="login-button" routerLink="/auth" (click)="closeMenu()">تسجيل الدخول</a>
+      </div>
+    </div>
+  </nav>
+</header>
