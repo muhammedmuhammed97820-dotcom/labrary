@@ -1,134 +1,56 @@
-<header class="library-navbar" dir="rtl">
-  <div class="navbar-shell">
-    <a class="brand" routerLink="/" (click)="closeMenu()" aria-label="المكتبة الإلكترونية">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
-          <path d="M8 6h8"></path><path d="M8 10h6"></path>
-        </svg>
+<header class="nav glass" [class.menu-open]="menuOpen">
+  <div class="nav-main">
+    <a routerLink="/" class="brand" aria-label="المكتبة الإلكترونية" (click)="closeMenu()">
+      <span class="brand-mark">
+        <span class="brand-spark"></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v15H6.5A2.5 2.5 0 0 0 4 20.5zM20 5.5A2.5 2.5 0 0 0 17.5 3H13v15h4.5a2.5 2.5 0 0 1 2.5 2.5z"/><path d="M11 5h2M11 8h2M11 11h2"/></svg>
       </span>
-      <span class="brand-copy">
-        <strong>المكتبة الإلكترونية</strong>
-        <small>معرفتك في مكان واحد</small>
-      </span>
+      <span class="brand-copy"><b>المكتبة</b><small>الإلكترونية</small></span>
     </a>
 
-    <nav class="desktop-nav" aria-label="التنقل الرئيسي">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">الرئيسية</a>
-      <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">الكتب</a>
-      <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
-      <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
-      @if (isLoggedIn) {
-        <a routerLink="/my-submissions" routerLinkActive="active" (click)="closeMenu()">طلباتي</a>
-      }
-      @if (isAdmin) {
-        <a class="admin-link" routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">
-          <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
-          </span>
-          لوحة الإدارة
-        </a>
-      }
+    <nav class="main-nav" aria-label="التنقل الرئيسي">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>الرئيسية</span>
+      </a>
+      <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H7a2 2 0 0 1-2-2z"/><path d="M7 4v16M10 8h6M10 11h6M10 14h4"/></svg><span>الكتب</span>
+      </a>
+      <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h5v8H4zM13 3h5a2 2 0 0 1 2 2v6h-7zM4 13h7v8H6a2 2 0 0 1-2-2zM13 13h7v6a2 2 0 0 1-2 2h-5z"/></svg><span>التصنيفات</span>
+      </a>
+      <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 4.5a3 3 0 0 1 0 5.8M17 14.5a5 5 0 0 1 3.5 5"/></svg><span>المؤلفون</span>
+      </a>
+      <a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/><path d="m9 12 2 2 4-4"/></svg><span>الإدارة</span>
+      </a>
     </nav>
 
-    <div class="navbar-actions">
-      @if (isLoggedIn) {
-        <a class="icon-button notification-button" routerLink="/notifications" aria-label="الإشعارات" title="الإشعارات" (click)="closeMenu()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span class="notification-dot"></span>
-        </a>
-        <a class="icon-button" routerLink="/profile" aria-label="الملف الشخصي" title="الملف الشخصي" (click)="closeMenu()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
-        </a>
-      }
-
-      <button class="icon-button theme-button" type="button" (click)="toggleTheme()" [attr.aria-label]="themeService.isDarkMode() ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'" [title]="themeService.isDarkMode() ? 'الوضع النهاري' : 'الوضع الليلي'">
-        @if (themeService.isDarkMode()) {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
-        } @else {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg>
-        }
+    <div class="actions">
+      <button class="icon-btn" type="button" (click)="onThemeToggle()" aria-label="تبديل الوضع الليلي">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.5 8.5 0 0 1 8.7 4a8.5 8.5 0 1 0 11.3 11.3z"/></svg>
       </button>
-
-      <button class="palette-trigger" type="button" (click)="togglePanel()" [attr.aria-expanded]="showPanel()" aria-label="تخصيص المظهر">
-        <span class="palette-swatch" aria-hidden="true"></span>
-        <span>المظهر</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      <button class="icon-btn customize-btn" type="button" (click)="onCustomize()" aria-label="تخصيص المظهر">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></svg>
       </button>
-
-      @if (!isLoggedIn) {
-        <a class="login-link" routerLink="/login" (click)="closeMenu()">تسجيل الدخول</a>
-        <a class="primary-action" routerLink="/register" (click)="closeMenu()">إنشاء حساب</a>
-      } @else {
-        <button class="logout-button" type="button" (click)="logout()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
-          خروج
-        </button>
-      }
-
-      <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="فتح قائمة التنقل">
-        @if (menuOpen()) {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
-        } @else {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
-        }
+      <a routerLink="/auth" class="login" (click)="closeMenu()"><span>تسجيل الدخول</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 7l5 5-5 5"/></svg></a>
+      <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-controls="mobile-navigation" aria-label="فتح قائمة التنقل">
+        <span></span><span></span><span></span>
       </button>
     </div>
+  </div>
 
-    @if (showPanel()) {
-      <section class="theme-panel" aria-label="تخصيص المظهر">
-        <div class="panel-heading">
-          <div>
-            <span class="eyebrow">هوية المكتبة</span>
-            <h3>تخصيص المظهر</h3>
-          </div>
-          <button class="close-panel" type="button" (click)="togglePanel()" aria-label="إغلاق لوحة المظهر">×</button>
-        </div>
-
-        <div class="mode-switch" role="group" aria-label="وضع العرض">
-          <button type="button" [class.active]="!themeService.isDarkMode()" (click)="themeService.setTheme('day')">نهاري</button>
-          <button type="button" [class.active]="themeService.isDarkMode()" (click)="themeService.setTheme('night')">ليلي</button>
-        </div>
-
-        <div class="preset-list">
-          <span class="section-label">التدرجات الجاهزة</span>
-          <div class="preset-grid">
-            @for (preset of themeService.presets; track preset.name) {
-              <button class="preset" type="button" (click)="applyPreset(preset)" [title]="'تطبيق تدرج ' + preset.name">
-                <span class="preset-gradient" [style.background]="'linear-gradient(135deg,' + preset.day[0] + ',' + preset.day[1] + ',' + preset.day[2] + ')'" aria-hidden="true"></span>
-                <span>{{ preset.name }}</span>
-              </button>
-            }
-          </div>
-        </div>
-
-        <div class="custom-colors">
-          <span class="section-label">ألوان مخصصة</span>
-          <label>النهاري <input type="color" [value]="themeService.palette().dayC1" (input)="onColorChange($event, 'dayC1')"></label>
-          <label>الليلي <input type="color" [value]="themeService.palette().nightC1" (input)="onColorChange($event, 'nightC1')"></label>
-        </div>
-
-        <button class="reset-theme" type="button" (click)="resetTheme()">إعادة المظهر الافتراضي</button>
-      </section>
-    }
-
-    @if (menuOpen()) {
-      <nav class="mobile-nav" aria-label="قائمة التنقل للجوال">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">الرئيسية</a>
-        <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">الكتب</a>
-        <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">التصنيفات</a>
-        <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()">المؤلفون</a>
-        @if (isLoggedIn) { <a routerLink="/my-submissions" routerLinkActive="active" (click)="closeMenu()">طلباتي</a> }
-        @if (isAdmin) { <a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">لوحة الإدارة</a> }
-        @if (!isLoggedIn) {
-          <a routerLink="/login" routerLinkActive="active" (click)="closeMenu()">تسجيل الدخول</a>
-          <a class="mobile-register" routerLink="/register" (click)="closeMenu()">إنشاء حساب</a>
-        } @else {
-          <a routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">الملف الشخصي</a>
-          <button type="button" class="mobile-logout" (click)="logout()">تسجيل الخروج</button>
-        }
-      </nav>
-    }
+  <div class="mobile-panel" id="mobile-navigation" [class.open]="menuOpen">
+    <nav aria-label="التنقل على الهاتف">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>الرئيسية</span></a>
+      <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H7a2 2 0 0 1-2-2z"/><path d="M7 4v16M10 8h6M10 11h6M10 14h4"/></svg><span>الكتب</span></a>
+      <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h5v8H4zM13 3h5a2 2 0 0 1 2 2v6h-7zM4 13h7v8H6a2 2 0 0 1-2-2zM13 13h7v6a2 2 0 0 1-2 2h-5z"/></svg><span>التصنيفات</span></a>
+      <a routerLink="/authors" routerLinkActive="active" (click)="closeMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 4.5a3 3 0 0 1 0 5.8M17 14.5a5 5 0 0 1 3.5 5"/></svg><span>المؤلفون</span></a>
+      <a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.2 8.3-8 10-4.8-1.7-8-5-8-10V6z"/><path d="m9 12 2 2 4-4"/></svg><span>الإدارة</span></a>
+    </nav>
+    <div class="mobile-actions">
+      <button type="button" (click)="onThemeToggle()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.5 8.5 0 0 1 8.7 4a8.5 8.5 0 1 0 11.3 11.3z"/></svg>الوضع الليلي</button>
+      <button type="button" (click)="onCustomize()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></svg>تخصيص المظهر</button>
+    </div>
   </div>
 </header>

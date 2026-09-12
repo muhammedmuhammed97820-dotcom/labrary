@@ -1,40 +1,29 @@
-import { Component, inject, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from './shared/components/navbar/navbar.component';
-import { NotificationToastComponent } from './shared/components/notification-toast/notification-toast';
-import { ThemeService } from './core/services/theme.service';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { ThemePalette, ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, NotificationToastComponent],
-  templateUrl: './app.html'
+  imports: [CommonModule, RouterOutlet, NavbarComponent],
+  templateUrl: './app.html',
+  styleUrl: './app.scss'
 })
 export class App {
-  public readonly themeService = inject(ThemeService);
-  private readonly document = inject(DOCUMENT);
+  customizerOpen = signal(false);
+  readonly palettes = [
+    { id: 'rose' as ThemePalette, name: 'وردي', colors: 'linear-gradient(90deg,#ff9a9e,#fecfef,#a1c4fd)' },
+    { id: 'ocean' as ThemePalette, name: 'محيط', colors: 'linear-gradient(90deg,#89f7fe,#66a6ff)' },
+    { id: 'violet' as ThemePalette, name: 'بنفسجي', colors: 'linear-gradient(90deg,#c471f5,#fa71cd)' },
+    { id: 'emerald' as ThemePalette, name: 'زمردي', colors: 'linear-gradient(90deg,#84fab0,#8fd3f4)' },
+    { id: 'sunset' as ThemePalette, name: 'غروب', colors: 'linear-gradient(90deg,#f6d365,#fda085)' }
+  ];
 
-  constructor() {
-    effect(() => {
-      const isDark = this.themeService.isDarkMode();
-      const html = this.document.documentElement;
-      const body = this.document.body;
-      const themeClass = isDark ? 'theme-night' : 'theme-day';
-      const oldThemeClass = isDark ? 'theme-day' : 'theme-night';
+  constructor(readonly theme: ThemeService) {}
 
-      html.classList.remove(oldThemeClass, 'light-mode', 'dark-mode');
-      body.classList.remove(oldThemeClass, 'light-mode', 'dark-mode');
-      html.classList.add(themeClass);
-      body.classList.add(themeClass);
-
-      if (isDark) {
-        html.classList.add('dark-mode');
-        body.classList.add('dark-mode');
-      } else {
-        html.classList.add('light-mode');
-        body.classList.add('light-mode');
-      }
-    });
-  }
+  toggleMode(): void { this.theme.toggleMode(); }
+  setPalette(palette: ThemePalette): void { this.theme.setPalette(palette); }
+  toggleCustomizer(): void { this.customizerOpen.update(value => !value); }
 }

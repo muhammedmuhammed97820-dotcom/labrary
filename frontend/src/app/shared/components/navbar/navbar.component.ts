@@ -1,7 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { ThemeService, ColorPalette, ThemePreset } from '../../../core/services/theme.service';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -11,43 +9,25 @@ import { ThemeService, ColorPalette, ThemePreset } from '../../../core/services/
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-  public readonly themeService = inject(ThemeService);
+  @Output() customize = new EventEmitter<void>();
+  @Output() themeToggle = new EventEmitter<void>();
 
-  menuOpen = signal<boolean>(false);
-  showPanel = signal<boolean>(false);
+  menuOpen = false;
 
-  get isAdmin(): boolean { return this.auth.isAdmin; }
-  get isLoggedIn(): boolean { return this.auth.isLoggedIn; }
-
-  toggleTheme(): void {
-    this.themeService.toggleTheme();
+  closeMenu(): void {
+    this.menuOpen = false;
   }
 
-  togglePanel(): void {
-    this.showPanel.update(v => !v);
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
   }
 
-  onColorChange(event: Event, key: keyof ColorPalette): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.themeService.updatePalette({ [key]: value });
-  }
-
-  applyPreset(preset: ThemePreset): void {
-    this.themeService.applyPreset(preset);
-  }
-
-  resetTheme(): void {
-    this.themeService.reset();
-  }
-
-  logout(): void {
-    this.auth.logout();
+  onCustomize(): void {
+    this.customize.emit();
     this.closeMenu();
-    this.router.navigate(['/login']);
   }
 
-  closeMenu(): void { this.menuOpen.set(false); }
-  toggleMenu(): void { this.menuOpen.update(v => !v); }
+  onThemeToggle(): void {
+    this.themeToggle.emit();
+  }
 }

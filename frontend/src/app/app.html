@@ -1,9 +1,9 @@
-<div class="app-shell">
-  <app-navbar></app-navbar>
-
-  <main class="app-main" aria-label="محتوى المكتبة">
-    <router-outlet></router-outlet>
-  </main>
-
-  <app-notification-toast></app-notification-toast>
-</div>
+<div class="orb one"></div><div class="orb two"></div><div class="orb three"></div>
+<app-navbar (customize)="toggleCustomizer()" (themeToggle)="toggleMode()"></app-navbar>
+<aside class="customizer glass" [class.open]="customizerOpen()" aria-label="تخصيص المظهر">
+  <div class="customizer-head"><div><strong>تخصيص الواجهة</strong><small>غيّر شكل المكتبة كما تحب</small></div><button class="close" (click)="toggleCustomizer()">×</button></div>
+  <div class="mode-row"><span>الوضع</span><div class="mode-buttons"><button [class.active]="theme.mode()==='light'" (click)="theme.setMode('light')">☀️ نهاري</button><button [class.active]="theme.mode()==='dark'" (click)="theme.setMode('dark')">🌙 ليلي</button></div></div>
+  <div class="mode-row"><span>التدرجات</span><div class="palette-grid"><button *ngFor="let p of palettes" [class.active]="theme.palette()===p.id" (click)="setPalette(p.id)"><i [style.background]="p.colors"></i>{{p.name}}</button></div></div>
+</aside>
+<div class="backdrop" [class.show]="customizerOpen()" (click)="toggleCustomizer()"></div>
+<main class="content"><router-outlet></router-outlet></main>
