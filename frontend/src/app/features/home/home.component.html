@@ -1,0 +1,54 @@
+<section class="home-shell">
+  <div class="hero-card glass-card">
+    <div class="hero-copy">
+      <span class="eyebrow">📚 مكتبتك الرقمية</span>
+      <h1>اقرأ، اكتشف،<br><span>واصنع معرفتك</span></h1>
+      <p>مكتبة إلكترونية عربية تجمع الكتب والمعرفة في تجربة هادئة، عصرية وتفاعلية.</p>
+      <div class="hero-actions">
+        <a routerLink="/books" class="primary-btn">استكشف الكتب <span>←</span></a>
+        <a routerLink="/categories" class="soft-btn">تصفح التصنيفات</a>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="book-glow"></div>
+      <div class="floating-book back">📖</div>
+      <div class="floating-book front">📚</div>
+    </div>
+  </div>
+
+  <div class="quick-stats">
+    <div class="stat glass-card"><strong>مفتوحة</strong><span>مكتبة للجميع</span></div>
+    <div class="stat glass-card"><strong>قراءة</strong><span>في أي وقت</span></div>
+    <div class="stat glass-card"><strong>مجانية</strong><span>المعرفة حق</span></div>
+    <div class="stat glass-card"><strong>تفاعلية</strong><span>تجربة حديثة</span></div>
+  </div>
+
+  <div class="section-head">
+    <div><span class="section-kicker">آخر الإضافات</span><h2>كتب تستحق الاكتشاف</h2></div>
+    <a routerLink="/books">عرض الكل ←</a>
+  </div>
+
+  <div class="books-grid" *ngIf="!loadingBooks && realBooks.length; else emptyState">
+    <a class="book-card glass-card" *ngFor="let book of realBooks" [routerLink]="['/books', getBookId(book)]">
+      <div class="cover-wrap">
+        <img *ngIf="getBookCover(book); else coverFallback" [src]="getBookCover(book)" [alt]="book.title || 'غلاف الكتاب'">
+        <ng-template #coverFallback><div class="cover-fallback">📖</div></ng-template>
+        <span class="book-badge">كتاب</span>
+      </div>
+      <div class="book-info">
+        <h3>{{ book.title || 'كتاب بدون عنوان' }}</h3>
+        <p>{{ getAuthorName(book) }}</p>
+        <span>اقرأ التفاصيل ←</span>
+      </div>
+    </a>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-card glass-card">
+      <div class="empty-icon">📚</div>
+      <h3>{{ loadingBooks ? 'جاري تحميل الكتب...' : 'المكتبة بانتظار كتبك' }}</h3>
+      <p>{{ loadingBooks ? 'نجهز لك أحدث الكتب.' : 'ابدأ باستكشاف الأقسام أو أضف كتابًا جديدًا.' }}</p>
+      <a *ngIf="!loadingBooks" routerLink="/books" class="primary-btn">استكشف المكتبة</a>
+    </div>
+  </ng-template>
+</section>
