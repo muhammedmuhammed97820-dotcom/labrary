@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 
@@ -19,16 +19,12 @@ export class NavbarComponent {
   day = ['#ff9a9e', '#fecfef', '#a1c4fd'];
   night = ['#0f0c29', '#302b63', '#24243e'];
 
-  notifications = [
-    { id: 1, title: 'مرحبًا بك في المكتبة', text: 'استكشف أحدث الكتب المضافة إلى المكتبة.', time: 'الآن', unread: true },
-    { id: 2, title: 'كتب جديدة', text: 'تمت إضافة كتب جديدة يمكنك اكتشافها الآن.', time: 'منذ قليل', unread: true }
-  ];
-
-  get unreadCount(): number {
-    return this.notifications.filter(item => item.unread).length;
+  toggleMenu(): void {
+    this.menuOpen.update(open => !open);
+    this.customizerOpen.set(false);
+    this.notificationsOpen.set(false);
   }
 
-  toggleMenu(): void { this.menuOpen.update(open => !open); }
   closeMenu(): void { this.menuOpen.set(false); }
 
   toggleTheme(): void {
@@ -45,10 +41,22 @@ export class NavbarComponent {
   toggleNotifications(): void {
     this.notificationsOpen.update(open => !open);
     this.customizerOpen.set(false);
+    this.closeMenu();
   }
 
-  markAllRead(): void {
-    this.notifications = this.notifications.map(item => ({ ...item, unread: false }));
+  closeDropdowns(): void {
+    this.customizerOpen.set(false);
+    this.notificationsOpen.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest('.navbar')) {
+      this.menuOpen.set(false);
+      this.customizerOpen.set(false);
+      this.notificationsOpen.set(false);
+    }
   }
 
   setColor(mode: 'day' | 'night', index: number, event: Event): void {
