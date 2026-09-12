@@ -1,0 +1,40 @@
+<section class="reader-shell" [class.fullscreen-reader]="fullscreen" dir="rtl" (mousemove)="onPointerActivity()" (touchstart)="onPointerActivity()">
+  <header class="reader-toolbar" [class.hidden-toolbar]="!showToolbar">
+    <div class="reader-brand"><a routerLink="/books" class="reader-back" title="العودة إلى المكتبة"><svg viewBox="0 0 24 24"><path d="m14 7-5 5 5 5"/></svg></a><div><strong>{{ book?.title || 'قارئ الكتب' }}</strong><span>{{ authorName() }}</span></div></div>
+    <div class="reader-actions">
+      <button type="button" (click)="searchOpen=!searchOpen" title="بحث"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>
+      <button type="button" (click)="toggleBookmark()" [class.active]="isBookmarked()" title="علامة مرجعية"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-3-6 3V4Z"/></svg></button>
+      <button type="button" (click)="settingsOpen=!settingsOpen" title="إعدادات العرض"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.1l2-1.5-2-3.4-2.3.9A7.5 7.5 0 0 0 15 6l-.3-2.5h-4.1L10.3 6a7.5 7.5 0 0 0-1.6.9l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 4.3 12c0 .4 0 .7.1 1.1l-2 1.5 2 3.4 2.3-.9c.5.4 1 .7 1.6.9l.3 2.5h4.1l.3-2.5a7.5 7.5 0 0 0 1.6-.9l2.3.9 2-3.4-2-1.5c.1-.4.1-.7.1-1.1Z"/></svg></button>
+      <button type="button" (click)="toggleFullscreen()" title="ملء الشاشة"><svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/></svg></button>
+    </div>
+  </header>
+
+  <div *ngIf="searchOpen" class="reader-search glass-reader-panel">
+    <div class="search-input-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input #searchInput [(ngModel)]="searchTerm" (keyup.enter)="search()" placeholder="ابحث داخل الكتاب..."><button type="button" (click)="search()">{{ searchBusy ? '...' : 'بحث' }}</button></div>
+    <div class="search-results" *ngIf="searchResults.length"><button *ngFor="let result of searchResults; let i=index" type="button" [class.selected]="i===currentSearchIndex" (click)="jumpToSearchResult(result)"><strong>صفحة {{ result.page }}</strong><span>{{ result.snippet }}</span></button></div>
+    <p class="no-search" *ngIf="!searchBusy && searchTerm && !searchResults.length">لا توجد نتائج مطابقة.</p>
+  </div>
+
+  <aside class="reader-sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-head"><strong>{{ searchOpen ? 'نتائج البحث' : 'العلامات المرجعية' }}</strong><button type="button" (click)="sidebarOpen=false">×</button></div>
+    <div *ngIf="!bookmarks.length" class="sidebar-empty"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-3-6 3V4Z"/></svg><span>لا توجد علامات مرجعية</span></div>
+    <button class="bookmark-item" *ngFor="let bookmark of bookmarks" type="button" (click)="openBookmark(bookmark)"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-3-6 3V4Z"/></svg><span>صفحة {{ bookmark }}</span></button>
+  </aside>
+
+  <main class="reader-main">
+    <div *ngIf="loading" class="reader-state"><div class="loader"></div><strong>جاري فتح الكتاب...</strong><span>يتم تجهيز صفحات PDF للقراءة</span></div>
+    <div *ngIf="!loading && error" class="reader-state"><div class="reader-error-icon"><svg viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17.5v.1"/></svg></div><strong>تعذر فتح الكتاب</strong><span>{{ error }}</span><a routerLink="/books">العودة إلى المكتبة</a></div>
+    <div #readerViewport class="reader-viewport" *ngIf="!loading && !error">
+      <div class="page-stage"><canvas #pageCanvas aria-label="صفحة الكتاب"></canvas><div *ngIf="rendering" class="render-indicator">جاري تحديث الصفحة...</div></div>
+    </div>
+  </main>
+
+  <footer class="reader-bottom" [class.hidden-toolbar]="!showToolbar" *ngIf="!loading && !error">
+    <div class="page-controls"><button type="button" (click)="previousPage()" [disabled]="page<=1" title="الصفحة السابقة"><svg viewBox="0 0 24 24"><path d="m14 7-5 5 5 5"/></svg></button><div class="page-input"><input [(ngModel)]="pageInput" (keyup.enter)="goToPage()" (blur)="goToPage()"><span>/ {{ totalPages }}</span></div><button type="button" (click)="nextPage()" [disabled]="page>=totalPages" title="الصفحة التالية"><svg viewBox="0 0 24 24"><path d="m10 7 5 5-5 5"/></svg></button></div>
+    <div class="reader-tools"><button type="button" (click)="zoomOut()" title="تصغير">−</button><span>{{ Math.round(zoom*100) }}%</span><button type="button" (click)="zoomIn()" title="تكبير">+</button><button type="button" (click)="setFit('width')" [class.active]="fitMode==='width'">عرض</button><button type="button" (click)="setFit('page')" [class.active]="fitMode==='page'">صفحة</button><button type="button" (click)="rotate()" title="تدوير"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.8-4.2L3 9M3 5v4h4M4 13a8 8 0 0 0 14.8 4.2L21 15M21 19v-4h-4"/></svg></button></div>
+  </footer>
+
+  <div class="settings-pop glass-reader-panel" *ngIf="settingsOpen">
+    <div class="settings-title">إعدادات العرض</div><div class="settings-row"><span>حجم العرض</span><div><button type="button" (click)="zoomOut()">−</button><strong>{{ Math.round(zoom*100) }}%</strong><button type="button" (click)="zoomIn()">+</button></div></div><div class="settings-row"><span>طريقة الملاءمة</span><div class="fit-buttons"><button type="button" (click)="setFit('width')" [class.active]="fitMode==='width'">العرض</button><button type="button" (click)="setFit('page')" [class.active]="fitMode==='page'">الصفحة</button></div></div>
+  </div>
+</section>
