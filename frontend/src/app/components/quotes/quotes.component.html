@@ -1,0 +1,31 @@
+<section class="quotes-page" dir="rtl">
+  <div class="quotes-shell">
+    <header class="quotes-hero glass">
+      <div><span class="eyebrow">مجتمع المكتبة</span><h1>الاقتباسات</h1><p>كلمات تستحق أن تُحفظ وتُشارك مع محبي القراءة.</p></div>
+      <button class="primary-btn" type="button" (click)="openComposer()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> أضف اقتباسًا</button>
+    </header>
+
+    <div class="toolbar glass">
+      <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/></svg><input type="search" [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="ابحث في الاقتباسات أو أسماء المستخدمين"></label>
+      <select [(ngModel)]="sort" (ngModelChange)="applyFilters()"><option value="latest">الأحدث</option><option value="likes">الأكثر إعجابًا</option></select>
+    </div>
+
+    <div class="composer glass" *ngIf="showComposer">
+      <div class="composer-head"><div><span class="eyebrow">مشاركة جديدة</span><h2>{{ editingId ? 'تعديل الاقتباس' : 'أضف اقتباسًا' }}</h2></div><button type="button" class="icon-btn" (click)="cancelComposer()">×</button></div>
+      <textarea [(ngModel)]="quoteText" rows="5" maxlength="1000" placeholder="اكتب اقتباسًا يلهمك..."></textarea>
+      <div class="composer-footer"><span>{{ quoteText.length }}/1000</span><button type="button" class="primary-btn" [disabled]="saving" (click)="saveQuote()">{{ saving ? 'جارٍ الحفظ...' : 'حفظ الاقتباس' }}</button></div>
+    </div>
+
+    <div class="state glass" *ngIf="loading"><span class="spinner"></span> جارٍ تحميل الاقتباسات...</div>
+    <div class="empty glass" *ngIf="!loading && !filteredQuotes.length"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16H7z"/><path d="M9 8h6M9 12h5"/></svg><h2>لا توجد اقتباسات</h2><p>{{ search ? 'لم نجد نتائج مطابقة لبحثك.' : 'كن أول من يشارك اقتباسًا مع المجتمع.' }}</p></div>
+
+    <div class="quotes-grid" *ngIf="!loading && filteredQuotes.length">
+      <article class="quote-card glass" *ngFor="let q of filteredQuotes">
+        <div class="quote-mark">“</div><p class="quote-text">{{ q.text }}</p>
+        <footer><div class="user"><div class="avatar"><img *ngIf="q.user.avatar" [src]="q.user.avatar" [alt]="q.user.name"><span *ngIf="!q.user.avatar">{{ q.user.name.charAt(0) }}</span></div><div><strong>{{ q.user.name }}</strong><time>{{ q.createdAt | date:'mediumDate' }}</time></div></div>
+          <div class="actions"><button type="button" [class.active]="q.liked" [disabled]="isLiking(q._id)" (click)="toggleLike(q)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.9c0 5.1-8.8 10-8.8 10s-8.8-4.9-8.8-10A4.7 4.7 0 0 1 12 6a4.7 4.7 0 0 1 8.8 2.9Z"/></svg>{{ q.likesCount || 0 }}</button><button type="button" *ngIf="isOwner(q)" (click)="startEdit(q)">تعديل</button><button type="button" *ngIf="isOwner(q)" (click)="deleteQuote(q)">حذف</button><button type="button" (click)="report(q)">إبلاغ</button></div>
+        </footer>
+      </article>
+    </div>
+  </div>
+</section>
