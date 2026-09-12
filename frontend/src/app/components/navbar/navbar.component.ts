@@ -2,6 +2,14 @@ import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 
+interface LibraryNotification {
+  id: number;
+  title: string;
+  text: string;
+  time: string;
+  unread: boolean;
+}
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -19,13 +27,21 @@ export class NavbarComponent {
   day = ['#ff9a9e', '#fecfef', '#a1c4fd'];
   night = ['#0f0c29', '#302b63', '#24243e'];
 
+  notifications: LibraryNotification[] = [];
+
+  get unreadCount(): number {
+    return this.notifications.filter(notification => notification.unread).length;
+  }
+
   toggleMenu(): void {
     this.menuOpen.update(open => !open);
     this.customizerOpen.set(false);
     this.notificationsOpen.set(false);
   }
 
-  closeMenu(): void { this.menuOpen.set(false); }
+  closeMenu(): void {
+    this.menuOpen.set(false);
+  }
 
   toggleTheme(): void {
     this.themeService.toggleMode();
@@ -44,15 +60,23 @@ export class NavbarComponent {
     this.closeMenu();
   }
 
-  closeDropdowns(): void {
-    this.customizerOpen.set(false);
-    this.notificationsOpen.set(false);
+  markAllRead(): void {
+    this.notifications = this.notifications.map(notification => ({
+      ...notification,
+      unread: false
+    }));
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
-    if (!target?.closest('.navbar')) {
+    if (!target) return;
+
+    const clickedInsideDropdown = target.closest(
+      '.customizer-panel, .notifications-panel, .palette-btn, .notification-wrap, .menu-toggle'
+    );
+
+    if (!clickedInsideDropdown) {
       this.menuOpen.set(false);
       this.customizerOpen.set(false);
       this.notificationsOpen.set(false);
