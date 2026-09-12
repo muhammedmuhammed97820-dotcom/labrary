@@ -1,18 +1,18 @@
 <section class="home-shell">
   <div class="hero-card glass-card">
     <div class="hero-copy">
-      <span class="eyebrow">📚 مكتبتك الرقمية</span>
+      <span class="eyebrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg> مكتبتك الرقمية</span>
       <h1>اقرأ، اكتشف،<br><span>واصنع معرفتك</span></h1>
       <p>مكتبة إلكترونية عربية تجمع الكتب والمعرفة في تجربة هادئة، عصرية وتفاعلية.</p>
       <div class="hero-actions">
-        <a routerLink="/books" class="primary-btn">استكشف الكتب <span>←</span></a>
-        <a routerLink="/categories" class="soft-btn">تصفح التصنيفات</a>
+        <a routerLink="/books" class="primary-btn">استكشف الكتب <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a routerLink="/categories" class="soft-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v5H4zM13 14h7v5h-7z"/></svg> تصفح التصنيفات</a>
       </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
       <div class="book-glow"></div>
-      <div class="floating-book back">📖</div>
-      <div class="floating-book front">📚</div>
+      <div class="floating-book back"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg></div>
+      <div class="floating-book front"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg></div>
     </div>
   </div>
 
@@ -25,27 +25,27 @@
 
   <div class="section-head">
     <div><span class="section-kicker">آخر الإضافات</span><h2>كتب تستحق الاكتشاف</h2></div>
-    <a routerLink="/books">عرض الكل ←</a>
+    <a routerLink="/books">عرض الكل <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
 
   <div class="books-grid" *ngIf="!loadingBooks && realBooks.length; else emptyState">
     <a class="book-card glass-card" *ngFor="let book of realBooks" [routerLink]="['/books', getBookId(book)]">
       <div class="cover-wrap">
         <img *ngIf="getBookCover(book); else coverFallback" [src]="getBookCover(book)" [alt]="book.title || 'غلاف الكتاب'">
-        <ng-template #coverFallback><div class="cover-fallback">📖</div></ng-template>
+        <ng-template #coverFallback><div class="cover-fallback"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg></div></ng-template>
         <span class="book-badge">كتاب</span>
       </div>
       <div class="book-info">
         <h3>{{ book.title || 'كتاب بدون عنوان' }}</h3>
         <p>{{ getAuthorName(book) }}</p>
-        <span>اقرأ التفاصيل ←</span>
+        <span>اقرأ التفاصيل <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </div>
     </a>
   </div>
 
   <ng-template #emptyState>
     <div class="empty-card glass-card">
-      <div class="empty-icon">📚</div>
+      <div class="empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg></div>
       <h3>{{ loadingBooks ? 'جاري تحميل الكتب...' : 'المكتبة بانتظار كتبك' }}</h3>
       <p>{{ loadingBooks ? 'نجهز لك أحدث الكتب.' : 'ابدأ باستكشاف الأقسام أو أضف كتابًا جديدًا.' }}</p>
       <a *ngIf="!loadingBooks" routerLink="/books" class="primary-btn">استكشف المكتبة</a>
