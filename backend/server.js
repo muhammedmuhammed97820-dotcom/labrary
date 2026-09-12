@@ -11,6 +11,7 @@ const bookRoutes = require("./src/routes/book.routes");
 const authorRoutes = require("./src/routes/author.routes");
 const categoryRoutes = require("./src/routes/category.routes");
 const authRoutes = require("./src/routes/auth.routes");
+const notificationRoutes = require("./src/routes/notification.routes");
 const smartImporterRoutes = require("./src/routes/smart-importer.routes");
 const userManagementRoutes = require("./src/routes/user-management.routes");
 const communityRoutes = require("./src/routes/community.routes");
@@ -32,6 +33,7 @@ app.use("/uploads", (req, res, next) => { res.setHeader("Access-Control-Allow-Or
 app.get("/", (req, res) => res.json({ name: "Electronic Library API", version: "1.0.0", status: "online" }));
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "Electronic Library Backend", timestamp: new Date().toISOString() }));
 app.use("/api/auth", authRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/authors", authorRoutes);
 app.use("/api/categories", categoryRoutes);
