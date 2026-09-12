@@ -13,10 +13,20 @@ export class NavbarComponent {
   readonly themeService = inject(ThemeService);
   menuOpen = signal(false);
   customizerOpen = signal(false);
+  notificationsOpen = signal(false);
   isNight = signal(this.themeService.mode() === 'dark');
 
   day = ['#ff9a9e', '#fecfef', '#a1c4fd'];
   night = ['#0f0c29', '#302b63', '#24243e'];
+
+  notifications = [
+    { id: 1, title: 'مرحبًا بك في المكتبة', text: 'استكشف أحدث الكتب المضافة إلى المكتبة.', time: 'الآن', unread: true },
+    { id: 2, title: 'كتب جديدة', text: 'تمت إضافة كتب جديدة يمكنك اكتشافها الآن.', time: 'منذ قليل', unread: true }
+  ];
+
+  get unreadCount(): number {
+    return this.notifications.filter(item => item.unread).length;
+  }
 
   toggleMenu(): void { this.menuOpen.update(open => !open); }
   closeMenu(): void { this.menuOpen.set(false); }
@@ -28,7 +38,17 @@ export class NavbarComponent {
 
   toggleCustomizer(): void {
     this.customizerOpen.update(open => !open);
+    this.notificationsOpen.set(false);
     this.closeMenu();
+  }
+
+  toggleNotifications(): void {
+    this.notificationsOpen.update(open => !open);
+    this.customizerOpen.set(false);
+  }
+
+  markAllRead(): void {
+    this.notifications = this.notifications.map(item => ({ ...item, unread: false }));
   }
 
   setColor(mode: 'day' | 'night', index: number, event: Event): void {
