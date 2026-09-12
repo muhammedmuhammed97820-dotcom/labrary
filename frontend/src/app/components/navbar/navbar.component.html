@@ -23,6 +23,51 @@
     </nav>
 
     <div class="nav-actions">
+      <div class="notification-wrap">
+        <button class="notification-btn" type="button" (click)="toggleNotifications()" aria-label="الإشعارات" [attr.aria-expanded]="notificationsOpen()">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+          @if (unreadCount > 0) { <span class="notification-count">{{ unreadCount }}</span> }
+        </button>
+
+        @if (notificationsOpen()) {
+          <section class="notifications-panel" aria-label="قائمة الإشعارات">
+            <div class="notifications-head">
+              <div>
+                <span>مركز التنبيهات</span>
+                <small>{{ unreadCount }} إشعارات جديدة</small>
+              </div>
+              @if (unreadCount > 0) {
+                <button type="button" class="mark-read" (click)="markAllRead()">تحديد كمقروء</button>
+              }
+            </div>
+
+            @if (notifications.length) {
+              <div class="notification-list">
+                @for (notification of notifications; track notification.id) {
+                  <article class="notification-item" [class.unread]="notification.unread">
+                    <div class="notification-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg>
+                    </div>
+                    <div class="notification-content">
+                      <strong>{{ notification.title }}</strong>
+                      <p>{{ notification.text }}</p>
+                      <small>{{ notification.time }}</small>
+                    </div>
+                    @if (notification.unread) { <span class="unread-dot"></span> }
+                  </article>
+                }
+              </div>
+            } @else {
+              <div class="notifications-empty">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+                <strong>لا توجد إشعارات</strong>
+                <span>سنخبرك بكل جديد هنا.</span>
+              </div>
+            }
+          </section>
+        }
+      </div>
+
       <button class="glass-btn" type="button" (click)="toggleTheme()">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           @if (isNight()) { <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/> }
