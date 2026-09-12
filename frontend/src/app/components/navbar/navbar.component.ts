@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -9,30 +10,20 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
+  readonly themeService = inject(ThemeService);
   menuOpen = signal(false);
   customizerOpen = signal(false);
-  isNight = signal(false);
+  isNight = signal(this.themeService.mode() === 'dark');
 
   day = ['#ff9a9e', '#fecfef', '#a1c4fd'];
   night = ['#0f0c29', '#302b63', '#24243e'];
-
-  constructor() {
-    const saved = localStorage.getItem('library-theme');
-    const night = saved === 'night';
-    this.isNight.set(night);
-    document.body.classList.toggle('theme-night', night);
-    document.body.classList.toggle('theme-day', !night);
-  }
 
   toggleMenu(): void { this.menuOpen.update(open => !open); }
   closeMenu(): void { this.menuOpen.set(false); }
 
   toggleTheme(): void {
-    const night = !this.isNight();
-    this.isNight.set(night);
-    document.body.classList.toggle('theme-night', night);
-    document.body.classList.toggle('theme-day', !night);
-    localStorage.setItem('library-theme', night ? 'night' : 'day');
+    this.themeService.toggleMode();
+    this.isNight.set(this.themeService.mode() === 'dark');
   }
 
   toggleCustomizer(): void {
