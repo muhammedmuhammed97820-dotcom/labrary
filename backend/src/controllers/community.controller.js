@@ -36,13 +36,20 @@ async function listQuotes(req, res, next) {
 
 async function createQuote(req, res, next) {
   try {
-    const { text, book } = req.body || {};
-    if (!validId(book) || !String(text || '').trim()) return res.status(400).json({ message: 'الكتاب ونص الاقتباس مطلوبان.' });
-    const Book = require('../models/Book');
-    if (!(await Book.exists({ _id: book, status: 'approved' }))) return res.status(404).json({ message: 'الكتاب غير موجود أو غير معتمد.' });
-    const q = await Quote.create({ book, user: req.user._id, text: String(text).trim() });
-    const item = await Quote.findById(q._id).populate(populateUser).populate(populateQuoteBook).lean();
-    res.status(201).json({ ...item, likesCount: 0, liked: false });
+    const { text, book = null } = req.body || {};
+    if (!String(text || '').trim()) return res.status(400).json({ message: 'نص الاقتباس مطلوب.' });
+
+    let bookId = null;
+    if (book) {
+      if (!validId(book)) return res.status(400).json({ message: 'معرّف الكتاب غير صحيح.' });
+      const Book = require('../models/Book');
+      if (!(await Book.exists({ _id: book, status: 'approved' }))) return res.status(404).json({ message: 'الكتاب غير موجود أو غير معتمد.' });
+      bookId = book;
+    }
+
+    const q = await Quote.create({ book: bookId, user: req.user._id, text: String(text).trim() });
+    const item = await Quote.findById(q._id).select('+likedBy').populate(populateUser).populate(populateQuoteBook).lean();
+    res.status(201).json(withLikeState(item, req.user._id));
   } catch (e) { next(e); }
 }
 
