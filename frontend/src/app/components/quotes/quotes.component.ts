@@ -2,7 +2,9 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { forkJoin, timeout } from 'rxjs';
 import { CommunityService, Quote } from '../../core/services/community.service';
+import { BookApiService, Book } from '../../core/services/book-api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -17,34 +19,37 @@ import { ThemeService } from '../../core/services/theme.service';
 })
 export class QuotesComponent implements OnInit {
   private readonly service = inject(CommunityService);
+  private readonly bookApi = inject(BookApiService);
   private readonly notify = inject(NotificationService);
   readonly auth = inject(AuthService);
   readonly themeService = inject(ThemeService);
 
   readonly quotes = signal<Quote[]>([]);
   readonly filteredQuotes = signal<Quote[]>([]);
+  readonly books = signal<Book[]>([]);
   readonly loading = signal(true);
   readonly loadFailed = signal(false);
   readonly saving = signal(false);
   readonly showComposer = signal(false);
   readonly editingId = signal('');
   readonly quoteText = signal('');
+  readonly quoteType = signal<'general' | 'book'>('general');
+  readonly selectedBookId = signal('');
   readonly liking = new Set<string>();
 
   search = '';
   sort = 'latest';
 
-  ngOnInit(): void {
-    this.load();
-  }
+  ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading.set(true);
     this.loadFailed.set(false);
 
-    this.service.quotes().subscribe({
-      next: items => {
-        this.quotes.set(items ?? []);
+    forkJoin({ quotes: this.service.quotes(), books: this.bookApi.getAll(1, 100) }).pipe(timeout(12000)).subscribe({
+      next: ({ quotes, books }) => {
+        this.quotes.set(quotes ?? []);
+        this.books.set((books ?? []).filter(book => !!book._id));
         this.applyFilters();
         this.loading.set(false);
       },
@@ -60,13 +65,19 @@ export class QuotesComponent implements OnInit {
 
   openComposer(): void {
     if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول لإضافة اقتباس.');
-    this.notify.info('إضافة الاقتباس أصبحت من صفحة مجتمع الكتاب، حتى يرتبط الاقتباس بالكتاب الصحيح.');
+    this.editingId.set('');
+    this.quoteText.set('');
+    this.quoteType.set('general');
+    this.selectedBookId.set('');
+    this.showComposer.set(true);
   }
 
   startEdit(q: Quote): void {
     if (!this.isOwner(q)) return this.notify.error('لا يمكنك تعديل اقتباس مستخدم آخر.');
     this.editingId.set(q._id);
     this.quoteText.set(q.text);
+    this.quoteType.set(q.book ? 'book' : 'general');
+    this.selectedBookId.set(this.bookId(q));
     this.showComposer.set(true);
   }
 
@@ -75,6 +86,8 @@ export class QuotesComponent implements OnInit {
     this.showComposer.set(false);
     this.editingId.set('');
     this.quoteText.set('');
+    this.quoteType.set('general');
+    this.selectedBookId.set('');
   }
 
   saveQuote(): void {
@@ -84,21 +97,39 @@ export class QuotesComponent implements OnInit {
     if (text.length < 3) return this.notify.warning('نص الاقتباس قصير جدًا.');
 
     const editing = this.editingId();
-    if (!editing) return this.notify.warning('لإضافة اقتباس جديد، افتح صفحة مجتمع الكتاب أولاً.');
+    if (editing) {
+      this.saving.set(true);
+      this.service.updateQuote(editing, text).pipe(timeout(12000)).subscribe({
+        next: quote => {
+          this.quotes.set(this.quotes().map(q => q._id === quote._id ? quote : q));
+          this.applyFilters();
+          this.saving.set(false);
+          this.notify.success('تم تعديل الاقتباس.');
+          this.cancelComposer();
+        },
+        error: e => {
+          this.saving.set(false);
+          this.notify.error(e?.error?.message || 'تعذر حفظ الاقتباس.');
+        }
+      });
+      return;
+    }
+
+    const bookId = this.quoteType() === 'book' ? this.selectedBookId() : null;
+    if (this.quoteType() === 'book' && !bookId) return this.notify.warning('اختر الكتاب المرتبط بالاقتباس.');
 
     this.saving.set(true);
-    this.service.updateQuote(editing, text).subscribe({
+    this.service.addQuote(bookId, text).pipe(timeout(12000)).subscribe({
       next: quote => {
-        const updated = this.quotes().map(q => q._id === quote._id ? quote : q);
-        this.quotes.set(updated);
+        this.quotes.set([quote, ...this.quotes()]);
         this.applyFilters();
         this.saving.set(false);
-        this.notify.success('تم تعديل الاقتباس.');
+        this.notify.success(bookId ? 'تمت إضافة اقتباس مرتبط بالكتاب.' : 'تمت إضافة الاقتباس العام.');
         this.cancelComposer();
       },
       error: e => {
         this.saving.set(false);
-        this.notify.error(e?.error?.message || 'تعذر حفظ الاقتباس.');
+        this.notify.error(e?.error?.message || 'تعذر إضافة الاقتباس.');
       }
     });
   }
@@ -106,7 +137,6 @@ export class QuotesComponent implements OnInit {
   deleteQuote(q: Quote): void {
     if (!this.isOwner(q)) return this.notify.error('لا يمكنك حذف اقتباس مستخدم آخر.');
     if (!confirm('هل تريد حذف هذا الاقتباس نهائيًا؟')) return;
-
     this.service.deleteQuote(q._id).subscribe({
       next: r => {
         this.quotes.set(this.quotes().filter(item => item._id !== q._id));
@@ -130,12 +160,8 @@ export class QuotesComponent implements OnInit {
       ? source.filter(q => q.text.toLowerCase().includes(term) || q.user?.name?.toLowerCase().includes(term) || this.bookTitle(q).toLowerCase().includes(term))
       : [...source];
 
-    if (this.sort === 'likes') {
-      items.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
-    } else {
-      items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    }
-
+    if (this.sort === 'likes') items.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
+    else items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     this.filteredQuotes.set(items);
   }
 
@@ -144,15 +170,14 @@ export class QuotesComponent implements OnInit {
   }
 
   bookTitle(q: Quote): string {
-    return typeof q.book === 'string' ? 'كتاب' : q.book?.title || 'كتاب';
+    return typeof q.book === 'string' ? 'كتاب' : q.book?.title || '';
   }
 
   toggleLike(q: Quote): void {
     if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول للإعجاب.');
     if (this.liking.has(q._id)) return;
-
     this.liking.add(q._id);
-    this.service.toggleLike('quote', q._id).subscribe({
+    this.service.toggleLike('quote', q._id).pipe(timeout(12000)).subscribe({
       next: result => {
         q.liked = result.liked;
         q.likesCount = result.likesCount;
@@ -171,13 +196,11 @@ export class QuotesComponent implements OnInit {
     if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول للإبلاغ.');
     const reason = prompt('سبب البلاغ: abuse / spam / misinformation / copyright / other', 'other') || 'other';
     const note = prompt('ملاحظة إضافية (اختياري):', '') || '';
-    this.service.report('quote', q._id, reason, note).subscribe({
+    this.service.report('quote', q._id, reason, note).pipe(timeout(12000)).subscribe({
       next: r => this.notify.success(r.message),
       error: e => this.notify.error(e?.error?.message || 'تعذر إرسال البلاغ.')
     });
   }
 
-  isLiking(id: string): boolean {
-    return this.liking.has(id);
-  }
+  isLiking(id: string): boolean { return this.liking.has(id); }
 }
