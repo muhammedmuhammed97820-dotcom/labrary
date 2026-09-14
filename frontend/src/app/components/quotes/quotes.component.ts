@@ -37,7 +37,6 @@ export class QuotesComponent implements OnInit {
 
   loadQuotes(): void {
     this.loading = true;
-    // /quotes is now reserved for general quotes only.
     this.community.quotes().subscribe({
       next: quotes => {
         this.quotes = (quotes ?? []).filter(q => !q.book);
@@ -66,8 +65,8 @@ export class QuotesComponent implements OnInit {
     if (this.saving) return;
     this.saving = true;
 
-    // No book id is supplied: this creates a general quote.
-    this.community.addQuote(undefined, text).subscribe({
+    // General quote: explicitly pass null because the service expects string | null.
+    this.community.addQuote(null, text).subscribe({
       next: quote => {
         this.quotes = [quote, ...this.quotes.filter(q => !q.book)];
         this.quoteText = '';
@@ -149,7 +148,8 @@ export class QuotesComponent implements OnInit {
       this.notify.show('اكتب سبب البلاغ أولًا.', 'error');
       return;
     }
-    this.community.reportQuote(String(id), this.reportReason.trim()).subscribe({
+
+    this.community.report('quote', String(id), this.reportReason.trim()).subscribe({
       next: () => {
         this.notify.show('تم إرسال البلاغ للمراجعة.', 'success');
         this.closeReport();
