@@ -72,6 +72,23 @@ export class BookDetailsComponent implements OnInit {
     });
   }
 
+  private registerViewOnce(): void {
+    if (!this.bookId || this.viewRequestStarted || this.api.hasViewedBook(this.bookId)) return;
+    this.viewRequestStarted = true;
+
+    this.api.addView(this.bookId).subscribe({
+      next: result => {
+        this.api.markBookAsViewed(this.bookId);
+        if (this.book) this.book.viewsCount = result.viewsCount;
+        this.cdr.detectChanges();
+      },
+      error: (err: unknown) => {
+        console.error('View count error:', err);
+        this.viewRequestStarted = false;
+      }
+    });
+  }
+
   private loadQuotes(): void {
     this.quotesLoading = true;
     this.community.quotes(this.bookId).subscribe({
