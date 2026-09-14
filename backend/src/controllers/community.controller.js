@@ -4,6 +4,7 @@ const Comment = require('../models/Comment');
 const Report = require('../models/Report');
 const THRESHOLD = 15;
 const populateUser = { path: 'user', select: 'name email avatar' };
+const populateQuoteBook = { path: 'book', select: 'title' };
 const validId = id => mongoose.Types.ObjectId.isValid(id);
 const modelFor = type => type === 'quote' ? Quote : Comment;
 
@@ -17,17 +18,30 @@ function withLikeState(item, userId) {
 
 async function listQuotes(req, res, next) {
   try {
-    const items = await Quote.find({ status: 'visible' }).select('+likedBy').populate(populateUser).sort({ createdAt: -1 }).limit(Math.min(Number(req.query.limit) || 50, 100)).lean();
+    const filter = { status: 'visible' };
+    if (req.query.book) {
+      if (!validId(req.query.book)) return res.status(400).json({ message: 'معرّف الكتاب غير صحيح.' });
+      filter.book = req.query.book;
+    }
+    const items = await Quote.find(filter)
+      .select('+likedBy')
+      .populate(populateUser)
+      .populate(populateQuoteBook)
+      .sort({ createdAt: -1 })
+      .limit(Math.min(Number(req.query.limit) || 50, 100))
+      .lean();
     res.json(items.map(item => withLikeState(item, req.user?._id)));
   } catch (e) { next(e); }
 }
 
 async function createQuote(req, res, next) {
   try {
-    const { text } = req.body || {};
-    if (!String(text || '').trim()) return res.status(400).json({ message: 'نص الاقتباس مطلوب.' });
-    const q = await Quote.create({ user: req.user._id, text: String(text).trim() });
-    const item = await Quote.findById(q._id).populate(populateUser).lean();
+    const { text, book } = req.body || {};
+    if (!validId(book) || !String(text || '').trim()) return res.status(400).json({ message: 'الكتاب ونص الاقتباس مطلوبان.' });
+    const Book = require('../models/Book');
+    if (!(await Book.exists({ _id: book, status: 'approved' }))) return res.status(404).json({ message: 'الكتاب غير موجود أو غير معتمد.' });
+    const q = await Quote.create({ book, user: req.user._id, text: String(text).trim() });
+    const item = await Quote.findById(q._id).populate(populateUser).populate(populateQuoteBook).lean();
     res.status(201).json({ ...item, likesCount: 0, liked: false });
   } catch (e) { next(e); }
 }
@@ -46,7 +60,7 @@ async function updateQuote(req, res, next) {
     quote.rejectionReason = '';
     quote.reportCount = 0;
     await quote.save();
-    const item = await Quote.findById(quote._id).select('+likedBy').populate(populateUser).lean();
+    const item = await Quote.findById(quote._id).select('+likedBy').populate(populateUser).populate(populateQuoteBook).lean();
     res.json(withLikeState(item, req.user._id));
   } catch (e) { next(e); }
 }
@@ -57,6 +71,7 @@ async function deleteQuote(req, res, next) {
     const quote = await Quote.findOne({ _id: req.params.id, user: req.user._id });
     if (!quote) return res.status(404).json({ message: 'الاقتباس غير موجود أو لا تملك صلاحية حذفه.' });
     await Report.deleteMany({ quote: quote._id });
+    await Comment.updateMany({ quote: quote._id }, { $set: { quote: null } });
     await Quote.deleteOne({ _id: quote._id });
     res.json({ message: 'تم حذف الاقتباس.' });
   } catch (e) { next(e); }
@@ -78,7 +93,11 @@ async function createComment(req, res, next) {
     if (!validId(book) || !String(text || '').trim()) return res.status(400).json({ message: 'الكتاب ونص التعليق مطلوبان.' });
     const Book = require('../models/Book');
     if (!(await Book.exists({ _id: book, status: 'approved' }))) return res.status(404).json({ message: 'الكتاب غير موجود.' });
-    if (quote && (!validId(quote) || !(await Quote.exists({ _id: quote, status: 'visible' })))) return res.status(400).json({ message: 'الاقتباس غير صحيح.' });
+    if (quote) {
+      if (!validId(quote)) return res.status(400).json({ message: 'الاقتباس غير صحيح.' });
+      const quoteExists = await Quote.exists({ _id: quote, book, status: 'visible' });
+      if (!quoteExists) return res.status(400).json({ message: 'الاقتباس لا ينتمي إلى هذا الكتاب.' });
+    }
     if (parent && (!validId(parent) || !(await Comment.exists({ _id: parent, book, status: 'visible' })))) return res.status(400).json({ message: 'التعليق الأب غير صحيح.' });
     const c = await Comment.create({ book, quote: quote || null, parent: parent || null, user: req.user._id, text: String(text).trim() });
     const item = await Comment.findById(c._id).populate(populateUser).lean();
@@ -125,7 +144,7 @@ async function report(req, res, next) {
 
 async function adminList(req, res, next) {
   try {
-    const reports = await Report.find({ status: 'pending' }).populate('reporter', 'name email avatar').populate({ path: 'quote', populate: [populateUser] }).populate({ path: 'comment', populate: [populateUser, { path: 'book', select: 'title' }] }).sort({ createdAt: -1 }).lean();
+    const reports = await Report.find({ status: 'pending' }).populate('reporter', 'name email avatar').populate({ path: 'quote', populate: [populateUser, populateQuoteBook] }).populate({ path: 'comment', populate: [populateUser, { path: 'book', select: 'title' }] }).sort({ createdAt: -1 }).lean();
     const groups = new Map();
     for (const r of reports) {
       const item = r.targetType === 'quote' ? r.quote : r.comment;
