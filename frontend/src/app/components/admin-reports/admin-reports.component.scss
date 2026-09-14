@@ -1,1 +1,75 @@
-.reports-page{min-height:100vh;padding:35px 18px;background:#0b1220;color:#eef2ff}.reports-container{max-width:1050px;margin:auto}.top a{color:#a5b4fc;text-decoration:none}.top h1{margin:18px 0 6px}.top p{opacity:.7}.card{margin-top:18px;padding:22px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(255,255,255,.06)}.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(245,158,11,.15);color:#fbbf24}.card h2{line-height:1.7}.meta{opacity:.65}.report{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;margin-top:8px;border-radius:10px;background:rgba(0,0,0,.18)}.report span{opacity:.7}.actions{display:flex;gap:10px;margin-top:18px}.actions button{border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:#22c55e;color:white}.actions .danger{background:#ef4444}.state,.empty{padding:35px;text-align:center;border-radius:16px;background:rgba(255,255,255,.05)}@media(max-width:700px){.report{display:block}.report span{display:block;margin-top:4px}.actions button{flex:1}}
+:host{display:block}
+
+.reports-page{
+  min-height:100vh;
+  padding:clamp(28px,5vw,54px) 18px;
+  background:#f6f8fc;
+  color:#172033;
+  transition:background .25s ease,color .25s ease;
+}
+
+.reports-page.dark-theme{
+  background:#0b1220;
+  color:#eef2ff;
+}
+
+.reports-container{max-width:1050px;margin:0 auto}
+
+.top a{color:#4f46e5;text-decoration:none;font-weight:700}
+.dark-theme .top a{color:#a5b4fc}
+.top h1{margin:18px 0 6px;font-size:clamp(28px,4vw,40px)}
+.top p{margin:0;color:#667085;line-height:1.8}
+.dark-theme .top p{color:#aab4c8}
+
+.reports-list{display:grid;gap:18px;margin-top:24px}
+
+.card{
+  padding:22px;
+  border:1px solid #e5e7eb;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 12px 35px rgba(15,23,42,.07);
+}
+.dark-theme .card{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.055);box-shadow:none}
+
+.badge{display:inline-flex;padding:7px 12px;border-radius:999px;background:#fff7ed;color:#c2410c;font-weight:800}
+.dark-theme .badge{background:rgba(245,158,11,.15);color:#fbbf24}
+
+.card h2{margin:18px 0 10px;line-height:1.8;font-size:20px}
+.meta{margin:0;color:#667085}
+.dark-theme .meta{color:#aab4c8}
+.card h3{margin:22px 0 10px;font-size:15px}
+
+.reports{display:grid;gap:8px}
+.report{display:flex;justify-content:space-between;gap:14px;padding:12px 14px;border-radius:12px;background:#f8fafc;border:1px solid #edf0f5}
+.dark-theme .report{background:rgba(0,0,0,.18);border-color:rgba(255,255,255,.06)}
+.report span{color:#667085}
+.dark-theme .report span{color:#aab4c8}
+
+.actions{display:flex;gap:10px;margin-top:20px}
+.actions button,.state button{
+  border:0;border-radius:12px;padding:11px 17px;cursor:pointer;font:inherit;font-weight:800;background:#16a34a;color:#fff;transition:transform .15s,opacity .15s
+}
+.actions button:hover,.state button:hover{transform:translateY(-1px)}
+.actions button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.actions .danger{background:#dc2626}
+
+.state,.empty{
+  margin-top:24px;padding:42px 24px;text-align:center;border-radius:20px;background:#fff;border:1px solid #e5e7eb;box-shadow:0 12px 35px rgba(15,23,42,.06);display:flex;flex-direction:column;align-items:center;gap:9px
+}
+.dark-theme .state,.dark-theme .empty{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.1);box-shadow:none}
+.state small,.empty span{color:#667085}
+.dark-theme .state small,.dark-theme .empty span{color:#aab4c8}
+.error-state{border-color:#fecaca}
+.dark-theme .error-state{border-color:rgba(248,113,113,.25)}
+.error-state button{margin-top:8px;background:#4f46e5}
+.state-icon,.empty-icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:22px;font-weight:900;background:#eef2ff;color:#4f46e5}
+.empty-icon{background:#dcfce7;color:#16a34a}
+
+.spinner{width:34px;height:34px;border:3px solid #dbeafe;border-top-color:#4f46e5;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:5px}
+.dark-theme .spinner{border-color:rgba(165,180,252,.2);border-top-color:#a5b4fc}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:700px){
+  .report{display:block}.report span{display:block;margin-top:5px}.actions button{flex:1}
+}
