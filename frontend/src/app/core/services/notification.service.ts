@@ -4,32 +4,46 @@ import { BehaviorSubject } from 'rxjs';
 export interface Toast {
   id: number;
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error' | 'info' | 'warning';
 }
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private toastsSubject = new BehaviorSubject<Toast[]>([]);
-  toasts$ = this.toastsSubject.asObservable();
+  readonly toasts$ = this.toastsSubject.asObservable();
 
-  show(message: string, type: 'success' | 'error' | 'info' = 'success'): void {
+  show(message: string, type: Toast['type'] = 'success'): void {
     const arabicMessage = this.toArabic(message, type);
-    const id = Date.now();
+    const id = Date.now() + Math.floor(Math.random() * 1000);
     const current = this.toastsSubject.value;
     this.toastsSubject.next([...current, { id, message: arabicMessage, type }]);
 
-    setTimeout(() => this.remove(id), 3500);
+    setTimeout(() => this.remove(id), 4500);
+  }
+
+  success(message: string): void {
+    this.show(message, 'success');
+  }
+
+  error(message: string): void {
+    this.show(message, 'error');
+  }
+
+  warning(message: string): void {
+    this.show(message, 'warning');
+  }
+
+  info(message: string): void {
+    this.show(message, 'info');
   }
 
   remove(id: number): void {
-    const updated = this.toastsSubject.value.filter(t => t.id !== id);
-    this.toastsSubject.next(updated);
+    this.toastsSubject.next(this.toastsSubject.value.filter(toast => toast.id !== id));
   }
 
-  private toArabic(message: string, type: 'success' | 'error' | 'info'): string {
+  private toArabic(message: string, type: Toast['type']): string {
     const text = String(message ?? '').trim();
 
-    // الرسائل العربية تمر كما هي.
     if (!text || /[\u0600-\u06FF]/.test(text)) {
       return text || this.defaultArabic(type);
     }
@@ -52,12 +66,11 @@ export class NotificationService {
       [/\b(upload|uploaded)\b/,
         value.includes('success') || value.includes('successful') ? 'تم رفع الملف بنجاح.' : 'تعذر رفع الملف، يرجى المحاولة مرة أخرى.'],
       [/\b(delete|deleted|remove|removed)\b/,
-        value.includes('success') || value.includes('successful') ? 'تم الحذف بنجاح.' : 'تعذر الحذف، يرجى المحاولة مرة أخرى.'],
+        value.includes('success') || value.includes('successful') ? 'تم حذف المستخدم بنجاح.' : 'تعذر الحذف، يرجى المحاولة مرة أخرى.'],
       [/\b(update|updated|edit|edited)\b/,
-        value.includes('success') || value.includes('successful') ? 'تم التحديث بنجاح.' : 'تعذر تحديث البيانات، يرجى المحاولة مرة أخرى.'],
+        value.includes('success') || value.includes('successful') ? 'تم تحديث البيانات بنجاح.' : 'تعذر تحديث البيانات، يرجى المحاولة مرة أخرى.'],
       [/\b(create|created|added|add)\b/,
         value.includes('success') || value.includes('successful') ? 'تمت الإضافة بنجاح.' : 'تعذر إضافة البيانات، يرجى المحاولة مرة أخرى.'],
-      [/\b(book|books)\b.*\bnot found\b/, 'الكتاب المطلوب غير موجود.'],
       [/\bserver error|internal server error|500\b/, 'حدث خطأ في الخادم، يرجى المحاولة لاحقاً.'],
       [/\b(error|failed|failure|exception)\b/, 'حدث خطأ، يرجى المحاولة مرة أخرى.'],
       [/\bsuccess(fully)?\b|\bsuccessful\b/, 'تمت العملية بنجاح.']
@@ -67,13 +80,13 @@ export class NotificationService {
       if (pattern.test(value)) return translated;
     }
 
-    // لا نعرض أي نص إنجليزي للمستخدم حتى لو أضاف أحد المكونات رسالة جديدة.
     return this.defaultArabic(type);
   }
 
-  private defaultArabic(type: 'success' | 'error' | 'info'): string {
+  private defaultArabic(type: Toast['type']): string {
     switch (type) {
       case 'success': return 'تمت العملية بنجاح.';
+      case 'warning': return 'تنبيه: يرجى التحقق من البيانات.';
       case 'info': return 'لديك إشعار جديد.';
       default: return 'حدث خطأ، يرجى المحاولة مرة أخرى.';
     }

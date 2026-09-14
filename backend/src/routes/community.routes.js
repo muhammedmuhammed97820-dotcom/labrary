@@ -1,0 +1,15 @@
+const express = require('express');
+const controller = require('../controllers/community.controller');
+const { authenticate, requireAdmin } = require('../middleware/auth.middleware');
+const router = express.Router();
+router.get('/quotes', controller.listQuotes);
+router.get('/comments', controller.listComments);
+router.post('/quotes', authenticate, controller.createQuote);
+router.patch('/quotes/:id', authenticate, controller.updateQuote);
+router.delete('/quotes/:id', authenticate, controller.deleteQuote);
+router.post('/comments', authenticate, controller.createComment);
+router.post('/likes/:type/:id/toggle', authenticate, controller.toggleLike);
+router.post('/reports', authenticate, controller.report);
+router.get('/admin/reports', authenticate, requireAdmin, controller.adminList);
+router.patch('/admin/reports/:type/:id', authenticate, requireAdmin, controller.review);
+module.exports = router;

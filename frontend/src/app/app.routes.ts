@@ -7,6 +7,7 @@ import { AdminComponent } from './features/admin/admin.component';
 import { BookCreateComponent } from './features/admin/books/book-create/book-create.component';
 import { AdminBooksComponent } from './features/admin/books/admin-books.component';
 import { BookEditComponent } from './features/admin/books/book-edit/book-edit.component';
+import { ArabicImportComponent } from './features/admin/arabic-import/arabic-import.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
@@ -18,12 +19,14 @@ import { CategoriesManagementComponent } from './features/admin/categories/categ
 import { BookSubmitComponent } from './features/books/book-submit/book-submit.component';
 import { MySubmissionsComponent } from './features/books/my-submissions/my-submissions.component';
 import { BookSubmissionsComponent } from './features/admin/submissions/book-submissions.component';
-
+import { UserManagementComponent } from './features/admin/users/user-management.component';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'books', loadComponent: () => import('./features/books/books.component').then(m => m.BooksComponent) },
   { path: 'books/:id/read', component: BookReaderComponent },
+  { path: 'books/:id/community', loadComponent: () => import('./components/community/community.component').then(m => m.CommunityComponent) },
   { path: 'books/:id', component: BookDetailsComponent },
+  { path: 'quotes', loadComponent: () => import('./components/quotes/quotes.component').then(m => m.QuotesComponent) },
   { path: 'categories', component: CategoriesComponent },
   { path: 'authors', component: AuthorsComponent },
   { path: 'authors/:id', component: AuthorDetailsComponent },
@@ -34,11 +37,14 @@ export const routes: Routes = [
   { path: 'submit-book', component: BookSubmitComponent, canActivate: [authGuard] },
   { path: 'my-submissions', component: MySubmissionsComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
+  { path: 'admin/users', component: UserManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/books', component: AdminBooksComponent, canActivate: [adminGuard] },
   { path: 'admin/books/create', component: BookCreateComponent, canActivate: [adminGuard] },
   { path: 'admin/books/:id/edit', component: BookEditComponent, canActivate: [adminGuard] },
+  { path: 'admin/arabic-import', component: ArabicImportComponent, canActivate: [adminGuard] },
   { path: 'admin/authors', component: AuthorsManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/categories', component: CategoriesManagementComponent, canActivate: [adminGuard] },
   { path: 'admin/book-submissions', component: BookSubmissionsComponent, canActivate: [adminGuard] },
+  { path: 'admin/reports', loadComponent: () => import('./components/admin-reports/admin-reports.component').then(m => m.AdminReportsComponent), canActivate: [adminGuard] },
   { path: '**', redirectTo: '' }
 ];

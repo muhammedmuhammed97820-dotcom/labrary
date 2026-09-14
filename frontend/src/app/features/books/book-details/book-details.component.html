@@ -29,6 +29,7 @@
                 <a [routerLink]="['/books', bookId, 'read']" class="add-book-btn text-decoration-none"><i class="fa-solid fa-book-open"></i><span>فتح القارئ</span></a>
                 <button type="button" class="retry-btn-outline" (click)="download()"><i class="fa-solid fa-download"></i><span>تحميل PDF</span></button>
               }
+              <a [routerLink]="['/books', bookId, 'community']" class="retry-btn-outline text-decoration-none"><i class="fa-solid fa-comments"></i><span>التعليقات والاقتباسات</span></a>
               <button type="button" class="favorite-toggle-btn" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><i class="fa-solid fa-heart"></i><span>{{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}</span></button>
             </div>
           </div>

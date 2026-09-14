@@ -30,14 +30,14 @@ export class AdminComponent implements OnInit {
     this.loading = true;
     this.error = '';
     this.api.getAdminAll().subscribe({
-      next: b => {
-        this.books = b;
+      next: books => {
+        this.books = books;
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: e => {
-        console.error('Admin books load error:', e);
-        this.error = e?.error?.message || 'تعذر تحميل إحصائيات المكتبة.';
+      error: error => {
+        console.error('Admin books load error:', error);
+        this.error = error?.error?.message || 'تعذر تحميل إحصائيات المكتبة.';
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -56,19 +56,44 @@ export class AdminComponent implements OnInit {
     return typeof author === 'string' ? author : author.name || 'مؤلف غير معروف';
   }
 
-  get total(): number { return this.books.length; }
-  get available(): number { return this.books.filter(b => b.isAvailable !== false).length; }
-  get views(): number { return this.books.reduce((n, b) => n + (Number(b.viewsCount) || 0), 0); }
-  get downloads(): number { return this.books.reduce((n, b) => n + (Number(b.downloads) || 0), 0); }
-  get authors(): number { return new Set(this.books.map(b => typeof b.author === 'string' ? b.author : b.author?.name).filter(Boolean)).size; }
-  get categories(): number { return new Set(this.books.map(b => typeof b.category === 'string' ? b.category : b.category?.name).filter(Boolean)).size; }
+  get total(): number {
+    return this.books.length;
+  }
+
+  get available(): number {
+    return this.books.filter(book => book.isAvailable !== false).length;
+  }
+
+  get views(): number {
+    return this.books.reduce((total, book) => total + (Number(book.viewsCount) || 0), 0);
+  }
+
+  get downloads(): number {
+    return this.books.reduce((total, book) => total + (Number(book.downloads) || 0), 0);
+  }
+
+  get authors(): number {
+    return new Set(
+      this.books
+        .map(book => typeof book.author === 'string' ? book.author : book.author?.name)
+        .filter(Boolean)
+    ).size;
+  }
+
+  get categories(): number {
+    return new Set(
+      this.books
+        .map(book => typeof book.category === 'string' ? book.category : book.category?.name)
+        .filter(Boolean)
+    ).size;
+  }
+
   get recent(): Book[] {
     return [...this.books]
-      .sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
-      })
+      .sort((a, b) =>
+        (b.createdAt ? new Date(b.createdAt).getTime() : 0) -
+        (a.createdAt ? new Date(a.createdAt).getTime() : 0)
+      )
       .slice(0, 5);
   }
 }
