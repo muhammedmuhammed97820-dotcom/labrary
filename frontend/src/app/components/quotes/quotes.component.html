@@ -3,34 +3,50 @@
     <div class="details-top-bar">
       <a routerLink="/" class="back-nav-btn"><i class="fa-solid fa-arrow-right"></i><span>العودة للرئيسية</span></a>
       <div class="top-actions">
-        <span class="quotes-badge"><i class="fa-solid fa-quote-right"></i> اقتباسات مرتبطة بالكتب</span>
+        <button type="button" class="submit-quote-btn" (click)="openComposer()" *ngIf="auth.isLoggedIn">
+          <i class="fa-solid fa-plus"></i><span>إضافة اقتباس</span>
+        </button>
+        <span class="quotes-badge"><i class="fa-solid fa-quote-right"></i> مجتمع الاقتباسات</span>
       </div>
     </div>
 
     <header class="quotes-header">
       <span class="panel-tag">COMMUNITY</span>
-      <h1 class="panel-title">اقتباسات من كتب المكتبة</h1>
-      <p>كل اقتباس مرتبط بالكتاب الذي أُخذ منه، ويمكن إضافة اقتباس جديد من صفحة مجتمع الكتاب.</p>
+      <h1 class="panel-title">اقتباسات المكتبة</h1>
+      <p>الاقتباس العام يبقى في المكتبة، والاقتباس المرتبط بكتاب يظهر في صفحة مجتمع ذلك الكتاب فقط.</p>
     </header>
 
     <section *ngIf="showComposer() && auth.isLoggedIn" class="panel-glass-card composer-card">
       <div class="composer-heading">
         <div class="composer-icon"><i class="fa-solid fa-quote-right"></i></div>
         <div>
-          <h2>تعديل الاقتباس</h2>
-          <p>عدّل النص ثم اضغط حفظ.</p>
+          <h2>{{ editingId() ? 'تعديل الاقتباس' : 'إضافة اقتباس' }}</h2>
+          <p>{{ editingId() ? 'عدّل النص ثم اضغط حفظ.' : 'اختر هل الاقتباس عام أم مأخوذ من كتاب محدد.' }}</p>
         </div>
       </div>
 
+      <div class="quote-type-options" *ngIf="!editingId()">
+        <button type="button" [class.active]="quoteType() === 'general'" (click)="quoteType.set('general'); selectedBookId.set('')">
+          <i class="fa-solid fa-earth-americas"></i>
+          <span><strong>اقتباس عام</strong><small>يظهر في صفحة الاقتباسات العامة فقط</small></span>
+        </button>
+        <button type="button" [class.active]="quoteType() === 'book'" (click)="quoteType.set('book')">
+          <i class="fa-solid fa-book-open"></i>
+          <span><strong>اقتباس من كتاب</strong><small>يظهر داخل مجتمع الكتاب المحدد</small></span>
+        </button>
+      </div>
+
+      <label class="quote-book-field" *ngIf="quoteType() === 'book'">
+        <span>الكتاب <b>*</b></span>
+        <select [ngModel]="selectedBookId()" (ngModelChange)="selectedBookId.set($event)" [disabled]="saving() || !!editingId()">
+          <option value="">اختر الكتاب المرتبط بالاقتباس</option>
+          <option *ngFor="let book of books()" [value]="book._id">{{ book.title }}</option>
+        </select>
+      </label>
+
       <label class="quote-text-field">
         <span>نص الاقتباس <b>*</b></span>
-        <textarea
-          [ngModel]="quoteText()"
-          (ngModelChange)="quoteText.set($event)"
-          [disabled]="saving()"
-          maxlength="3000"
-          rows="6"
-          placeholder="اكتب اقتباسك هنا..."></textarea>
+        <textarea [ngModel]="quoteText()" (ngModelChange)="quoteText.set($event)" [disabled]="saving()" maxlength="3000" rows="6" placeholder="اكتب اقتباسك هنا..."></textarea>
         <small>{{ quoteText().length }}/3000</small>
       </label>
 
@@ -38,7 +54,7 @@
         <button type="button" class="cancel-btn" (click)="cancelComposer()" [disabled]="saving()">إلغاء</button>
         <button type="button" class="submit-quote-btn" (click)="saveQuote()" [disabled]="saving()">
           <i class="fa-solid" [class.fa-spinner]="saving()" [class.fa-spin]="saving()" [class.fa-paper-plane]="!saving()"></i>
-          {{ saving() ? 'جاري الحفظ...' : 'حفظ التعديل' }}
+          {{ saving() ? 'جاري الحفظ...' : (editingId() ? 'حفظ التعديل' : 'نشر الاقتباس') }}
         </button>
       </div>
     </section>
@@ -54,40 +70,30 @@
       </select>
     </section>
 
-    <div *ngIf="loading()" class="state-card loading-box">
-      <span class="glass-spinner"></span>
-      <strong>جاري تحميل الاقتباسات...</strong>
-      <small>لحظات ونجهزها لك</small>
-    </div>
+    <div *ngIf="loading()" class="state-card loading-box"><span class="glass-spinner"></span><strong>جاري تحميل الاقتباسات...</strong><small>لحظات ونجهزها لك</small></div>
 
     <div *ngIf="!loading() && loadFailed()" class="state-card error-state">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-      <h3>تعذر تحميل الاقتباسات</h3>
-      <p>تحقق من اتصال الخادم ثم حاول مرة أخرى.</p>
-      <button type="button" class="retry-btn" (click)="load()">إعادة المحاولة</button>
+      <i class="fa-solid fa-triangle-exclamation"></i><h3>تعذر تحميل الاقتباسات</h3><p>تحقق من اتصال الخادم ثم حاول مرة أخرى.</p><button type="button" class="retry-btn" (click)="load()">إعادة المحاولة</button>
     </div>
 
     <section *ngIf="!loading() && !loadFailed() && filteredQuotes().length" class="quotes-grid">
       <article *ngFor="let q of filteredQuotes()" class="panel-glass-card quote-card">
         <div class="quote-mark"><i class="fa-solid fa-quote-right"></i></div>
         <blockquote>{{ q.text }}</blockquote>
+
         <a *ngIf="bookId(q)" class="book-reference" [routerLink]="['/books', bookId(q), 'community']">
-          <i class="fa-solid fa-book-open"></i>
-          <span>{{ bookTitle(q) }}</span>
-          <i class="fa-solid fa-arrow-left"></i>
+          <i class="fa-solid fa-book-open"></i><span>{{ bookTitle(q) }}</span><i class="fa-solid fa-arrow-left"></i>
         </a>
+        <div *ngIf="!bookId(q)" class="book-reference general-reference">
+          <i class="fa-solid fa-earth-americas"></i><span>اقتباس عام من مجتمع المكتبة</span>
+        </div>
+
         <div class="author-meta">
           <span class="avatar">{{ (q.user?.name || '؟').charAt(0) }}</span>
-          <span>
-            <strong>{{ q.user?.name || 'قارئ' }}</strong>
-            <small>{{ q.createdAt | date:'mediumDate' }}</small>
-          </span>
+          <span><strong>{{ q.user?.name || 'قارئ' }}</strong><small>{{ q.createdAt | date:'mediumDate' }}</small></span>
         </div>
         <div class="quote-actions">
-          <button class="community-action like-btn" [class.liked]="q.liked" [disabled]="isLiking(q._id)" (click)="toggleLike(q)">
-            <i [class]="q.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-            <span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b>
-          </button>
+          <button class="community-action like-btn" [class.liked]="q.liked" [disabled]="isLiking(q._id)" (click)="toggleLike(q)"><i [class]="q.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i><span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b></button>
           <button *ngIf="isOwner(q)" class="community-action" type="button" (click)="startEdit(q)"><i class="fa-solid fa-pen"></i><span>تعديل</span></button>
           <button *ngIf="isOwner(q)" class="community-action report" type="button" (click)="deleteQuote(q)"><i class="fa-solid fa-trash"></i><span>حذف</span></button>
           <button class="community-action report" type="button" (click)="report(q)"><i class="fa-regular fa-flag"></i><span>إبلاغ</span></button>
@@ -96,9 +102,7 @@
     </section>
 
     <div *ngIf="!loading() && !loadFailed() && !filteredQuotes().length" class="state-card empty-state">
-      <i class="fa-solid fa-quote-right"></i>
-      <h3>{{ search ? 'لا توجد نتائج' : 'لا توجد اقتباسات بعد' }}</h3>
-      <p>{{ search ? 'لم نجد اقتباسات تطابق البحث الحالي.' : 'أضف اقتباسك من صفحة مجتمع الكتاب ليبقى مرتبطًا بالكتاب.' }}</p>
+      <i class="fa-solid fa-quote-right"></i><h3>{{ search ? 'لا توجد نتائج' : 'لا توجد اقتباسات بعد' }}</h3><p>{{ search ? 'لم نجد اقتباسات تطابق البحث الحالي.' : 'أضف اقتباسًا عامًا أو اربطه بكتاب من زر إضافة اقتباس.' }}</p>
     </div>
   </div>
 </main>
