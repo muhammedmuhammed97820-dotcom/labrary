@@ -13,6 +13,7 @@
       <a class="nav-item-link" routerLink="/books" routerLinkActive="active">المكتبة</a>
       <a class="nav-item-link" routerLink="/categories" routerLinkActive="active">التصنيفات</a>
       <a class="nav-item-link" routerLink="/authors" routerLinkActive="active">المؤلفون</a>
+      <a class="nav-item-link" routerLink="/quotes" routerLinkActive="active">الاقتباسات</a>
 
       @if (isLoggedIn && !isAdmin) {
         <a class="nav-item-link" routerLink="/favorites" routerLinkActive="active">المفضلة</a>
@@ -74,6 +75,7 @@
       <a class="drawer-link" routerLink="/books" (click)="closeMenu()">المكتبة</a>
       <a class="drawer-link" routerLink="/categories" (click)="closeMenu()">التصنيفات</a>
       <a class="drawer-link" routerLink="/authors" (click)="closeMenu()">المؤلفون</a>
+      <a class="drawer-link" routerLink="/quotes" (click)="closeMenu()">الاقتباسات</a>
 
       @if (isLoggedIn && !isAdmin) {
         <a class="drawer-link" routerLink="/favorites" (click)="closeMenu()">المفضلة</a>
