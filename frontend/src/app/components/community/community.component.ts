@@ -52,12 +52,12 @@ export class CommunityComponent {
       return;
     }
 
-    this.service.quotes().pipe(timeout(12000)).subscribe({
+    this.service.quotes(this.bookId).pipe(timeout(12000)).subscribe({
       next: quotes => {
         this.quotes = quotes ?? [];
         this.loadComments();
       },
-      error: error => this.failLoading(error, 'تعذر تحميل الاقتباسات.')
+      error: error => this.failLoading(error, 'تعذر تحميل اقتباسات هذا الكتاب.')
     });
   }
 
@@ -67,7 +67,7 @@ export class CommunityComponent {
         this.comments = comments ?? [];
         this.loading = false;
       },
-      error: error => this.failLoading(error, 'تعذر تحميل التعليقات.')
+      error: error => this.failLoading(error, 'تعذر تحميل تعليقات هذا الكتاب.')
     });
   }
 
@@ -82,12 +82,12 @@ export class CommunityComponent {
     if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول لإضافة اقتباس.');
     if (!this.quoteText.trim()) return this.notify.warning('اكتب نص الاقتباس.');
     this.saving = true;
-    this.service.addQuote(this.quoteText.trim()).pipe(timeout(12000)).subscribe({
+    this.service.addQuote(this.bookId, this.quoteText.trim()).pipe(timeout(12000)).subscribe({
       next: quote => {
         this.quotes = [quote, ...this.quotes];
         this.quoteText = '';
         this.saving = false;
-        this.notify.success('تمت إضافة الاقتباس.');
+        this.notify.success('تمت إضافة الاقتباس لهذا الكتاب.');
       },
       error: error => {
         this.saving = false;
