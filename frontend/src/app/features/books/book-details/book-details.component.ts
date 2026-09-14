@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Book, BookApiService } from '../../../core/services/book-api.service';
+import { CommunityService, Quote } from '../../../core/services/community.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -13,7 +15,7 @@ interface FavoriteResponse { favorite: boolean; favorites: string[]; }
 @Component({
   selector: 'app-book-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   encapsulation: ViewEncapsulation.None,
   templateUrl: './book-details.component.html',
   styleUrl: './book-details.component.scss'
@@ -21,6 +23,7 @@ interface FavoriteResponse { favorite: boolean; favorites: string[]; }
 export class BookDetailsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(BookApiService);
+  private readonly community = inject(CommunityService);
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly notify = inject(NotificationService);
@@ -29,10 +32,14 @@ export class BookDetailsComponent implements OnInit {
 
   bookId = '';
   book: Book | null = null;
+  quotes: Quote[] = [];
+  quoteText = '';
   loading = true;
+  quotesLoading = true;
   error = '';
   favoriteBusy = false;
   downloadBusy = false;
+  quoteSaving = false;
   private viewRequestStarted = false;
 
   ngOnInit(): void {
@@ -40,6 +47,7 @@ export class BookDetailsComponent implements OnInit {
     if (!this.bookId) {
       this.error = 'معرّف الكتاب غير موجود.';
       this.loading = false;
+      this.quotesLoading = false;
       return;
     }
     this.loadBookDetails();
@@ -52,28 +60,61 @@ export class BookDetailsComponent implements OnInit {
         this.loading = false;
         this.cdr.detectChanges();
         this.registerViewOnce();
+        this.loadQuotes();
       },
       error: (err: unknown) => {
         const httpError = err as { error?: { message?: string } };
         this.error = httpError.error?.message || 'تعذر تحميل تفاصيل الكتاب.';
         this.loading = false;
+        this.quotesLoading = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  private registerViewOnce(): void {
-    if (!this.bookId || this.viewRequestStarted || this.api.hasViewedBook(this.bookId)) return;
-    this.viewRequestStarted = true;
-    this.api.addView(this.bookId).subscribe({
-      next: result => {
-        this.api.markBookAsViewed(this.bookId);
-        if (this.book) {
-          this.book.viewsCount = result.viewsCount;
-          this.cdr.detectChanges();
-        }
+  private loadQuotes(): void {
+    this.quotesLoading = true;
+    this.community.quotes(this.bookId).subscribe({
+      next: quotes => {
+        this.quotes = quotes ?? [];
+        this.quotesLoading = false;
+        this.cdr.detectChanges();
       },
-      error: (err: unknown) => console.warn('Failed to register view count:', err)
+      error: () => {
+        this.quotes = [];
+        this.quotesLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  addQuote(): void {
+    if (!this.auth.isLoggedIn) {
+      this.notify.show('سجّل الدخول أولًا لإضافة اقتباس.', 'error');
+      return;
+    }
+    const text = this.quoteText.trim();
+    if (!text) {
+      this.notify.show('اكتب نص الاقتباس أولًا.', 'error');
+      return;
+    }
+    if (!this.bookId || this.quoteSaving) return;
+
+    this.quoteSaving = true;
+    this.community.addQuote(this.bookId, text).subscribe({
+      next: quote => {
+        this.quotes = [quote, ...this.quotes];
+        this.quoteText = '';
+        this.quoteSaving = false;
+        this.notify.show('تمت إضافة الاقتباس إلى هذا الكتاب ✓', 'success');
+        this.cdr.detectChanges();
+      },
+      error: (err: unknown) => {
+        const httpError = err as { error?: { message?: string } };
+        this.quoteSaving = false;
+        this.notify.show(httpError.error?.message || 'تعذر إضافة الاقتباس.', 'error');
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -114,9 +155,6 @@ export class BookDetailsComponent implements OnInit {
 
   download(): void {
     if (!this.bookId || this.downloadBusy) return;
-
-    // The browser-side check prevents duplicate requests, while the backend's
-    // unique index remains the final source of truth against repeated calls.
     if (this.api.hasDownloadedBook(this.bookId)) {
       window.open(this.api.getDownloadUrl(this.bookId), '_blank', 'noopener,noreferrer');
       return;
