@@ -1,31 +1,48 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CommunityService, ModerationItem, ReviewResponse, Quote, CommunityComment } from '../../core/services/community.service';
+import { timeout } from 'rxjs';
+import { CommunityService, ModerationItem, ReviewResponse, CommunityComment } from '../../core/services/community.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-admin-reports',
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './admin-reports.component.html',
-  styleUrl: './admin-reports.component.scss'
+  styleUrl: './admin-reports.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminReportsComponent implements OnInit {
+export class AdminReportsComponent {
   private readonly service = inject(CommunityService);
   private readonly notify = inject(NotificationService);
+  readonly themeService = inject(ThemeService);
 
-  items: ModerationItem[] = [];
-  loading = true;
-  busy = '';
+  readonly items = signal<ModerationItem[]>([]);
+  readonly loading = signal(true);
+  readonly loadFailed = signal(false);
+  readonly busy = signal('');
 
-  ngOnInit(): void { this.load(); }
+  constructor() {
+    this.load();
+  }
 
   load(): void {
-    this.loading = true;
-    this.service.adminReports().subscribe({
-      next: response => { this.items = response.items ?? []; this.loading = false; },
-      error: error => { this.loading = false; this.notify.error(error?.error?.message || 'تعذر تحميل البلاغات'); }
+    this.loading.set(true);
+    this.loadFailed.set(false);
+
+    this.service.adminReports().pipe(timeout(12000)).subscribe({
+      next: response => {
+        this.items.set(response?.items ?? []);
+        this.loading.set(false);
+      },
+      error: error => {
+        this.items.set([]);
+        this.loading.set(false);
+        this.loadFailed.set(true);
+        this.notify.error(error?.error?.message || 'تعذر تحميل البلاغات. تأكد من تشغيل الخادم وتسجيل الدخول بصلاحية مدير.');
+      }
     });
   }
 
@@ -47,16 +64,18 @@ export class AdminReportsComponent implements OnInit {
   review(item: ModerationItem, action: 'restore' | 'reject'): void {
     const id = item.item._id;
     if (action === 'reject' && !confirm('هل تريد إخفاء هذا المحتوى نهائياً؟')) return;
-    this.busy = id;
+
+    this.busy.set(id);
     const reason = action === 'reject' ? 'محتوى مخالف بعد مراجعة الإدارة' : '';
-    this.service.review(item.type, id, action, reason).subscribe({
+
+    this.service.review(item.type, id, action, reason).pipe(timeout(12000)).subscribe({
       next: (response: ReviewResponse) => {
         this.notify.success(response.message);
-        this.items = this.items.filter(x => x !== item);
-        this.busy = '';
+        this.items.update(current => current.filter(x => x !== item));
+        this.busy.set('');
       },
       error: error => {
-        this.busy = '';
+        this.busy.set('');
         this.notify.error(error?.error?.message || 'تعذر تنفيذ المراجعة');
       }
     });
