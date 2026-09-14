@@ -3,106 +3,56 @@
     <div class="details-top-bar">
       <a routerLink="/" class="back-nav-btn"><i class="fa-solid fa-arrow-right"></i><span>العودة للرئيسية</span></a>
       <div class="top-actions">
-        <button type="button" class="submit-quote-btn" (click)="openComposer()" *ngIf="auth.isLoggedIn">
-          <i class="fa-solid fa-plus"></i><span>إضافة اقتباس</span>
-        </button>
+        <button type="button" class="submit-quote-btn" (click)="openComposer()" *ngIf="auth.isLoggedIn"><i class="fa-solid fa-plus"></i><span>إضافة اقتباس</span></button>
         <span class="quotes-badge"><i class="fa-solid fa-quote-right"></i> مجتمع الاقتباسات</span>
       </div>
     </div>
 
     <header class="quotes-header">
-      <span class="panel-tag">COMMUNITY</span>
-      <h1 class="panel-title">اقتباسات المكتبة</h1>
-      <p>الاقتباس العام يبقى في المكتبة، والاقتباس المرتبط بكتاب يظهر في صفحة مجتمع ذلك الكتاب فقط.</p>
+      <div class="header-copy"><span class="panel-tag">COMMUNITY</span><h1 class="panel-title">اقتباسات المكتبة</h1><p>مساحة تجمع أجمل ما يشاركه القرّاء، مع فصل واضح بين الاقتباسات العامة والاقتباسات المرتبطة بالكتب.</p></div>
+      <div class="header-stats"><div><strong>{{ quotes().length }}</strong><span>اقتباس</span></div><div><strong>{{ books().length }}</strong><span>كتاب متاح</span></div></div>
     </header>
 
     <section *ngIf="showComposer() && auth.isLoggedIn" class="panel-glass-card composer-card">
-      <div class="composer-heading">
-        <div class="composer-icon"><i class="fa-solid fa-quote-right"></i></div>
-        <div>
-          <h2>{{ editingId() ? 'تعديل الاقتباس' : 'إضافة اقتباس' }}</h2>
-          <p>{{ editingId() ? 'عدّل النص ثم اضغط حفظ.' : 'اختر هل الاقتباس عام أم مأخوذ من كتاب محدد.' }}</p>
-        </div>
-      </div>
-
+      <div class="composer-heading"><div class="composer-icon"><i class="fa-solid fa-quote-right"></i></div><div><h2>{{ editingId() ? 'تعديل الاقتباس' : 'إضافة اقتباس جديد' }}</h2><p>{{ editingId() ? 'عدّل النص ثم احفظ التغيير.' : 'شارك فكرة أو عبارة أعجبتك مع مجتمع المكتبة.' }}</p></div></div>
       <div class="quote-type-options" *ngIf="!editingId()">
-        <button type="button" [class.active]="quoteType() === 'general'" (click)="quoteType.set('general'); selectedBookId.set('')">
-          <i class="fa-solid fa-earth-americas"></i>
-          <span><strong>اقتباس عام</strong><small>يظهر في صفحة الاقتباسات العامة فقط</small></span>
-        </button>
-        <button type="button" [class.active]="quoteType() === 'book'" (click)="quoteType.set('book')">
-          <i class="fa-solid fa-book-open"></i>
-          <span><strong>اقتباس من كتاب</strong><small>يظهر داخل مجتمع الكتاب المحدد</small></span>
-        </button>
+        <button type="button" [class.active]="quoteType() === 'general'" (click)="quoteType.set('general'); selectedBookId.set('')"><i class="fa-solid fa-earth-americas"></i><span><strong>اقتباس عام</strong><small>يظهر في صفحة الاقتباسات العامة</small></span><i class="select-check fa-solid fa-check"></i></button>
+        <button type="button" [class.active]="quoteType() === 'book'" (click)="quoteType.set('book')"><i class="fa-solid fa-book-open"></i><span><strong>اقتباس من كتاب</strong><small>يرتبط بكتاب محدد ويظهر في مجتمعه</small></span><i class="select-check fa-solid fa-check"></i></button>
       </div>
-
-      <label class="quote-book-field" *ngIf="quoteType() === 'book'">
-        <span>الكتاب <b>*</b></span>
-        <select [ngModel]="selectedBookId()" (ngModelChange)="selectedBookId.set($event)" [disabled]="saving() || !!editingId()">
-          <option value="">اختر الكتاب المرتبط بالاقتباس</option>
-          <option *ngFor="let book of books()" [value]="book._id">{{ book.title }}</option>
-        </select>
-      </label>
-
-      <label class="quote-text-field">
-        <span>نص الاقتباس <b>*</b></span>
-        <textarea [ngModel]="quoteText()" (ngModelChange)="quoteText.set($event)" [disabled]="saving()" maxlength="3000" rows="6" placeholder="اكتب اقتباسك هنا..."></textarea>
-        <small>{{ quoteText().length }}/3000</small>
-      </label>
-
-      <div class="composer-actions">
-        <button type="button" class="cancel-btn" (click)="cancelComposer()" [disabled]="saving()">إلغاء</button>
-        <button type="button" class="submit-quote-btn" (click)="saveQuote()" [disabled]="saving()">
-          <i class="fa-solid" [class.fa-spinner]="saving()" [class.fa-spin]="saving()" [class.fa-paper-plane]="!saving()"></i>
-          {{ saving() ? 'جاري الحفظ...' : (editingId() ? 'حفظ التعديل' : 'نشر الاقتباس') }}
-        </button>
-      </div>
+      <label class="quote-book-field" *ngIf="quoteType() === 'book'"><span>الكتاب <b>*</b></span><select [ngModel]="selectedBookId()" (ngModelChange)="selectedBookId.set($event)" [disabled]="saving() || !!editingId()"><option value="">اختر الكتاب المرتبط بالاقتباس</option><option *ngFor="let book of books()" [value]="book._id">{{ book.title }}</option></select></label>
+      <label class="quote-text-field"><span>نص الاقتباس <b>*</b></span><textarea [ngModel]="quoteText()" (ngModelChange)="quoteText.set($event)" [disabled]="saving()" maxlength="3000" rows="6" placeholder="اكتب اقتباسك هنا..."></textarea><small>{{ quoteText().length }}/3000</small></label>
+      <div class="composer-actions"><button type="button" class="cancel-btn" (click)="cancelComposer()" [disabled]="saving()">إلغاء</button><button type="button" class="submit-quote-btn" (click)="saveQuote()" [disabled]="saving()"><i class="fa-solid" [class.fa-spinner]="saving()" [class.fa-spin]="saving()" [class.fa-paper-plane]="!saving()"></i>{{ saving() ? 'جاري الحفظ...' : (editingId() ? 'حفظ التعديل' : 'نشر الاقتباس') }}</button></div>
     </section>
 
     <section class="panel-glass-card filters-card">
-      <div class="filter-search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="ابحث في الاقتباسات أو أسماء القرّاء أو الكتب..." />
-      </div>
-      <select [(ngModel)]="sort" (ngModelChange)="applyFilters()" aria-label="ترتيب الاقتباسات">
-        <option value="latest">الأحدث</option>
-        <option value="likes">الأكثر إعجابًا</option>
-      </select>
+      <div class="filter-search"><i class="fa-solid fa-magnifying-glass"></i><input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="ابحث في النص أو اسم القارئ أو الكتاب..." /><button *ngIf="search" type="button" class="clear-search" (click)="search=''; applyFilters()" aria-label="مسح البحث"><i class="fa-solid fa-xmark"></i></button></div>
+      <select [(ngModel)]="sort" (ngModelChange)="applyFilters()" aria-label="ترتيب الاقتباسات"><option value="latest">الأحدث أولاً</option><option value="likes">الأكثر إعجابًا</option></select>
+      <div class="filter-tabs"><button type="button" [class.active]="typeFilter === 'all'" (click)="typeFilter='all'; applyFilters()">الكل <b>{{ quotes().length }}</b></button><button type="button" [class.active]="typeFilter === 'general'" (click)="typeFilter='general'; applyFilters()">عامة <b>{{ quotes().filter(q => !bookId(q)).length }}</b></button><button type="button" [class.active]="typeFilter === 'book'" (click)="typeFilter='book'; applyFilters()">من الكتب <b>{{ quotes().filter(q => !!bookId(q)).length }}</b></button></div>
     </section>
 
     <div *ngIf="loading()" class="state-card loading-box"><span class="glass-spinner"></span><strong>جاري تحميل الاقتباسات...</strong><small>لحظات ونجهزها لك</small></div>
-
-    <div *ngIf="!loading() && loadFailed()" class="state-card error-state">
-      <i class="fa-solid fa-triangle-exclamation"></i><h3>تعذر تحميل الاقتباسات</h3><p>تحقق من اتصال الخادم ثم حاول مرة أخرى.</p><button type="button" class="retry-btn" (click)="load()">إعادة المحاولة</button>
-    </div>
+    <div *ngIf="!loading() && loadFailed()" class="state-card error-state"><i class="fa-solid fa-triangle-exclamation"></i><h3>تعذر تحميل الاقتباسات</h3><p>تحقق من اتصال الخادم ثم حاول مرة أخرى.</p><button type="button" class="retry-btn" (click)="load()">إعادة المحاولة</button></div>
 
     <section *ngIf="!loading() && !loadFailed() && filteredQuotes().length" class="quotes-grid">
       <article *ngFor="let q of filteredQuotes()" class="panel-glass-card quote-card">
+        <div class="card-topline"><span class="quote-type" [class.book-type]="!!bookId(q)"><i class="fa-solid" [class.fa-book-open]="!!bookId(q)" [class.fa-earth-americas]="!bookId(q)"></i>{{ bookId(q) ? 'من كتاب' : 'اقتباس عام' }}</span><span class="quote-index">#{{ filteredQuotes().indexOf(q) + 1 }}</span></div>
         <div class="quote-mark"><i class="fa-solid fa-quote-right"></i></div>
         <blockquote>{{ q.text }}</blockquote>
-
-        <a *ngIf="bookId(q)" class="book-reference" [routerLink]="['/books', bookId(q), 'community']">
-          <i class="fa-solid fa-book-open"></i><span>{{ bookTitle(q) }}</span><i class="fa-solid fa-arrow-left"></i>
-        </a>
-        <div *ngIf="!bookId(q)" class="book-reference general-reference">
-          <i class="fa-solid fa-earth-americas"></i><span>اقتباس عام من مجتمع المكتبة</span>
-        </div>
-
-        <div class="author-meta">
-          <span class="avatar">{{ (q.user?.name || '؟').charAt(0) }}</span>
-          <span><strong>{{ q.user?.name || 'قارئ' }}</strong><small>{{ q.createdAt | date:'mediumDate' }}</small></span>
-        </div>
-        <div class="quote-actions">
-          <button class="community-action like-btn" [class.liked]="q.liked" [disabled]="isLiking(q._id)" (click)="toggleLike(q)"><i [class]="q.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i><span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b></button>
-          <button *ngIf="isOwner(q)" class="community-action" type="button" (click)="startEdit(q)"><i class="fa-solid fa-pen"></i><span>تعديل</span></button>
-          <button *ngIf="isOwner(q)" class="community-action report" type="button" (click)="deleteQuote(q)"><i class="fa-solid fa-trash"></i><span>حذف</span></button>
-          <button class="community-action report" type="button" (click)="report(q)"><i class="fa-regular fa-flag"></i><span>إبلاغ</span></button>
-        </div>
+        <a *ngIf="bookId(q)" class="book-reference" [routerLink]="['/books', bookId(q), 'community']"><i class="fa-solid fa-book-open"></i><span>{{ bookTitle(q) }}</span><i class="fa-solid fa-arrow-left"></i></a>
+        <div *ngIf="!bookId(q)" class="book-reference general-reference"><i class="fa-solid fa-earth-americas"></i><span>اقتباس عام من مجتمع المكتبة</span></div>
+        <div class="author-meta"><span class="avatar">{{ (q.user?.name || '؟').charAt(0) }}</span><span><strong>{{ q.user?.name || 'قارئ' }}</strong><small>{{ q.createdAt | date:'mediumDate' }}</small></span></div>
+        <div class="quote-actions"><button class="community-action like-btn" [class.liked]="q.liked" [disabled]="isLiking(q._id)" (click)="toggleLike(q)"><i [class]="q.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i><span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b></button><button *ngIf="isOwner(q)" class="community-action" type="button" (click)="startEdit(q)"><i class="fa-solid fa-pen"></i><span>تعديل</span></button><button *ngIf="isOwner(q)" class="community-action danger" type="button" (click)="askDelete(q)"><i class="fa-solid fa-trash"></i><span>حذف</span></button><button class="community-action report" type="button" (click)="openReport(q)"><i class="fa-regular fa-flag"></i><span>إبلاغ</span></button></div>
       </article>
     </section>
 
-    <div *ngIf="!loading() && !loadFailed() && !filteredQuotes().length" class="state-card empty-state">
-      <i class="fa-solid fa-quote-right"></i><h3>{{ search ? 'لا توجد نتائج' : 'لا توجد اقتباسات بعد' }}</h3><p>{{ search ? 'لم نجد اقتباسات تطابق البحث الحالي.' : 'أضف اقتباسًا عامًا أو اربطه بكتاب من زر إضافة اقتباس.' }}</p>
+    <div *ngIf="!loading() && !loadFailed() && !filteredQuotes().length" class="state-card empty-state"><i class="fa-solid fa-quote-right"></i><h3>{{ search ? 'لا توجد نتائج مطابقة' : typeFilter !== 'all' ? 'لا توجد اقتباسات من هذا النوع' : 'لا توجد اقتباسات بعد' }}</h3><p>{{ search ? 'جرّب كلمة أخرى أو امسح البحث.' : 'كن أول من يشارك اقتباسًا مع مجتمع المكتبة.' }}</p><button *ngIf="auth.isLoggedIn" type="button" class="submit-quote-btn" (click)="openComposer()"><i class="fa-solid fa-plus"></i> إضافة اقتباس</button></div>
+
+    <div *ngIf="showDeleteModal()" class="modal-backdrop" (click)="cancelDelete()">
+      <section class="modal-card danger-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()"><div class="modal-icon danger-icon"><i class="fa-solid fa-trash"></i></div><h2>حذف الاقتباس؟</h2><p>سيتم حذف الاقتباس نهائيًا ولن تتمكن من استعادته.</p><div class="modal-preview">{{ pendingQuote()?.text }}</div><div class="modal-actions"><button type="button" class="cancel-btn" (click)="cancelDelete()" [disabled]="deleting()">إلغاء</button><button type="button" class="danger-confirm" (click)="confirmDelete()" [disabled]="deleting()"><i class="fa-solid" [class.fa-spinner]="deleting()" [class.fa-spin]="deleting()" [class.fa-trash]="!deleting()"></i>{{ deleting() ? 'جاري الحذف...' : 'نعم، احذف' }}</button></div></section>
+    </div>
+
+    <div *ngIf="showReportModal()" class="modal-backdrop" (click)="cancelReport()">
+      <section class="modal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()"><div class="modal-icon"><i class="fa-regular fa-flag"></i></div><h2>الإبلاغ عن الاقتباس</h2><p>اختر سبب البلاغ، وسيراجعه فريق الإدارة.</p><div class="report-options"><label *ngFor="let option of [{v:'abuse',t:'إساءة أو محتوى مسيء'},{v:'spam',t:'رسائل مزعجة أو سبام'},{v:'misinformation',t:'معلومات مضللة'},{v:'copyright',t:'مشكلة حقوق نشر'},{v:'other',t:'سبب آخر'}]"><input type="radio" name="reportReason" [value]="option.v" [ngModel]="reportReason()" (ngModelChange)="reportReason.set($event)"><span>{{ option.t }}</span></label></div><textarea class="report-note" [ngModel]="reportNote()" (ngModelChange)="reportNote.set($event)" maxlength="500" rows="4" placeholder="ملاحظة إضافية (اختياري)..."></textarea><div class="modal-actions"><button type="button" class="cancel-btn" (click)="cancelReport()" [disabled]="reporting()">إلغاء</button><button type="button" class="submit-quote-btn" (click)="submitReport()" [disabled]="reporting()"><i class="fa-solid" [class.fa-spinner]="reporting()" [class.fa-spin]="reporting()" [class.fa-paper-plane]="!reporting()"></i>{{ reporting() ? 'جاري الإرسال...' : 'إرسال البلاغ' }}</button></div></section>
     </div>
   </div>
 </main>
