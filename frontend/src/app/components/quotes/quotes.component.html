@@ -3,25 +3,22 @@
     <div class="details-top-bar">
       <a routerLink="/" class="back-nav-btn"><i class="fa-solid fa-arrow-right"></i><span>العودة للرئيسية</span></a>
       <div class="top-actions">
-        <button *ngIf="auth.isLoggedIn" type="button" class="add-quote-btn" (click)="openComposer()">
-          <i class="fa-solid fa-plus"></i><span>إضافة اقتباس</span>
-        </button>
-        <span class="quotes-badge"><i class="fa-solid fa-quote-right"></i> اقتباسات المكتبة</span>
+        <span class="quotes-badge"><i class="fa-solid fa-quote-right"></i> اقتباسات مرتبطة بالكتب</span>
       </div>
     </div>
 
     <header class="quotes-header">
       <span class="panel-tag">COMMUNITY</span>
       <h1 class="panel-title">اقتباسات من كتب المكتبة</h1>
-      <p>مساحة هادئة لمشاركة أجمل العبارات والأفكار التي تستحق أن تبقى.</p>
+      <p>كل اقتباس مرتبط بالكتاب الذي أُخذ منه، ويمكن إضافة اقتباس جديد من صفحة مجتمع الكتاب.</p>
     </header>
 
     <section *ngIf="showComposer() && auth.isLoggedIn" class="panel-glass-card composer-card">
       <div class="composer-heading">
         <div class="composer-icon"><i class="fa-solid fa-quote-right"></i></div>
         <div>
-          <h2>{{ editingId() ? 'تعديل الاقتباس' : 'أضف اقتباسًا جديدًا' }}</h2>
-          <p>اكتب النص ثم اضغط نشر.</p>
+          <h2>تعديل الاقتباس</h2>
+          <p>عدّل النص ثم اضغط حفظ.</p>
         </div>
       </div>
 
@@ -41,7 +38,7 @@
         <button type="button" class="cancel-btn" (click)="cancelComposer()" [disabled]="saving()">إلغاء</button>
         <button type="button" class="submit-quote-btn" (click)="saveQuote()" [disabled]="saving()">
           <i class="fa-solid" [class.fa-spinner]="saving()" [class.fa-spin]="saving()" [class.fa-paper-plane]="!saving()"></i>
-          {{ saving() ? 'جاري الحفظ...' : (editingId() ? 'حفظ التعديل' : 'نشر الاقتباس') }}
+          {{ saving() ? 'جاري الحفظ...' : 'حفظ التعديل' }}
         </button>
       </div>
     </section>
@@ -49,7 +46,7 @@
     <section class="panel-glass-card filters-card">
       <div class="filter-search">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="ابحث في الاقتباسات أو أسماء القرّاء..." />
+        <input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="ابحث في الاقتباسات أو أسماء القرّاء أو الكتب..." />
       </div>
       <select [(ngModel)]="sort" (ngModelChange)="applyFilters()" aria-label="ترتيب الاقتباسات">
         <option value="latest">الأحدث</option>
@@ -74,6 +71,11 @@
       <article *ngFor="let q of filteredQuotes()" class="panel-glass-card quote-card">
         <div class="quote-mark"><i class="fa-solid fa-quote-right"></i></div>
         <blockquote>{{ q.text }}</blockquote>
+        <a *ngIf="bookId(q)" class="book-reference" [routerLink]="['/books', bookId(q), 'community']">
+          <i class="fa-solid fa-book-open"></i>
+          <span>{{ bookTitle(q) }}</span>
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
         <div class="author-meta">
           <span class="avatar">{{ (q.user?.name || '؟').charAt(0) }}</span>
           <span>
@@ -96,8 +98,7 @@
     <div *ngIf="!loading() && !loadFailed() && !filteredQuotes().length" class="state-card empty-state">
       <i class="fa-solid fa-quote-right"></i>
       <h3>{{ search ? 'لا توجد نتائج' : 'لا توجد اقتباسات بعد' }}</h3>
-      <p>{{ search ? 'لم نجد اقتباسات تطابق البحث الحالي.' : 'كن أول من يشارك اقتباسًا في مكتبتنا.' }}</p>
-      <button *ngIf="auth.isLoggedIn && !search" type="button" class="retry-btn" (click)="openComposer()">أضف أول اقتباس</button>
+      <p>{{ search ? 'لم نجد اقتباسات تطابق البحث الحالي.' : 'أضف اقتباسك من صفحة مجتمع الكتاب ليبقى مرتبطًا بالكتاب.' }}</p>
     </div>
   </div>
 </main>
