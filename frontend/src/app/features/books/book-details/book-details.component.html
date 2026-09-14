@@ -29,7 +29,7 @@
                 <a [routerLink]="['/books', bookId, 'read']" class="add-book-btn text-decoration-none"><i class="fa-solid fa-book-open"></i><span>فتح القارئ</span></a>
                 <button type="button" class="retry-btn-outline" (click)="download()"><i class="fa-solid fa-download"></i><span>تحميل PDF</span></button>
               }
-              <a [routerLink]="['/books', bookId, 'community']" class="retry-btn-outline text-decoration-none"><i class="fa-solid fa-comments"></i><span>التعليقات والاقتباسات</span></a>
+              <a [routerLink]="['/books', bookId, 'community']" class="retry-btn-outline text-decoration-none"><i class="fa-solid fa-comments"></i><span>التعليقات والنقاش</span></a>
               <button type="button" class="favorite-toggle-btn" [class.active]="isFavorite()" [disabled]="favoriteBusy" (click)="toggleFavorite()"><i class="fa-solid fa-heart"></i><span>{{ isFavorite() ? 'في المفضلة' : 'إضافة للمفضلة' }}</span></button>
             </div>
           </div>
@@ -44,6 +44,53 @@
         <div class="panel-glass-card"><div class="panel-header"><span class="panel-tag">SPECIFICATIONS</span><h2 class="panel-title"><i class="fa-solid fa-circle-info me-2 text-warning"></i> معلومات الكتاب</h2></div><ul class="info-list-specs"><li><span>المؤلف:</span> <strong>{{ author() }}</strong></li><li><span>التصنيف:</span> <strong>{{ category() }}</strong></li><li><span>سنة النشر:</span> <strong>{{ b.publishedYear || 'غير محددة' }}</strong></li><li><span>حالة التوفر:</span> <span class="status-badge" [class.available]="b.isAvailable !== false" [class.unavailable]="b.isAvailable === false">{{ b.isAvailable === false ? 'غير متاح حالياً' : 'متاح للقراءة والتحميل' }}</span></li></ul></div>
         <div class="panel-glass-card"><div class="panel-header"><span class="panel-tag">OVERVIEW</span><h2 class="panel-title"><i class="fa-solid fa-quote-right me-2 text-warning"></i> نبذة عن الكتاب</h2></div><p class="about-long-text">{{ b.description || 'لا توجد تفاصيل إضافية مسجلة لهذا الكتاب في الوقت الحالي.' }}</p></div>
       </div>
+
+      <section class="book-quotes-section panel-glass-card mt-4">
+        <div class="quotes-section-header">
+          <div>
+            <span class="panel-tag">BOOK QUOTES</span>
+            <h2 class="panel-title"><i class="fa-solid fa-quote-right"></i> اقتباسات من هذا الكتاب</h2>
+            <p>هنا تظهر الاقتباسات المرتبطة بهذا الكتاب فقط.</p>
+          </div>
+          <span class="quotes-count-badge"><i class="fa-solid fa-quote-left"></i> {{ quotes.length }} اقتباس</span>
+        </div>
+
+        @if (auth.isLoggedIn) {
+          <div class="book-quote-composer">
+            <div class="quote-composer-icon"><i class="fa-solid fa-pen-nib"></i></div>
+            <div class="quote-composer-body">
+              <label for="bookQuote">أضف اقتباسًا من الكتاب</label>
+              <textarea id="bookQuote" [(ngModel)]="quoteText" maxlength="1000" placeholder="اكتب الاقتباس الذي أعجبك..."></textarea>
+              <div class="quote-composer-footer">
+                <small>{{ quoteText.length }}/1000</small>
+                <button type="button" class="quote-submit-btn" (click)="addQuote()" [disabled]="quoteSaving || !quoteText.trim()"><i class="fa-solid fa-plus"></i><span>{{ quoteSaving ? 'جارِ الإضافة...' : 'إضافة الاقتباس' }}</span></button>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="quote-login-hint"><i class="fa-solid fa-circle-info"></i><span>سجّل الدخول حتى تتمكن من إضافة اقتباس لهذا الكتاب.</span></div>
+        }
+
+        @if (quotesLoading) {
+          <div class="quotes-state"><div class="glass-spinner"></div><span>جارِ تحميل الاقتباسات...</span></div>
+        } @else if (quotes.length) {
+          <div class="book-quotes-grid">
+            @for (q of quotes; track q._id) {
+              <article class="book-quote-card">
+                <div class="quote-card-top"><span class="quote-number">#{{ $index + 1 }}</span><i class="fa-solid fa-quote-right"></i></div>
+                <blockquote>{{ q.text }}</blockquote>
+                <div class="quote-author"><span class="quote-avatar">{{ (q.user?.name || 'ق').charAt(0) }}</span><span><strong>{{ q.user?.name || 'قارئ' }}</strong><small>{{ q.createdAt | date:'mediumDate' }}</small></span></div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="quotes-state empty"><i class="fa-solid fa-quote-left"></i><strong>لا توجد اقتباسات لهذا الكتاب بعد</strong><span>كن أول من يشارك اقتباسًا أعجبه.</span></div>
+        }
+
+        <div class="quotes-footer-link">
+          <a [routerLink]="['/books', bookId, 'community']"><i class="fa-solid fa-comments"></i><span>فتح مجتمع الكتاب والتعليقات</span><i class="fa-solid fa-arrow-left"></i></a>
+        </div>
+      </section>
     }
   </div>
 </main>
