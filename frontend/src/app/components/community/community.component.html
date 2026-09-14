@@ -1,4 +1,4 @@
-<main class="admin-dashboard-wrapper community-page" dir="rtl">
+<main class="admin-dashboard-wrapper community-page" [class.dark-theme]="themeService.isDarkMode()" dir="rtl">
   <div class="admin-container">
     <div class="details-top-bar">
       <a routerLink="/books" class="back-nav-btn"><i class="fa-solid fa-arrow-right"></i><span>العودة إلى المكتبة</span></a>
@@ -14,7 +14,18 @@
     </header>
 
     @if (loading) {
-      <div class="admin-state-box loading-box"><div class="glass-spinner"></div><p>جارِ تحميل المجتمع...</p></div>
+      <div class="admin-state-box loading-box">
+        <div class="glass-spinner"></div>
+        <strong>جارِ تحميل المجتمع...</strong>
+        <p>يتم جلب الاقتباسات والتعليقات من الخادم</p>
+      </div>
+    } @else if (loadFailed) {
+      <div class="admin-state-box error-box">
+        <div class="error-icon">!</div>
+        <strong>تعذر تحميل المجتمع</strong>
+        <p>{{ loadError || 'تحقق من تشغيل الـ Backend ثم حاول مرة أخرى.' }}</p>
+        <button type="button" class="retry-btn" (click)="load()">إعادة المحاولة</button>
+      </div>
     } @else {
       <section class="community-grid">
         <div class="panel-glass-card">
@@ -27,7 +38,7 @@
             <div class="composer-card">
               <h3><i class="fa-solid fa-pen-nib"></i> إضافة اقتباس</h3>
               <textarea [(ngModel)]="quoteText" placeholder="اكتب اقتباسك هنا..."></textarea>
-              <button class="add-book-btn primary-action" (click)="addQuote()" [disabled]="saving"><i class="fa-solid fa-plus"></i><span>إضافة الاقتباس</span></button>
+              <button class="add-book-btn primary-action" (click)="addQuote()" [disabled]="saving"><i class="fa-solid fa-plus"></i><span>{{ saving ? 'جارِ الحفظ...' : 'إضافة الاقتباس' }}</span></button>
             </div>
           } @else {
             <div class="login-hint"><i class="fa-solid fa-circle-info"></i><span>سجّل الدخول لإضافة اقتباس.</span></div>
@@ -40,9 +51,7 @@
                 <blockquote>{{ q.text }}</blockquote>
                 <div class="content-meta"><i class="fa-solid fa-user"></i><span>{{ q.user?.name || 'قارئ' }}</span></div>
                 <div class="community-actions">
-                  <button class="community-action like-btn" [class.liked]="q.liked" (click)="toggleLike('quote', q)" [disabled]="isLiking('quote', q._id)">
-                    <i class="fa-solid fa-heart"></i><span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b>
-                  </button>
+                  <button class="community-action like-btn" [class.liked]="q.liked" (click)="toggleLike('quote', q)" [disabled]="isLiking('quote', q._id)"><i class="fa-solid fa-heart"></i><span>{{ q.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ q.likesCount || 0 }}</b></button>
                   <button class="community-action report" (click)="report('quote', q._id)"><i class="fa-solid fa-flag"></i><span>إبلاغ</span></button>
                 </div>
               </article>
@@ -60,10 +69,12 @@
 
           @if (auth.isLoggedIn) {
             <div class="composer-card">
-              @if(replyTo){<div class="replying"><i class="fa-solid fa-reply"></i><span>أنت ترد على تعليق</span><button type="button" (click)="replyTo=''">إلغاء</button></div>}
+              @if (replyTo) {
+                <div class="replying"><i class="fa-solid fa-reply"></i><span>أنت ترد على تعليق</span><button type="button" (click)="replyTo=''">إلغاء</button></div>
+              }
               <h3><i class="fa-solid fa-comment-dots"></i> إضافة تعليق</h3>
               <textarea [(ngModel)]="commentText" placeholder="اكتب تعليقك..."></textarea>
-              <button class="add-book-btn primary-action" (click)="addComment()" [disabled]="saving"><i class="fa-solid fa-paper-plane"></i><span>إضافة التعليق</span></button>
+              <button class="add-book-btn primary-action" (click)="addComment()" [disabled]="saving"><i class="fa-solid fa-paper-plane"></i><span>{{ saving ? 'جارِ الحفظ...' : 'إضافة التعليق' }}</span></button>
             </div>
           } @else {
             <div class="login-hint"><i class="fa-solid fa-circle-info"></i><span>سجّل الدخول لإضافة تعليق.</span></div>
@@ -78,9 +89,7 @@
                 </div>
                 <p class="comment-text">{{ c.text }}</p>
                 <div class="community-actions">
-                  <button class="community-action like-btn" [class.liked]="c.liked" (click)="toggleLike('comment', c)" [disabled]="isLiking('comment', c._id)">
-                    <i class="fa-solid fa-heart"></i><span>{{ c.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ c.likesCount || 0 }}</b>
-                  </button>
+                  <button class="community-action like-btn" [class.liked]="c.liked" (click)="toggleLike('comment', c)" [disabled]="isLiking('comment', c._id)"><i class="fa-solid fa-heart"></i><span>{{ c.liked ? 'أعجبني' : 'إعجاب' }}</span><b>{{ c.likesCount || 0 }}</b></button>
                   <button class="community-action reply-btn" (click)="reply(c)"><i class="fa-solid fa-reply"></i><span>رد</span></button>
                   <button class="community-action report" (click)="report('comment', c._id)"><i class="fa-solid fa-flag"></i><span>إبلاغ</span></button>
                 </div>
