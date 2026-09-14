@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const quoteSchema = new mongoose.Schema({
+  book: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', required: true, index: true },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   text: { type: String, required: true, trim: true, maxlength: 3000 },
   likesCount: { type: Number, default: 0, min: 0 },
