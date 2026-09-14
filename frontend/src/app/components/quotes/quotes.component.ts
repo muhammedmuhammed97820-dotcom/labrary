@@ -60,9 +60,7 @@ export class QuotesComponent implements OnInit {
 
   openComposer(): void {
     if (!this.auth.isLoggedIn) return this.notify.warning('سجّل الدخول لإضافة اقتباس.');
-    this.editingId.set('');
-    this.quoteText.set('');
-    this.showComposer.set(true);
+    this.notify.info('إضافة الاقتباس أصبحت من صفحة مجتمع الكتاب، حتى يرتبط الاقتباس بالكتاب الصحيح.');
   }
 
   startEdit(q: Quote): void {
@@ -85,19 +83,17 @@ export class QuotesComponent implements OnInit {
     if (!text) return this.notify.warning('اكتب نص الاقتباس.');
     if (text.length < 3) return this.notify.warning('نص الاقتباس قصير جدًا.');
 
-    this.saving.set(true);
     const editing = this.editingId();
-    const request = editing ? this.service.updateQuote(editing, text) : this.service.addQuote(text);
+    if (!editing) return this.notify.warning('لإضافة اقتباس جديد، افتح صفحة مجتمع الكتاب أولاً.');
 
-    request.subscribe({
+    this.saving.set(true);
+    this.service.updateQuote(editing, text).subscribe({
       next: quote => {
-        const updated = editing
-          ? this.quotes().map(q => q._id === quote._id ? quote : q)
-          : [quote, ...this.quotes()];
+        const updated = this.quotes().map(q => q._id === quote._id ? quote : q);
         this.quotes.set(updated);
         this.applyFilters();
         this.saving.set(false);
-        this.notify.success(editing ? 'تم تعديل الاقتباس.' : 'تم نشر الاقتباس.');
+        this.notify.success('تم تعديل الاقتباس.');
         this.cancelComposer();
       },
       error: e => {
@@ -131,7 +127,7 @@ export class QuotesComponent implements OnInit {
     const source = this.quotes();
     const term = this.search.trim().toLowerCase();
     let items = term
-      ? source.filter(q => q.text.toLowerCase().includes(term) || q.user?.name?.toLowerCase().includes(term))
+      ? source.filter(q => q.text.toLowerCase().includes(term) || q.user?.name?.toLowerCase().includes(term) || this.bookTitle(q).toLowerCase().includes(term))
       : [...source];
 
     if (this.sort === 'likes') {
@@ -141,6 +137,14 @@ export class QuotesComponent implements OnInit {
     }
 
     this.filteredQuotes.set(items);
+  }
+
+  bookId(q: Quote): string {
+    return typeof q.book === 'string' ? q.book : q.book?._id || '';
+  }
+
+  bookTitle(q: Quote): string {
+    return typeof q.book === 'string' ? 'كتاب' : q.book?.title || 'كتاب';
   }
 
   toggleLike(q: Quote): void {
