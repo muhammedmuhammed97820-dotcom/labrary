@@ -171,7 +171,7 @@ async function approve(req, res) {
         publishedYear: item.publishedYear,
         language: "Arabic",
         isAvailable: true,
-        filePath: "",
+        filePath: item.sourceFileUrl,
         coverImage: item.coverUrl,
         status: "approved",
         submittedBy: req.user._id,
