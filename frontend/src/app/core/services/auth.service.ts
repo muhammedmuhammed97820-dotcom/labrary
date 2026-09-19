@@ -45,6 +45,7 @@ export class AuthService {
     localStorage.removeItem('user');
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('electronic_library_token');
     this.user.set(null);
   }
 
