@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ImportExtraction {
   score: number;
@@ -43,13 +44,13 @@ export interface ImportPreviewResponse {
 @Injectable({ providedIn: 'root' })
 export class SmartImporterService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:5000/api/admin/smart-importer';
+  private readonly api = `${environment.apiUrl}/smart-importer`;
 
   preview(url: string, maxPages = 20, maxBooks = 50): Observable<ImportPreviewResponse> {
     return this.http.post<ImportPreviewResponse>(`${this.api}/preview`, { url, maxPages, maxBooks });
   }
 
-  approve(books: ImportCandidate[], downloadPdf = false): Observable<any> {
+  approve(books: ImportCandidate[], downloadPdf = false): Observable<unknown> {
     return this.http.post(`${this.api}/approve`, { books, downloadPdf });
   }
 }
