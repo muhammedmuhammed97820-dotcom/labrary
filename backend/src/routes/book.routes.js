@@ -26,7 +26,7 @@ async function streamBookOrRemote(req, res, next, mode = "read") {
   try {
     const book = await Book.findOne({ _id: req.params.id, status: "approved" }).select("fileId filePath").lean();
     if (!book) return res.status(404).json({ message: "Book not found." });
-    if (!book.fileId && /^https:\/\/mc\.dlib\.nyu\.edu\/files\/books\//i.test(String(book.filePath || ""))) {
+    if (!book.fileId && /^(https:\/\/mc\.dlib\.nyu\.edu\/files\/books\/|https:\/\/archive\.org\/download\/)/i.test(String(book.filePath || ""))) {
       return res.redirect(book.filePath);
     }
     return controller.streamBookFile(req, res, mode);
