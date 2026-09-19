@@ -126,8 +126,8 @@ export class BookEditComponent implements OnInit {
     if (this.book.rating != null) fd.append('rating', String(this.book.rating));
     fd.append('isAvailable', String(this.book.isAvailable !== false));
     
-    if (this.pdf) fd.append('file', this.pdf);
-    if (this.cover) fd.append('cover', this.cover);
+    if (this.pdf) fd.append('bookFile', this.pdf, this.pdf.name);
+    if (this.cover) fd.append('coverImage', this.cover, this.cover.name);
 
     this.saving = true;
     this.cdr.detectChanges();
