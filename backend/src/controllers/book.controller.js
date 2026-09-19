@@ -280,7 +280,8 @@ async function streamBookFile(req, res, mode = "read") {
 
     if (mode === "download") {
       const safeTitle = String(book.title || "book").replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").slice(0, 180);
-      res.setHeader("Content-Disposition", `attachment; filename="${safeTitle}.pdf"`);
+      const extension = String(file.filename || "").toLowerCase().endsWith(".pdf") ? ".pdf" : "";
+      res.setHeader("Content-Disposition", `attachment; filename="${safeTitle}${extension}"`);
     }
 
     if (range) {

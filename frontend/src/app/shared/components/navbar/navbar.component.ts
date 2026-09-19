@@ -2,6 +2,7 @@ import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -15,7 +16,7 @@ export class NavbarComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   public readonly themeService = inject(ThemeService);
-  private readonly serverOrigin = 'http://localhost:5000';
+  private readonly serverOrigin = environment.apiOrigin.replace(/\/$/, '');
   
   menuOpen = false;
 
